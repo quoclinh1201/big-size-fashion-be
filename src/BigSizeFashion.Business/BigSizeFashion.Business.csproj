@@ -6,6 +6,11 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="FluentValidation" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BigSizeFashion.Data\BigSizeFashion.Data.csproj" />
   </ItemGroup>
 
 </Project>
