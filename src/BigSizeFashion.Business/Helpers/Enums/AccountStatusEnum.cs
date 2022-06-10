@@ -4,9 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BigSizeFashion.Business.Enums
+namespace BigSizeFashion.Business.Helpers.Enums
 {
-    class Class1
+    public enum AccountStatusEnum
     {
+        Disable,
+        Active
     }
 }

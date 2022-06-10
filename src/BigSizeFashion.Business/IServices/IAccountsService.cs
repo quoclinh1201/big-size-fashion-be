@@ -12,5 +12,6 @@ namespace BigSizeFashion.Business.IServices
     {
         Task<CustomerLoginResponse> CustomerLogin(CustomerLoginRequest request);
         Task<StaffLoginResponse> StaffLogin(StaffLoginRequest request);
+        Task<CreateCustomerAccountResponse> CreateCustomerAccount(CreateCustomerAccountRequest request);
     }
 }

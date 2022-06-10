@@ -20,7 +20,7 @@ namespace BigSizeFashion.Data.Entities
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public DateTime? Birthday { get; set; }
-        public bool Gender { get; set; }
+        public bool? Gender { get; set; }
         public string PinCode { get; set; }
         public byte? Weigth { get; set; }
         public byte? Heigth { get; set; }

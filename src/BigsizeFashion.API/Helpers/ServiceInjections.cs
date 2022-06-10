@@ -1,11 +1,9 @@
 ﻿using BigSizeFashion.Business.Helpers.RequestObjects;
-using BigSizeFashion.Business.Helpers.Validators;
 using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Business.Services;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
 using BigSizeFashion.Data.Repositories;
-using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,10 +42,6 @@ namespace BigsizeFashion.API.Helpers
 
             // Config for Auto Mapper
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            // Config for Validators
-            services.AddScoped<IValidator<CustomerLoginRequest>, CustomerLoginValidator>();
-            services.AddScoped<IValidator<StaffLoginRequest>, StaffLoginValidator>();
 
             // Config for Services Dependency Injection
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

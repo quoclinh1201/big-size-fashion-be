@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BigSizeFashion.Business.AutoMapper
+namespace BigSizeFashion.Business.Enums
 {
-    class Class1
+    public enum GenderEnum
     {
+        Female,
+        Male,
+        Unknow
     }
 }

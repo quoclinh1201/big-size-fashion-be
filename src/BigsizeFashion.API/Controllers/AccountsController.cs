@@ -34,12 +34,13 @@ namespace BigsizeFashion.API.Controllers
         [HttpPost("customer-login")]
         public async Task<IActionResult> CustomerLogin([FromBody] CustomerLoginRequest request)
         {
-            var result = await _service.CustomerLogin(request);
-            if(result != null)
+            if (!ModelState.IsValid)
             {
-                return Ok(result);
+                return BadRequest();
             }
-            return BadRequest();
+
+            var result = await _service.CustomerLogin(request);
+            return Ok(result);
         }
 
         /// <summary>
@@ -51,12 +52,30 @@ namespace BigsizeFashion.API.Controllers
         [HttpPost("staff-login")]
         public async Task<IActionResult> StaffLogin([FromBody] StaffLoginRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
             var result = await _service.StaffLogin(request);
             if (result != null)
             {
                 return Ok(result);
             }
             return BadRequest();
+        }
+
+        [AllowAnonymous]
+        [HttpPost("create-customer-account")]
+        public async Task<IActionResult> CreateCustomerAccount([FromBody] CreateCustomerAccountRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var result = await _service.CreateCustomerAccount(request);
+            return Ok(result);
         }
     }
 }
