@@ -67,6 +67,34 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
+        public async Task<AccountResponse> CreateStaffAccount(CreateStaffAccountRequest request)
+        {
+            try
+            {
+                var account = _mapper.Map<Account>(request);
+                var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
+                account.RoleId = role.RoleId;
+                await _accountRepository.InsertAsync(account);
+                await _accountRepository.SaveAsync();
+
+
+                var staff = _mapper.Map<staff>(request);
+                staff.Uid = account.Uid;
+                await _staffRepository.InsertAsync(staff);
+                await _staffRepository.SaveAsync();
+
+                var result = _mapper.Map<AccountResponse>(account);
+                result.RoleAccount = request.RoleAccount;
+                result.Fullname = staff.Fullname;
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<CustomerLoginResponse> CustomerLogin(CustomerLoginRequest request)
         {
             try
