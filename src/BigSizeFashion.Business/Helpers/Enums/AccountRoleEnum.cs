@@ -6,9 +6,12 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.Enums
 {
-    public enum AccountStatusEnum
+    public enum AccountRoleEnum
     {
-        Inactive,
-        Active
+        Admin,
+        Manager,
+        Staff,
+        Customer,
+        Owner
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using BigSizeFashion.Business.Helpers.RequestObjects;
+using BigSizeFashion.Business.Helpers.Common;
+using BigSizeFashion.Business.Helpers.Parameters;
 
 namespace BigSizeFashion.Business.Services
 {
@@ -42,10 +44,11 @@ namespace BigSizeFashion.Business.Services
             _config = config;
         }
 
-        public async Task<CreateCustomerAccountResponse> CreateCustomerAccount(CreateCustomerAccountRequest request)
+        public async Task<Result<CreateCustomerAccountResponse>> CreateCustomerAccount(CreateCustomerAccountRequest request)
         {
             try
             {
+                var result = new Result<CreateCustomerAccountResponse>();
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals("Customer"));
                 account.RoleId = role.RoleId;
@@ -58,7 +61,8 @@ namespace BigSizeFashion.Business.Services
                 await _customerRepository.SaveAsync();
 
                 var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.Role1);
-                return new CreateCustomerAccountResponse { Token = token };
+                result.Content = new CreateCustomerAccountResponse { Token = token };
+                return result;
             }
             catch (Exception)
             {
@@ -67,10 +71,11 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<AccountResponse> CreateStaffAccount(CreateStaffAccountRequest request)
+        public async Task<Result<AccountResponse>> CreateStaffAccount(CreateStaffAccountRequest request)
         {
             try
             {
+                var result = new Result<AccountResponse>();
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
                 account.RoleId = role.RoleId;
@@ -83,9 +88,10 @@ namespace BigSizeFashion.Business.Services
                 await _staffRepository.InsertAsync(staff);
                 await _staffRepository.SaveAsync();
 
-                var result = _mapper.Map<AccountResponse>(account);
-                result.RoleAccount = request.RoleAccount;
-                result.Fullname = staff.Fullname;
+                var response = _mapper.Map<AccountResponse>(account);
+                response.RoleAccount = request.RoleAccount;
+                response.Fullname = staff.Fullname;
+                result.Content = response;
                 return result;
             }
             catch (Exception)
@@ -95,10 +101,11 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<CustomerLoginResponse> CustomerLogin(CustomerLoginRequest request)
+        public async Task<Result<CustomerLoginResponse>> CustomerLogin(CustomerLoginRequest request)
         {
             try
             {
+                var result = new Result<CustomerLoginResponse>();
                 var account = _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Username.Equals(request.PhoneNumber))
                     .Include(a => a.Role).FirstOrDefault(); 
@@ -106,11 +113,13 @@ namespace BigSizeFashion.Business.Services
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
                     var token = GenerateJSONWebToken(customer.Uid.ToString(), customer.Fullname, account.Role.Role1);
-                    return new CustomerLoginResponse { Token = token ,IsNewCustomer = false };
+                    result.Content = new CustomerLoginResponse { Token = token, IsNewCustomer = false };
+                    return result;
                 }
                 else
                 {
-                    return new CustomerLoginResponse { IsNewCustomer = true };
+                    result.Content = new CustomerLoginResponse { IsNewCustomer = true };
+                    return result;
                 }
             }
             catch (Exception)
@@ -120,10 +129,50 @@ namespace BigSizeFashion.Business.Services
             
         }
 
-        public async Task<StaffLoginResponse> StaffLogin(StaffLoginRequest request)
+        public async Task<PagedResult<GetListAccountsResponse>> GetListAccounts(GetListAccountsParameter param)
         {
             try
             {
+                var role = await _roleRepository.FindAsync(r => r.Role1.Equals(param.Role.ToString()));
+                var accounts = await _accountRepository.FindByAsync(a => a.RoleId.Equals(role.RoleId));
+                var response = _mapper.Map<List<GetListAccountsResponse>>(accounts);
+
+                if(param.Role.ToString().Equals("Customer"))
+                {
+                    for (int i = 0; i < response.Count; i++)
+                    {
+                        var customer = await _customerRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
+                        response[i].Fullname = customer.Fullname;
+                    }
+                    var query = response.AsQueryable();
+                    FilterAccountByName(ref query, param.Fullname);
+                    response = query.ToList();
+                } 
+                else if(param.Role.ToString().Equals("Manager") || param.Role.ToString().Equals("Staff"))
+                {
+                    for (int i = 0; i < response.Count; i++)
+                    {
+                        var staff = await _staffRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
+                        response[i].Fullname = staff.Fullname;
+                    }
+                    var query = response.AsQueryable();
+                    FilterAccountByName(ref query, param.Fullname);
+                    response = query.ToList();
+                }
+                return PagedResult<GetListAccountsResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Result<StaffLoginResponse>> StaffLogin(StaffLoginRequest request)
+        {
+            try
+            {
+                var result = new Result<StaffLoginResponse>();
                 var account = _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Username.Equals(request.Username) && a.Password.Equals(request.Password))
                     .Include(a => a.Role).FirstOrDefault();
@@ -131,7 +180,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
                     var token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.Role1);
-                    return new StaffLoginResponse { Token = token, Role = account.Role.Role1 };
+
+                    result.Content = new StaffLoginResponse { Token = token, Role = account.Role.Role1 };
+                    return result;
                 }
                 return null;
             }
@@ -163,6 +214,16 @@ namespace BigSizeFashion.Business.Services
                                             signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private void FilterAccountByName(ref IQueryable<GetListAccountsResponse> query, string name)
+        {
+            if (!query.Any() || String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
+            query = query.Where(q => q.Fullname.ToLower().Contains(name.ToLower()));
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Enums;
-using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Data.Entities;
 using System;
@@ -12,18 +11,11 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.AutoMapper
 {
-    public class CreateStaffAccountMapper : Profile
+    public class GetListManagerAccountsMapper : Profile
     {
-        public CreateStaffAccountMapper()
+        public GetListManagerAccountsMapper()
         {
-            CreateMap<CreateStaffAccountRequest, Account>()
-                .ForMember(d => d.CreateAt, s => s.MapFrom(s => DateTime.UtcNow.AddHours(7)))
-                .ForMember(d => d.Status, s => s.MapFrom(s => true));
-
-            CreateMap<CreateStaffAccountRequest, staff>()
-                .ForMember(d => d.Status, s => s.MapFrom(s => true));
-
-            CreateMap<Account, AccountResponse>()
+            CreateMap<Account, GetListAccountsResponse>()
                 .ForMember(d => d.CreateAt, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateAt)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? AccountStatusEnum.Active : AccountStatusEnum.Inactive));
         }

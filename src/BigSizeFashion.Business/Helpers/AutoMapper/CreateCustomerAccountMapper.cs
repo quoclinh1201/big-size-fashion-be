@@ -16,7 +16,7 @@ namespace BigSizeFashion.Business.AutoMapper
         {
             CreateMap<CreateCustomerAccountRequest, Account>()
                 .ForMember(d => d.Username, s => s.MapFrom(s => s.PhoneNumber))
-                .ForMember(d => d.CreateAt, s => s.MapFrom(s => DateTime.Now))
+                .ForMember(d => d.CreateAt, s => s.MapFrom(s => DateTime.UtcNow.AddHours(7)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
 
             CreateMap<CreateCustomerAccountRequest, Customer>()

@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.RequestObjects;
+﻿using BigSizeFashion.Business.Helpers.Parameters;
+using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -105,6 +106,23 @@ namespace BigsizeFashion.API.Controllers
             }
 
             var result = await _service.CreateStaffAccount(request);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// [Admin] Get list accounts
+        /// </summary>
+        /// <remarks>
+        /// - Có thể search by Fullname
+        /// - Bỏ trống field Fullname thì là get all
+        /// </remarks>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-list-manager-accounts")]
+        public async Task<IActionResult> GetListAccounts([FromQuery] GetListAccountsParameter param)
+        {
+            var result = await _service.GetListAccounts(param);
             return Ok(result);
         }
     }
