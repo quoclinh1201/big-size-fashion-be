@@ -167,5 +167,13 @@ namespace BigsizeFashion.API.Controllers
             var result = await _service.ActiveAccount(uid);
             return Ok(result);
         }
+
+        //[Authorize]
+        [HttpPut("change-password")]
+        public async Task<IActionResult> ChangePassword([FromHeader] string authorization, [FromBody] ChangePasswordRequest request)
+        {
+            var result = await _service.ChangePassword(authorization.Substring(7), request);
+            return Ok(result);
+        }
     }
 }

@@ -344,5 +344,38 @@ namespace BigSizeFashion.Business.Services
                 throw;
             }
         }
+
+        public async Task<Result<string>> ChangePassword(string token, ChangePasswordRequest request)
+        {
+            try
+            {
+                var result = new Result<string>();
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+
+                if(uid == 0)
+                {
+                    result.Content = "Invalid token";
+                    return result;
+                }
+
+                var account = await _accountRepository.FindAsync(a => a.Uid.Equals(uid) && a.Password.Equals(request.OldPassword));
+
+                if (account == null)
+                {
+                    result.Content = "Account is not exist or wrong old password";
+                    return result;
+                }
+
+                account.Password = request.ConfirmNewPassword;
+                await _accountRepository.SaveAsync();
+                result.Content = "Successful";
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }
