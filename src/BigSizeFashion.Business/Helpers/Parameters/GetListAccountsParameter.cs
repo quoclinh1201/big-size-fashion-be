@@ -14,5 +14,8 @@ namespace BigSizeFashion.Business.Helpers.Parameters
 
         [Required]
         public AccountRoleEnum Role { get; set; }
+
+        [Required]
+        public AccountStatusEnum Status { get; set; }
     }
 }

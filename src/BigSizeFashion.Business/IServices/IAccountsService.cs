@@ -17,5 +17,8 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<CreateCustomerAccountResponse>> CreateCustomerAccount(CreateCustomerAccountRequest request);
         Task<Result<AccountResponse>> CreateStaffAccount(CreateStaffAccountRequest request);
         Task<PagedResult<GetListAccountsResponse>> GetListAccounts(GetListAccountsParameter param);
+        Task<Result<GetDetailUserByUidResponse>> GetDetailUserByUid(int uid);
+        Task<Result<bool>> DisableAccount(int uid);
+        Task<Result<bool>> ActiveAccount(int uid);
     }
 }

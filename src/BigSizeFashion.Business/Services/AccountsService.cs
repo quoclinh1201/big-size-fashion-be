@@ -16,6 +16,7 @@ using System.Security.Claims;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
+using BigSizeFashion.Business.Helpers.Enums;
 
 namespace BigSizeFashion.Business.Services
 {
@@ -134,7 +135,23 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(param.Role.ToString()));
-                var accounts = await _accountRepository.FindByAsync(a => a.RoleId.Equals(role.RoleId));
+                ICollection<Account> accounts = null;
+                if(param.Status.Equals(AccountStatusEnum.Both))
+                {
+                    accounts = await _accountRepository.FindByAsync(a => a.RoleId.Equals(role.RoleId));
+                }
+                else
+                {
+                    var stt = param.Status == AccountStatusEnum.Active ? true : false;
+                    accounts = await _accountRepository
+                        .FindByAsync(a => a.RoleId.Equals(role.RoleId) && a.Status.Equals(stt));
+                }
+
+                if(accounts == null)
+                {
+                    return null;
+                }
+
                 var response = _mapper.Map<List<GetListAccountsResponse>>(accounts);
 
                 if(param.Role.ToString().Equals("Customer"))
@@ -224,6 +241,108 @@ namespace BigSizeFashion.Business.Services
             }
 
             query = query.Where(q => q.Fullname.ToLower().Contains(name.ToLower()));
+        }
+
+        public async Task<Result<GetDetailUserByUidResponse>> GetDetailUserByUid(int uid)
+        {
+            try
+            {
+                var result = new Result<GetDetailUserByUidResponse>();
+                var account = await _accountRepository.GetAllByIQueryable()
+                    .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
+                    .FirstOrDefaultAsync();
+                if(account.Role.Role1.Equals(AccountRoleEnum.Customer.ToString()))
+                {
+                    var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var response = _mapper.Map<GetDetailUserByUidResponse>(customer);
+                    response.Role = account.Role.Role1;
+                    result.Content = response;
+                    return result;
+                } 
+                else if(account.Role.Role1.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.Role1.Equals(AccountRoleEnum.Staff.ToString()))
+                {
+                    var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var response = _mapper.Map<GetDetailUserByUidResponse>(staff);
+                    response.Role = account.Role.Role1;
+                    result.Content = response;
+                    return result;
+                } 
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Result<bool>> DisableAccount(int uid)
+        {
+            try
+            {
+                var result = new Result<bool>();
+                var account = await _accountRepository.GetAllByIQueryable()
+                    .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
+                    .FirstOrDefaultAsync();
+
+                account.Status = false;
+                await _accountRepository.SaveAsync();
+
+                if (account.Role.Role1.Equals(AccountRoleEnum.Customer.ToString()))
+                {
+                    var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
+                    customer.Status = false;
+                    await _customerRepository.SaveAsync();
+                }
+                else if (account.Role.Role1.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.Role1.Equals(AccountRoleEnum.Staff.ToString()))
+                {
+                    var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
+                    staff.Status = false;
+                    await _staffRepository.SaveAsync();
+                }
+                result.Content = true;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Result<bool>> ActiveAccount(int uid)
+        {
+            try
+            {
+                var result = new Result<bool>();
+                var account = await _accountRepository.GetAllByIQueryable()
+                    .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
+                    .FirstOrDefaultAsync();
+
+                account.Status = true;
+                await _accountRepository.SaveAsync();
+
+                if (account.Role.Role1.Equals(AccountRoleEnum.Customer.ToString()))
+                {
+                    var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
+                    customer.Status = true;
+                    await _customerRepository.SaveAsync();
+                }
+                else if (account.Role.Role1.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.Role1.Equals(AccountRoleEnum.Staff.ToString()))
+                {
+                    var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
+                    staff.Status = true;
+                    await _staffRepository.SaveAsync();
+                }
+                result.Content = true;
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

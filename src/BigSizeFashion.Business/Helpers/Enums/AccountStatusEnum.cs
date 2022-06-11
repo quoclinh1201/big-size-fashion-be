@@ -9,6 +9,7 @@ namespace BigSizeFashion.Business.Helpers.Enums
     public enum AccountStatusEnum
     {
         Inactive,
-        Active
+        Active,
+        Both
     }
 }

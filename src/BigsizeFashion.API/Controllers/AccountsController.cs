@@ -96,7 +96,7 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         [HttpPost("create-staff-account")]
         public async Task<IActionResult> CreateStaffAccount([FromBody] CreateStaffAccountRequest request)
         {
@@ -110,7 +110,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// [Admin] Get list accounts
+        /// Get list accounts
         /// </summary>
         /// <remarks>
         /// - Có thể search by Fullname
@@ -118,11 +118,53 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="param"></param>
         /// <returns></returns>
-        [Authorize(Roles = "Admin")]
+        //[Authorize]
         [HttpGet("get-list-manager-accounts")]
         public async Task<IActionResult> GetListAccounts([FromQuery] GetListAccountsParameter param)
         {
             var result = await _service.GetListAccounts(param);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// For admin or manager view detail account
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("get-detail-by-uid/{uid}")]
+        public async Task<IActionResult> GetDetailByUid(int uid)
+        {
+            
+            var result = await _service.GetDetailUserByUid(uid);
+            if(result != null)
+                return Ok(result);
+            return NoContent();
+        }
+
+        /// <summary>
+        /// Use for ban customer or disable staff account
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("disable-account/uid")]
+        public async Task<IActionResult> DisableAccount(int uid)
+        {
+            var result = await _service.DisableAccount(uid);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Use for unban customer or active staff account
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("active-account/uid")]
+        public async Task<IActionResult> ActiveAccount(int uid)
+        {
+            var result = await _service.ActiveAccount(uid);
             return Ok(result);
         }
     }
