@@ -80,6 +80,14 @@ namespace BigSizeFashion.Business.Services
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
                 account.RoleId = role.RoleId;
+
+                if (role.Role1.Equals("Manager"))
+                {
+                    var checkExistedManager = await _staffRepository.FindAsync(c => c.StoreId == request.StoreId && c.Status == true);
+                    if (checkExistedManager != null)
+                        return null;
+                }
+
                 await _accountRepository.InsertAsync(account);
                 await _accountRepository.SaveAsync();
 

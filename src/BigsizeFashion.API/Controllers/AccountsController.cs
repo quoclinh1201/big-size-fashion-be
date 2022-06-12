@@ -96,7 +96,7 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost("create-staff-account")]
         public async Task<IActionResult> CreateStaffAccount([FromBody] CreateStaffAccountRequest request)
         {
@@ -106,7 +106,9 @@ namespace BigsizeFashion.API.Controllers
             }
 
             var result = await _service.CreateStaffAccount(request);
-            return Ok(result);
+            if(result != null)
+                return Ok(result);
+            return BadRequest("The manager is existed in this store");
         }
 
         /// <summary>
