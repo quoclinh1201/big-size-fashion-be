@@ -20,7 +20,7 @@ using BigSizeFashion.Business.Helpers.Enums;
 
 namespace BigSizeFashion.Business.Services
 {
-    public class AccountsService : IAccountsService
+    public class AccountService : IAccountService
     {
         private readonly IGenericRepository<Account> _accountRepository;
         private readonly IGenericRepository<Customer> _customerRepository;
@@ -29,7 +29,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IMapper _mapper;
         private IConfiguration _config;
 
-        public AccountsService(
+        public AccountService(
             IGenericRepository<Account> accountRepository,
             IGenericRepository<Customer> customerRepository,
             IGenericRepository<staff> staffRepository,

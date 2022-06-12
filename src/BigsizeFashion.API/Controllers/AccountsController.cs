@@ -15,9 +15,9 @@ namespace BigsizeFashion.API.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly IAccountsService _service;
+        private readonly IAccountService _service;
 
-        public AccountsController(IAccountsService service)
+        public AccountsController(IAccountService service)
         {
             _service = service;
         }

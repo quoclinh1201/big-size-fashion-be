@@ -125,6 +125,8 @@ namespace BigSizeFashion.Data.Entities
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("category");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Color>(entity =>
@@ -137,6 +139,8 @@ namespace BigSizeFashion.Data.Entities
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("color");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Customer>(entity =>
@@ -277,6 +281,11 @@ namespace BigSizeFashion.Data.Entities
                 entity.Property(e => e.DeliveryDate)
                     .HasColumnType("datetime")
                     .HasColumnName("delivery_date");
+
+                entity.Property(e => e.InvoiceName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("invoice_name");
 
                 entity.Property(e => e.MainWarehouseId).HasColumnName("main_warehouse_id");
 
@@ -544,7 +553,7 @@ namespace BigSizeFashion.Data.Entities
                     .IsUnicode(false)
                     .HasColumnName("image_url");
 
-                entity.Property(e => e.IsReferenceImage).HasColumnName("is_reference_image");
+                entity.Property(e => e.IsMainImage).HasColumnName("is_main_image");
 
                 entity.Property(e => e.ProductId).HasColumnName("product_id");
 
@@ -626,6 +635,8 @@ namespace BigSizeFashion.Data.Entities
                     .HasMaxLength(10)
                     .IsUnicode(false)
                     .HasColumnName("size");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Store>(entity =>

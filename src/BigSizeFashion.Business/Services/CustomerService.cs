@@ -13,12 +13,12 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Services
 {
-    public class CustomersService : ICustomersService
+    public class CustomerService : ICustomerService
     {
         private readonly IGenericRepository<Customer> _genericRepository;
         private readonly IMapper _mapper;
 
-        public CustomersService(IGenericRepository<Customer> genericRepository, IMapper mapper)
+        public CustomerService(IGenericRepository<Customer> genericRepository, IMapper mapper)
         {
             _genericRepository = genericRepository;
             _mapper = mapper;

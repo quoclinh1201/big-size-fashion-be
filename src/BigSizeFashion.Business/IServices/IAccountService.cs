@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.IServices
 {
-    public interface IAccountsService
+    public interface IAccountService
     {
         Task<Result<CustomerLoginResponse>> CustomerLogin(CustomerLoginRequest request);
         Task<Result<StaffLoginResponse>> StaffLogin(StaffLoginRequest request);

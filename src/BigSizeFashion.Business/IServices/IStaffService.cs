@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.IServices
 {
-    public interface IStaffsService
+    public interface IStaffService
     {
         Task<Result<StaffProfileResponse>> GetOwnProfile(string token);
         Task<Result<StaffProfileResponse>> UpdateProfile(string token, UpdateStaffProfileRequest request);

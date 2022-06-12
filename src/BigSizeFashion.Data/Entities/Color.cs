@@ -14,6 +14,7 @@ namespace BigSizeFashion.Data.Entities
 
         public int ColorId { get; set; }
         public string Color1 { get; set; }
+        public bool Status { get; set; }
 
         public virtual ICollection<Product> Products { get; set; }
     }

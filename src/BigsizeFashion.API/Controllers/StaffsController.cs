@@ -14,9 +14,9 @@ namespace BigsizeFashion.API.Controllers
     [ApiController]
     public class StaffsController : ControllerBase
     {
-        private readonly IStaffsService _service;
+        private readonly IStaffService _service;
 
-        public StaffsController(IStaffsService service)
+        public StaffsController(IStaffService service)
         {
             _service = service;
         }
