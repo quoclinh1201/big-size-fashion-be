@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Helpers.Common;
+using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
@@ -26,27 +27,27 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<SizeResponse>> CreateSize(SizeRequest request)
         {
+            var result = new Result<SizeResponse>();
             try
             {
-                var result = new Result<SizeResponse>();
                 var newSize = _mapper.Map<Size>(request);
                 await _genericRepository.InsertAsync(newSize);
                 await _genericRepository.SaveAsync();
                 result.Content = _mapper.Map<SizeResponse>(newSize);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> DeleteSize(int id)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var size = await _genericRepository.FindAsync(s => s.SizeId == id);
 
                 if(size is null)
@@ -60,60 +61,60 @@ namespace BigSizeFashion.Business.Services
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<IEnumerable<SizeResponse>>> GetAllSize()
         {
+            var result = new Result<IEnumerable<SizeResponse>>();
             try
             {
-                var result = new Result<IEnumerable<SizeResponse>>();
                 var sizes = await _genericRepository.FindByAsync(s => s.Status == true);
                 result.Content = _mapper.Map<List<SizeResponse>>(sizes);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<SizeResponse>> GetSizeByID(int id)
         {
+            var result = new Result<SizeResponse>();
             try
             {
-                var result = new Result<SizeResponse>();
                 var size = await _genericRepository.FindAsync(s => s.SizeId == id && s.Status == true);
                 result.Content = _mapper.Map<SizeResponse>(size);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<SizeResponse>> UpdateSize(int id, SizeRequest request)
         {
+            var result = new Result<SizeResponse>();
             try
             {
-                var result = new Result<SizeResponse>();
                 var size = await _genericRepository.FindAsync(s => s.SizeId == id);
                 var model = _mapper.Map(request, size);
                 await _genericRepository.UpdateAsync(model);
                 result.Content = _mapper.Map<SizeResponse>(model);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }

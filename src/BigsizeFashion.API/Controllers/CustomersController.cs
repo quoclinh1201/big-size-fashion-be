@@ -31,6 +31,21 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> GetOwnProfile([FromHeader] string authorization)
         {
             var result = await _service.GetOwnProfile(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                if (result.Error.Code == 401)
+                {
+                    return Unauthorized(result);
+                }
+                else if (result.Error.Code == 404)
+                {
+                    return NotFound(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
             return Ok(result);
         }
 
@@ -48,7 +63,26 @@ namespace BigsizeFashion.API.Controllers
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromHeader] string authorization, [FromBody] UpdateCustomerProfileRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.UpdateProfile(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                if(result.Error.Code == 401)
+                {
+                    return Unauthorized(result);
+                }
+                else if (result.Error.Code == 404)
+                {
+                    return NotFound(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
             return Ok(result);
         }
 
@@ -67,7 +101,22 @@ namespace BigsizeFashion.API.Controllers
         [HttpPost("create-pin-code")]
         public async Task<IActionResult> CreatePINCode([FromHeader] string authorization, [FromBody] CreatePINCodeRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.CreatePINCode(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                if(result.Error.Code == 401)
+                {
+                    return Unauthorized(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
             return Ok(result);
         }
 
@@ -86,7 +135,22 @@ namespace BigsizeFashion.API.Controllers
         [HttpPut("change-pin-code")]
         public async Task<IActionResult> ChangePINCode([FromHeader] string authorization, [FromBody] ChangePINCodeRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.ChangePINCode(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                if (result.Error.Code == 401)
+                {
+                    return Unauthorized(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
             return Ok(result);
         }
 
@@ -104,6 +168,10 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> CheckPINCode([FromHeader] string authorization)
         {
             var result = await _service.CheckPINCode(authorization.Substring(7));
+            if(!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -122,7 +190,22 @@ namespace BigsizeFashion.API.Controllers
         [HttpPost("validate-pin-code")]
         public async Task<IActionResult> ValidatePINCode([FromHeader] string authorization, [FromBody] ValidatePINCodeRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.ValidatePINCode(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                if (result.Error.Code == 401)
+                {
+                    return Unauthorized(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
             return Ok(result);
         }
     }

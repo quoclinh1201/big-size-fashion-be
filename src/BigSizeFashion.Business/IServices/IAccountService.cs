@@ -20,6 +20,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<GetDetailUserByUidResponse>> GetDetailUserByUid(int uid);
         Task<Result<bool>> DisableAccount(int uid);
         Task<Result<bool>> ActiveAccount(int uid);
-        Task<Result<string>> ChangePassword(string token, ChangePasswordRequest request);
+        Task<Result<bool>> ChangePassword(string token, ChangePasswordRequest request);
     }
 }

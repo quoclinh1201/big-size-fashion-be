@@ -18,5 +18,6 @@ namespace BigsizeFashion.API.Controllers
         {
             _service = service;
         }
+
     }
 }

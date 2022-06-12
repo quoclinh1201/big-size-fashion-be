@@ -17,6 +17,7 @@ using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.Enums;
+using BigSizeFashion.Business.Helpers.Constants;
 
 namespace BigSizeFashion.Business.Services
 {
@@ -47,9 +48,9 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<CreateCustomerAccountResponse>> CreateCustomerAccount(CreateCustomerAccountRequest request)
         {
+            var result = new Result<CreateCustomerAccountResponse>();
             try
             {
-                var result = new Result<CreateCustomerAccountResponse>();
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals("Customer"));
                 account.RoleId = role.RoleId;
@@ -65,27 +66,33 @@ namespace BigSizeFashion.Business.Services
                 result.Content = new CreateCustomerAccountResponse { Token = token };
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<AccountResponse>> CreateStaffAccount(CreateStaffAccountRequest request)
         {
+            var result = new Result<AccountResponse>();
             try
             {
-                var result = new Result<AccountResponse>();
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
                 account.RoleId = role.RoleId;
 
                 if (role.Role1.Equals("Manager"))
                 {
-                    var checkExistedManager = await _staffRepository.FindAsync(c => c.StoreId == request.StoreId && c.Status == true);
+                    var checkExistedManager = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.staff.StoreId == request.StoreId && a.RoleId == role.RoleId && a.Status == true)
+                        .FirstOrDefaultAsync();
                     if (checkExistedManager != null)
-                        return null;
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ExistedManagerInStore);
+                        return result;
+                    }
                 }
 
                 await _accountRepository.InsertAsync(account);
@@ -103,18 +110,18 @@ namespace BigSizeFashion.Business.Services
                 result.Content = response;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<CustomerLoginResponse>> CustomerLogin(CustomerLoginRequest request)
         {
+            var result = new Result<CustomerLoginResponse>();
             try
             {
-                var result = new Result<CustomerLoginResponse>();
                 var account = _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Username.Equals(request.PhoneNumber))
                     .Include(a => a.Role).FirstOrDefault(); 
@@ -131,9 +138,10 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
             
         }
@@ -195,26 +203,33 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<StaffLoginResponse>> StaffLogin(StaffLoginRequest request)
         {
+            var result = new Result<StaffLoginResponse>();
             try
             {
-                var result = new Result<StaffLoginResponse>();
                 var account = _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Username.Equals(request.Username) && a.Password.Equals(request.Password))
                     .Include(a => a.Role).FirstOrDefault();
                 if(account != null)
                 {
+                    if(account.Status == false)
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.BlockedAccount);
+                        return result;
+                    }
+
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
                     var token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.Role1);
 
                     result.Content = new StaffLoginResponse { Token = token, Role = account.Role.Role1 };
                     return result;
                 }
-                return null;
+                result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.WrongUsernameOrPassword);
+                return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
@@ -241,7 +256,7 @@ namespace BigSizeFashion.Business.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private void FilterAccountByName(ref IQueryable<GetListAccountsResponse> query, string name)
+        private static void FilterAccountByName(ref IQueryable<GetListAccountsResponse> query, string name)
         {
             if (!query.Any() || String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
             {
@@ -253,9 +268,9 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<GetDetailUserByUidResponse>> GetDetailUserByUid(int uid)
         {
+            var result = new Result<GetDetailUserByUidResponse>();
             try
-            {
-                var result = new Result<GetDetailUserByUidResponse>();
+            { 
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
@@ -280,18 +295,18 @@ namespace BigSizeFashion.Business.Services
                     return null;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> DisableAccount(int uid)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
@@ -314,17 +329,18 @@ namespace BigSizeFashion.Business.Services
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> ActiveAccount(int uid)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
@@ -347,22 +363,23 @@ namespace BigSizeFashion.Business.Services
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
-        public async Task<Result<string>> ChangePassword(string token, ChangePasswordRequest request)
+        public async Task<Result<bool>> ChangePassword(string token, ChangePasswordRequest request)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<string>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
 
                 if(uid == 0)
                 {
-                    result.Content = "Invalid token";
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
                     return result;
                 }
 
@@ -370,19 +387,19 @@ namespace BigSizeFashion.Business.Services
 
                 if (account == null)
                 {
-                    result.Content = "Account is not exist or wrong old password";
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.WrongOldPassword);
                     return result;
                 }
 
                 account.Password = request.ConfirmNewPassword;
                 await _accountRepository.SaveAsync();
-                result.Content = "Successful";
+                result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }

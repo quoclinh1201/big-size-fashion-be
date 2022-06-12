@@ -42,6 +42,10 @@ namespace BigsizeFashion.API.Controllers
             }
 
             var result = await _service.CustomerLogin(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -60,11 +64,19 @@ namespace BigsizeFashion.API.Controllers
             }
 
             var result = await _service.StaffLogin(request);
-            if (result != null)
+
+            if (!result.IsSuccess)
             {
-                return Ok(result);
+                if (result.Error.Code == 404)
+                {
+                    return NotFound(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
             }
-            return BadRequest();
+            return Ok(result);
         }
 
         /// <summary>
@@ -85,6 +97,12 @@ namespace BigsizeFashion.API.Controllers
             }
 
             var result = await _service.CreateCustomerAccount(request);
+
+            if (!result.IsSuccess)
+            {
+                 return BadRequest(result);
+            }
+
             return Ok(result);
         }
 
@@ -106,9 +124,11 @@ namespace BigsizeFashion.API.Controllers
             }
 
             var result = await _service.CreateStaffAccount(request);
-            if(result != null)
-                return Ok(result);
-            return BadRequest("The manager is existed in this store");
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
         }
 
         /// <summary>
@@ -137,9 +157,16 @@ namespace BigsizeFashion.API.Controllers
         [HttpGet("get-detail-by-uid/{uid}")]
         public async Task<IActionResult> GetDetailByUid(int uid)
         {
-            
+            if(uid < 1)
+            {
+                return BadRequest();
+            }
             var result = await _service.GetDetailUserByUid(uid);
-            if(result != null)
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            if (result != null)
                 return Ok(result);
             return NoContent();
         }
@@ -153,7 +180,15 @@ namespace BigsizeFashion.API.Controllers
         [HttpDelete("disable-account/uid")]
         public async Task<IActionResult> DisableAccount(int uid)
         {
+            if (uid < 1)
+            {
+                return BadRequest();
+            }
             var result = await _service.DisableAccount(uid);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -166,7 +201,15 @@ namespace BigsizeFashion.API.Controllers
         [HttpPut("active-account/uid")]
         public async Task<IActionResult> ActiveAccount(int uid)
         {
+            if (uid < 1)
+            {
+                return BadRequest();
+            }
             var result = await _service.ActiveAccount(uid);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -174,7 +217,21 @@ namespace BigsizeFashion.API.Controllers
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromHeader] string authorization, [FromBody] ChangePasswordRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.ChangePassword(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                if(result.Error.Code == 401)
+                {
+                    return Unauthorized(result);
+                } else
+                {
+                    return BadRequest(result);
+                }
+            }
             return Ok(result);
         }
     }

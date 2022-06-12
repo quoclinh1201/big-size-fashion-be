@@ -30,6 +30,10 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> GetAllSize()
         {
             var result = await _service.GetAllSize();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -42,6 +46,10 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> GetSizeByID(int id)
         {
             var result = await _service.GetSizeByID(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -53,7 +61,15 @@ namespace BigsizeFashion.API.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateSize([FromBody] SizeRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.CreateSize(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return CreatedAtRoute(nameof(GetSizeByID), new { id = result.Content.SizeId }, result);
         }
 
@@ -65,7 +81,15 @@ namespace BigsizeFashion.API.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSize(int id, [FromBody] SizeRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             var result = await _service.UpdateSize(id, request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
 
@@ -79,6 +103,10 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> DeleteSize(int id)
         {
             var result = await _service.DeleteSize(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
     }

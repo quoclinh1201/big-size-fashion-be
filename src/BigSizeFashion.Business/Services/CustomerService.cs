@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Helpers.Common;
+using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
@@ -26,15 +27,20 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<bool>> ChangePINCode(string token, ChangePINCodeRequest request)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                if (uid == 0)
+                {
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
+                    return result;
+                }
                 var customer = await _genericRepository.FindAsync(c => c.Uid.Equals(uid) && c.PinCode.Equals(request.OldPinCode) && c.Status == true);
 
                 if (customer is null)
                 {
-                    result.Content = false;
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.NotExistedPINCode);
                     return result;
                 }
 
@@ -43,18 +49,18 @@ namespace BigSizeFashion.Business.Services
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> CheckPINCode(string token)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
                 var customer = await _genericRepository.FindAsync(c => c.Uid.Equals(uid) && c.PinCode != null && c.Status == true);
 
@@ -67,24 +73,29 @@ namespace BigSizeFashion.Business.Services
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> CreatePINCode(string token, CreatePINCodeRequest request)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                if (uid == 0)
+                {
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
+                    return result;
+                }
                 var customer = await _genericRepository.FindAsync(c => c.Uid.Equals(uid) && c.PinCode == null && c.Status == true);
 
                 if(customer is null)
                 {
-                    result.Content = false;
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ExistedPINCode);
                     return result;
                 }
 
@@ -93,75 +104,98 @@ namespace BigSizeFashion.Business.Services
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<CustomerProfileResponse>> GetOwnProfile(string token)
         {
+            var result = new Result<CustomerProfileResponse>();
             try
             {
-                var result = new Result<CustomerProfileResponse>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                if (uid == 0)
+                {
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
+                    return result;
+                }
                 var customer = await _genericRepository.FindAsync(c => c.Uid.Equals(uid) && c.Status == true);
+                if (customer == null)
+                {
+                    result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.NotExistedUser);
+                    return result;
+                }
                 var response = _mapper.Map<CustomerProfileResponse>(customer);
                 result.Content = response;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<CustomerProfileResponse>> UpdateProfile(string token, UpdateCustomerProfileRequest request)
         {
+            var result = new Result<CustomerProfileResponse>();
             try
             {
-                var result = new Result<CustomerProfileResponse>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                if (uid == 0)
+                {
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
+                    return result;
+                }
                 var customer = await _genericRepository.FindAsync(c => c.Uid == uid && c.Status == true);
 
                 if (customer == null)
-                    return null;
+                {
+                    result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.NotExistedUser);
+                    return result;
+                }
 
                 var model = _mapper.Map(request, customer);
                 await _genericRepository.UpdateAsync(model);
                 result.Content = _mapper.Map<CustomerProfileResponse>(model);
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> ValidatePINCode(string token, ValidatePINCodeRequest request)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                if (uid == 0)
+                {
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
+                    return result;
+                }
                 var customer = await _genericRepository.FindAsync(c => c.Uid.Equals(uid) && c.PinCode.Equals(request.PinCode) && c.Status == true);
 
                 if (customer is null)
                 {
-                    result.Content = false;
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.WrongPINCode);
                     return result;
                 }
 
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }
