@@ -150,7 +150,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="uid"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpPut("disable-account/uid")]
+        [HttpDelete("disable-account/uid")]
         public async Task<IActionResult> DisableAccount(int uid)
         {
             var result = await _service.DisableAccount(uid);

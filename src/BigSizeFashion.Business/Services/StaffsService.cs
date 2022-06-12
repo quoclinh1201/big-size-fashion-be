@@ -1,7 +1,11 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Helpers.Common;
+using BigSizeFashion.Business.Helpers.RequestObjects;
+using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +16,78 @@ namespace BigSizeFashion.Business.Services
 {
     public class StaffsService : IStaffsService
     {
-        private readonly IGenericRepository<staff> _genericRepository;
+        private readonly IGenericRepository<staff> _staffRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
         private readonly IMapper _mapper;
 
-        public StaffsService(IGenericRepository<staff> genericRepository, IMapper mapper)
+        public StaffsService(
+            IGenericRepository<staff> staffRepository,
+            IGenericRepository<Account> accountRepository,
+            IMapper mapper)
         {
-            _genericRepository = genericRepository;
+            _staffRepository = staffRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
+        }
+
+        public async Task<Result<StaffProfileResponse>> GetOwnProfile(string token)
+        {
+            try
+            {
+                var result = new Result<StaffProfileResponse>();
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.GetAllByIQueryable().Include(s => s.Store).Where(s => s.Uid == uid).FirstOrDefaultAsync();
+
+                if (staff is null)
+                    return null;
+
+                var response = _mapper.Map<StaffProfileResponse>(staff);
+                var account = await _accountRepository.GetAllByIQueryable().Include(a => a.Role).Where(s => s.Uid == uid).FirstOrDefaultAsync();
+
+                if (account is null)
+                    return null;
+
+                response.Role = account.Role.Role1;
+                result.Content = response;
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Result<StaffProfileResponse>> UpdateProfile(string token, UpdateStaffProfileRequest request)
+        {
+            try
+            {
+                var result = new Result<StaffProfileResponse>();
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.GetAllByIQueryable().Include(s => s.Store).Where(s => s.Uid == uid).FirstOrDefaultAsync();
+
+                if (staff is null)
+                    return null;
+
+                var model = _mapper.Map(request, staff);
+                await _staffRepository.UpdateAsync(model);
+
+                var account = await _accountRepository.GetAllByIQueryable().Include(a => a.Role).Where(s => s.Uid == uid).FirstOrDefaultAsync();
+
+                if (account is null)
+                    return null;
+
+                var response = _mapper.Map<StaffProfileResponse>(model);
+                response.Role = account.Role.Role1;
+
+                result.Content = response;
+                return result;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

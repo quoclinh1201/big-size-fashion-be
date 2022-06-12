@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.RequestObjects
 {
-    public class UpdateCustomerProfileRequest
+    public class UpdateStaffProfileRequest
     {
         [MaxLength(50)]
         public string Fullname { get; set; }
@@ -18,15 +18,8 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
 
         public string Birthday { get; set; }
 
-        [Required(AllowEmptyStrings = false)]
-        public bool Gender { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        [Range(0, 255)]
-        public byte Weigth { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        [Range(0, 255)]
-        public byte Heigth { get; set; }
+        [RegularExpression(@"[0]{1}[0-9]{9}")]
+        [MaxLength(10)]
+        public string PhoneNumber { get; set; }
     }
 }
