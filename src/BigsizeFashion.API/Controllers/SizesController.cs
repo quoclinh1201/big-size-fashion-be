@@ -27,7 +27,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <returns></returns>
         //[Authorize]
-        [HttpGet()]
+        [HttpGet]
         public async Task<IActionResult> GetAllSize([FromQuery] SearchSizeParameter param)
         {
             var result = await _service.GetAllSize(param);

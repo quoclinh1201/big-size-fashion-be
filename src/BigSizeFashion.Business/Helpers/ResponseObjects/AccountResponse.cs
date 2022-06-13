@@ -15,6 +15,6 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
         public string Username { get; set; }
         public string Password { get; set; }
         public string CreateAt { get; set; }
-        public AccountStatusEnum Status { get; set; }
+        public StatusEnum Status { get; set; }
     }
 }

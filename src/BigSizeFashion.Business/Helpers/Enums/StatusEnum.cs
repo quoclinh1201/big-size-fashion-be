@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.Enums
 {
-    public enum AccountStatusEnum
+    public enum StatusEnum
     {
         Inactive,
         Active,

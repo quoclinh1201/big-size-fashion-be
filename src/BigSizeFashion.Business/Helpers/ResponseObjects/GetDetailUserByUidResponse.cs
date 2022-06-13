@@ -17,6 +17,6 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
         public string Birthday { get; set; }
         public GenderEnum? Gender { get; set; }
         public string Role { get; set; }
-        public AccountStatusEnum Status { get; set; }
+        public StatusEnum Status { get; set; }
     }
 }

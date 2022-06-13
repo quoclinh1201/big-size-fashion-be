@@ -152,13 +152,13 @@ namespace BigSizeFashion.Business.Services
             {
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(param.Role.ToString()));
                 ICollection<Account> accounts = null;
-                if(param.Status.Equals(AccountStatusEnum.Both))
+                if(param.Status.Equals(StatusEnum.Both))
                 {
                     accounts = await _accountRepository.FindByAsync(a => a.RoleId.Equals(role.RoleId));
                 }
                 else
                 {
-                    var stt = param.Status == AccountStatusEnum.Active ? true : false;
+                    var stt = param.Status == StatusEnum.Active ? true : false;
                     accounts = await _accountRepository
                         .FindByAsync(a => a.RoleId.Equals(role.RoleId) && a.Status.Equals(stt));
                 }
