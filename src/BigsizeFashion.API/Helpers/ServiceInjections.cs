@@ -50,6 +50,7 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<ISizeService, SizeService>();
+            services.AddScoped<IColourService, ColourService>();
 
             return services;
         }

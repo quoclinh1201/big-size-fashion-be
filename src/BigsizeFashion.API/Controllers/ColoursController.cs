@@ -1,7 +1,6 @@
 ﻿using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -11,26 +10,27 @@ using System.Threading.Tasks;
 
 namespace BigsizeFashion.API.Controllers
 {
-    [Route("api/v1/sizes")]
+    [Route("api/v1/colour")]
     [ApiController]
-    public class SizesController : ControllerBase
+    public class ColoursController : ControllerBase
     {
-        private readonly ISizeService _service;
+        private readonly IColourService _service;
 
-        public SizesController(ISizeService service)
+        public ColoursController(IColourService service)
         {
             _service = service;
         }
 
         /// <summary>
-        /// Get all size
+        /// Get all colour
         /// </summary>
+        /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpGet()]
-        public async Task<IActionResult> GetAllSize([FromQuery] SearchSizeParameter param)
+        [HttpGet]
+        public async Task<IActionResult> GetAllColour([FromQuery] SearchColourParameter param)
         {
-            var result = await _service.GetAllSize(param);
+            var result = await _service.GetAllColour(param);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -39,14 +39,14 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Get size by ID
+        /// Get colour by ID
         /// </summary>
         /// <returns></returns>
         //[Authorize]
-        [HttpGet("{id}", Name = "GetSizeByID")]
-        public async Task<IActionResult> GetSizeByID(int id)
+        [HttpGet("{id}", Name = "GetColourByID")]
+        public async Task<IActionResult> GetColourByID(int id)
         {
-            var result = await _service.GetSizeByID(id);
+            var result = await _service.GetColourByID(id);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -55,38 +55,38 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Create new Size
+        /// Create new Colour
         /// </summary>
         /// <returns></returns>
         //[Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateSize([FromBody] SizeRequest request)
+        public async Task<IActionResult> CreateColour([FromBody] ColourRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            var result = await _service.CreateSize(request);
+            var result = await _service.CreateColour(request);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
             }
-            return CreatedAtRoute(nameof(GetSizeByID), new { id = result.Content.SizeId }, result);
+            return CreatedAtRoute(nameof(GetColourByID), new { id = result.Content.ColourId }, result);
         }
 
         /// <summary>
-        /// Update Size
+        /// Update Colour
         /// </summary>
         /// <returns></returns>
         //[Authorize]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateSize(int id, [FromBody] SizeRequest request)
+        public async Task<IActionResult> UpdateColour(int id, [FromBody] ColourRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
-            var result = await _service.UpdateSize(id, request);
+            var result = await _service.UpdateColour(id, request);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -95,15 +95,15 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Delete Size
+        /// Delete Colour
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteSize(int id)
+        public async Task<IActionResult> DeleteColour(int id)
         {
-            var result = await _service.DeleteSize(id);
+            var result = await _service.DeleteColour(id);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
+using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
@@ -68,13 +69,15 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<IEnumerable<SizeResponse>>> GetAllSize()
+        public async Task<Result<IEnumerable<SizeResponse>>> GetAllSize(SearchSizeParameter param)
         {
             var result = new Result<IEnumerable<SizeResponse>>();
             try
             {
-                var sizes = await _genericRepository.FindByAsync(s => s.Status == true);
-                result.Content = _mapper.Map<List<SizeResponse>>(sizes);
+                var sizes = await _genericRepository.GetAllAsync();
+                var query = sizes.AsQueryable();
+                FilterSizeByName(ref query, param.Size);
+                result.Content = _mapper.Map<List<SizeResponse>>(query.ToList());
                 return result;
             }
             catch (Exception ex)
@@ -82,6 +85,16 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
+        }
+
+        private static void FilterSizeByName(ref IQueryable<Size> query, string name)
+        {
+            if (!query.Any() || String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
+            {
+                return;
+            }
+
+            query = query.Where(q => q.Size1.ToLower().Contains(name.ToLower()));
         }
 
         public async Task<Result<SizeResponse>> GetSizeByID(int id)
