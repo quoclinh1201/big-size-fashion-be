@@ -16,11 +16,11 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
         public StaffProfileMapper()
         {
             CreateMap<staff, StaffProfileResponse>()
-                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.Birthday)))
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
                 .ForMember(d => d.StoreAddress, s => s.MapFrom(s => s.Store.StoreAddress));
 
             CreateMap<UpdateStaffProfileRequest, staff>()
-                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertStringToDatetime(s.Birthday)));
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertStringToDate(s.Birthday)));
         }
     }
 }

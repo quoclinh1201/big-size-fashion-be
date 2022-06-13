@@ -24,7 +24,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
 
             CreateMap<Account, AccountResponse>()
-                .ForMember(d => d.CreateAt, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateAt)))
+                .ForMember(d => d.CreateAt, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.CreateAt)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
         }
     }
