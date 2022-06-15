@@ -20,5 +20,6 @@ namespace BigSizeFashion.Business.Helpers.Constants
         public const string ExpireDateLessThanApplyDate = "Ngày kết thúc khuyến mãi phải sau ngày bắt đầu áp dụng.";
         public const string ApplyDateLessThanNow = "Ngày bắt đầu áp dụng khuyến mãi phải là một ngày trong tương lai.";
         public const string InvalidPromotionDatetime = "Ngày áp dụng hoặc ngày kết thúc khuyến mãi đã trùng với khoảng thời gian diễn ra khuyến mãi khác.";
+        public const string CannotUploadImage = "Đã có lỗi xảy ra khi upload hình ảnh.";
     }
 }

@@ -22,19 +22,65 @@ namespace BigsizeFashion.API.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Get list product
+        /// </summary>
+        /// <remarks>
+        /// - orderByPrice = true => Sắp xếp theo giá giảm dần
+        /// - orderByPrice = false => Sắp xếp theo giá tăng
+        /// - orderByPrice = null => Không sắp xếp
+        /// --------------------------------------------------
+        /// - status = null => get with all status
+        /// </remarks>
+        /// <param name="param"></param>
+        /// <returns></returns>
         //[Authorize]
-        //[HttpGet("all")]
-        //public async Task<IActionResult> GetListProductsWithAllStatus([FromQuery] SearchProductsParameter param)
-        //{
-        //    var result = await _service.GetListProductsWithAllStatus(param);
-        //    return Ok(result);
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetListProductsWithAllStatus([FromQuery] SearchProductsParameter param)
+        {
+            var result = await _service.GetListProductsWithAllStatus(param);
+            return Ok(result);
+        }
 
+        /// <summary>
+        /// Create product
+        /// </summary>
+        /// <remarks>
+        /// - Gender = true => Male
+        /// - Gender = false => Female
+        /// </remarks>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.CreateProduct(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return CreatedAtRoute(nameof(GetProductByID), new { id = result.Content.ProductId }, result);
+        }
+
+        /// <summary>
+        /// Get product by ID (Get detail)
+        /// </summary>
+        /// <returns></returns>
         //[Authorize]
-        //public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
-        //{
-        //    var result = await _service.CreateProduct(request);
-        //    return Ok(result);
-        //}
+        [HttpGet("{id}", Name = "GetProductByID")]
+        public async Task<IActionResult> GetProductByID(int id)
+        {
+            var result = await _service.GetProductByID(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

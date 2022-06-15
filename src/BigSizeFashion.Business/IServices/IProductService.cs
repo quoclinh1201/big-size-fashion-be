@@ -12,7 +12,8 @@ namespace BigSizeFashion.Business.IServices
 {
     public interface IProductService
     {
-        //Task<Result<IEnumerable<GetProductResponse>>> GetListProductsWithAllStatus(SearchProductsParameter param);
-        //Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request);
+        Task<PagedResult<GetListProductResponse>> GetListProductsWithAllStatus(SearchProductsParameter param);
+        Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request);
+        Task<Result<GetDetailProductResponse>> GetProductByID(int id);
     }
 }
