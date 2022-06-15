@@ -1,6 +1,7 @@
 ﻿using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -25,7 +26,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get all categories
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllCategory([FromQuery] SearchCategoryParameter param)
         {
@@ -41,7 +42,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get category by ID
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("{id}", Name = "GetCategoryByID")]
         public async Task<IActionResult> GetCategoryByID(int id)
         {
@@ -57,7 +58,7 @@ namespace BigsizeFashion.API.Controllers
         /// Create new category
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryRequest request)
         {
@@ -77,7 +78,7 @@ namespace BigsizeFashion.API.Controllers
         /// Update category
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] CategoryRequest request)
         {
@@ -98,7 +99,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {

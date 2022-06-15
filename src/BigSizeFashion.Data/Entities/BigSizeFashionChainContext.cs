@@ -19,6 +19,7 @@ namespace BigSizeFashion.Data.Entities
 
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<Admin> Admins { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
         public virtual DbSet<Colour> Colours { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
@@ -30,6 +31,7 @@ namespace BigSizeFashion.Data.Entities
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+        public virtual DbSet<Owner> Owners { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<Promotion> Promotions { get; set; }
@@ -113,6 +115,44 @@ namespace BigSizeFashion.Data.Entities
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Address__custome__2F10007B");
+            });
+
+            modelBuilder.Entity<Admin>(entity =>
+            {
+                entity.HasKey(e => e.Uid)
+                    .HasName("PK__Admin__DD70126462142ABB");
+
+                entity.ToTable("Admin");
+
+                entity.Property(e => e.Uid)
+                    .ValueGeneratedNever()
+                    .HasColumnName("uid");
+
+                entity.Property(e => e.Birthday)
+                    .HasColumnType("datetime")
+                    .HasColumnName("birthday");
+
+                entity.Property(e => e.Email)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("email");
+
+                entity.Property(e => e.Fullname)
+                    .HasMaxLength(50)
+                    .HasColumnName("fullname");
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .HasColumnName("phone_number");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.HasOne(d => d.UidNavigation)
+                    .WithOne(p => p.Admin)
+                    .HasForeignKey<Admin>(d => d.Uid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Admin__uid__6C190EBB");
             });
 
             modelBuilder.Entity<Category>(entity =>
@@ -492,6 +532,44 @@ namespace BigSizeFashion.Data.Entities
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__OrderDeta__produ__4AB81AF0");
+            });
+
+            modelBuilder.Entity<Owner>(entity =>
+            {
+                entity.HasKey(e => e.Uid)
+                    .HasName("PK__Owner__DD7012646DC0E3DF");
+
+                entity.ToTable("Owner");
+
+                entity.Property(e => e.Uid)
+                    .ValueGeneratedNever()
+                    .HasColumnName("uid");
+
+                entity.Property(e => e.Birthday)
+                    .HasColumnType("datetime")
+                    .HasColumnName("birthday");
+
+                entity.Property(e => e.Email)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("email");
+
+                entity.Property(e => e.Fullname)
+                    .HasMaxLength(50)
+                    .HasColumnName("fullname");
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .HasColumnName("phone_number");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.HasOne(d => d.UidNavigation)
+                    .WithOne(p => p.Owner)
+                    .HasForeignKey<Owner>(d => d.Uid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Owner__uid__6EF57B66");
             });
 
             modelBuilder.Entity<Product>(entity =>

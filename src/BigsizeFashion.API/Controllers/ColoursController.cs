@@ -1,6 +1,7 @@
 ﻿using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -26,7 +27,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllColour([FromQuery] SearchColourParameter param)
         {
@@ -42,7 +43,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get colour by ID
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("{id}", Name = "GetColourByID")]
         public async Task<IActionResult> GetColourByID(int id)
         {
@@ -58,7 +59,7 @@ namespace BigsizeFashion.API.Controllers
         /// Create new Colour
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateColour([FromBody] ColourRequest request)
         {
@@ -78,7 +79,7 @@ namespace BigsizeFashion.API.Controllers
         /// Update Colour
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateColour(int id, [FromBody] ColourRequest request)
         {
@@ -99,7 +100,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteColour(int id)
         {

@@ -26,7 +26,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="authorization"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("get-own-profile")]
         public async Task<IActionResult> GetOwnProfile([FromHeader] string authorization)
         {
@@ -59,7 +59,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="authorization"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("update-profile")]
         public async Task<IActionResult> UpdateProfile([FromHeader] string authorization, [FromBody] UpdateCustomerProfileRequest request)
         {
@@ -97,7 +97,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="authorization"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost("create-pin-code")]
         public async Task<IActionResult> CreatePINCode([FromHeader] string authorization, [FromBody] CreatePINCodeRequest request)
         {
@@ -131,7 +131,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="authorization"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("change-pin-code")]
         public async Task<IActionResult> ChangePINCode([FromHeader] string authorization, [FromBody] ChangePINCodeRequest request)
         {
@@ -163,7 +163,7 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="authorization"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("check-pin-code")]
         public async Task<IActionResult> CheckPINCode([FromHeader] string authorization)
         {
@@ -186,7 +186,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="authorization"></param>
         /// <param name="request"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost("validate-pin-code")]
         public async Task<IActionResult> ValidatePINCode([FromHeader] string authorization, [FromBody] ValidatePINCodeRequest request)
         {

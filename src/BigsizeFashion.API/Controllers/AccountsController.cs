@@ -49,21 +49,46 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        //[AllowAnonymous]
+        //[HttpPost("staff-login")]
+        //public async Task<IActionResult> StaffLogin([FromBody] UsernamePasswordLoginRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+
+        //    var result = await _service.StaffLogin(request);
+
+        //    if (!result.IsSuccess)
+        //    {
+        //        if (result.Error.Code == 404)
+        //        {
+        //            return NotFound(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(result);
+        //        }
+        //    }
+        //    return Ok(result);
+        //}
+
         /// <summary>
-        /// Staff Login
+        /// For Admin, Owner, Manager, Staff login
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         [AllowAnonymous]
-        [HttpPost("staff-login")]
-        public async Task<IActionResult> StaffLogin([FromBody] StaffLoginRequest request)
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UsernamePasswordLoginRequest request)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
 
-            var result = await _service.StaffLogin(request);
+            var result = await _service.Login(request);
 
             if (!result.IsSuccess)
             {
@@ -114,7 +139,7 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="request"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost("create-staff-account")]
         public async Task<IActionResult> CreateStaffAccount([FromBody] CreateStaffAccountRequest request)
         {
@@ -132,6 +157,28 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
+        /// Create account for admin and owner
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost("create-account")]
+        public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var result = await _service.CreateAccount(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Get list accounts
         /// </summary>
         /// <remarks>
@@ -140,8 +187,8 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="param"></param>
         /// <returns></returns>
-        //[Authorize]
-        [HttpGet("get-list-manager-accounts")]
+        [Authorize]
+        [HttpGet("get-list-accounts")]
         public async Task<IActionResult> GetListAccounts([FromQuery] GetListAccountsParameter param)
         {
             var result = await _service.GetListAccounts(param);
@@ -153,7 +200,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="uid"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("get-detail-by-uid/{uid}")]
         public async Task<IActionResult> GetDetailByUid(int uid)
         {
@@ -176,7 +223,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="uid"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpDelete("disable-account/uid")]
         public async Task<IActionResult> DisableAccount(int uid)
         {
@@ -197,7 +244,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="uid"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("active-account/uid")]
         public async Task<IActionResult> ActiveAccount(int uid)
         {
@@ -213,7 +260,13 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        //[Authorize]
+        /// <summary>
+        /// Change password
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize]
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromHeader] string authorization, [FromBody] ChangePasswordRequest request)
         {

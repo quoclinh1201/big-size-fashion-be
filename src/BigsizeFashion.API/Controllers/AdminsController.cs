@@ -10,19 +10,19 @@ using System.Threading.Tasks;
 
 namespace BigsizeFashion.API.Controllers
 {
-    [Route("api/v1/staffs")]
+    [Route("api/v1/admin")]
     [ApiController]
-    public class StaffsController : ControllerBase
+    public class AdminsController : ControllerBase
     {
-        private readonly IStaffService _service;
+        private readonly IAdminService _service;
 
-        public StaffsController(IStaffService service)
+        public AdminsController(IAdminService service)
         {
             _service = service;
         }
 
         /// <summary>
-        /// Allow staff get their own profile
+        /// Allow admin get their own profile
         /// </summary>
         /// <param name="authorization"></param>
         /// <returns></returns>
@@ -50,14 +50,14 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Allow staff update their own profile
+        /// Allow admin update their own profile
         /// </summary>
         /// <param name="authorization"></param>
         /// <param name="request"></param>
         /// <returns></returns>
         [Authorize]
         [HttpPut("update-profile")]
-        public async Task<IActionResult> UpdateProfile([FromHeader] string authorization, [FromBody] UpdateStaffProfileRequest request)
+        public async Task<IActionResult> UpdateProfile([FromHeader] string authorization, [FromBody] UpdateAdminProfileRequest request)
         {
             if (!ModelState.IsValid)
             {

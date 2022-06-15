@@ -104,48 +104,48 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> ValidateTimeOfPromotion(ValidateTimeOfPromotionRequest request)
-        {
-            var result = new Result<bool>();
-            try
-            {
-                var now = DateTime.UtcNow.AddHours(7);
-                var applyDate = ConvertDateTime.ConvertStringToDate(request.ApplyDate);
-                var expiredDate = ConvertDateTime.ConvertStringToDate(request.ExpiredDate);
+        //public async Task<Result<bool>> ValidateTimeOfPromotion(ValidateTimeOfPromotionRequest request)
+        //{
+        //    var result = new Result<bool>();
+        //    try
+        //    {
+        //        var now = DateTime.UtcNow.AddHours(7);
+        //        var applyDate = ConvertDateTime.ConvertStringToDate(request.ApplyDate);
+        //        var expiredDate = ConvertDateTime.ConvertStringToDate(request.ExpiredDate);
                 
-                if(expiredDate < applyDate)
-                {
-                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ExpireDateLessThanApplyDate);
-                    return result;
-                }
+        //        if(expiredDate < applyDate)
+        //        {
+        //            result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ExpireDateLessThanApplyDate);
+        //            return result;
+        //        }
 
-                if(now > applyDate)
-                {
-                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ApplyDateLessThanNow);
-                    return result;
-                }
+        //        if(now > applyDate)
+        //        {
+        //            result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ApplyDateLessThanNow);
+        //            return result;
+        //        }
 
-                var promotions = await _genericRepository.FindByAsync(
-                        d => (d.ApplyDate <= applyDate && applyDate < d.ExpiredDate)
-                        || (expiredDate > d.ApplyDate && expiredDate <= d.ExpiredDate)
-                        || (applyDate <= d.ApplyDate && expiredDate >= d.ExpiredDate)
-                        && d.Status == true
-                    );
-                if(promotions.Count > 0)
-                {
-                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.InvalidPromotionDatetime);
-                    return result;
-                }
+        //        var promotions = await _genericRepository.FindByAsync(
+        //                d => (d.ApplyDate <= applyDate && applyDate < d.ExpiredDate)
+        //                || (expiredDate > d.ApplyDate && expiredDate <= d.ExpiredDate)
+        //                || (applyDate <= d.ApplyDate && expiredDate >= d.ExpiredDate)
+        //                && d.Status == true
+        //            );
+        //        if(promotions.Count > 0)
+        //        {
+        //            result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.InvalidPromotionDatetime);
+        //            return result;
+        //        }
 
-                result.Content = true;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-                return result;
-            }
-        }
+        //        result.Content = true;
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+        //        return result;
+        //    }
+        //}
 
         public async Task<Result<PromotionResponse>> UpdatePromotion(int id, PromotionRequest request)
         {

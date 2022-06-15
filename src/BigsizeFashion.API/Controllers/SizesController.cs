@@ -26,7 +26,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get all size
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllSize([FromQuery] SearchSizeParameter param)
         {
@@ -42,7 +42,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get size by ID
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("{id}", Name = "GetSizeByID")]
         public async Task<IActionResult> GetSizeByID(int id)
         {
@@ -58,7 +58,7 @@ namespace BigsizeFashion.API.Controllers
         /// Create new Size
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateSize([FromBody] SizeRequest request)
         {
@@ -78,7 +78,7 @@ namespace BigsizeFashion.API.Controllers
         /// Update Size
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateSize(int id, [FromBody] SizeRequest request)
         {
@@ -99,7 +99,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteSize(int id)
         {

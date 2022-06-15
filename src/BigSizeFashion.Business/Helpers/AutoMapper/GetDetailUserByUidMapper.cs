@@ -24,6 +24,14 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             CreateMap<staff, GetDetailUserByUidResponse>()
                 .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
+
+            CreateMap<Admin, GetDetailUserByUidResponse>()
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
+                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
+
+            CreateMap<Owner, GetDetailUserByUidResponse>()
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
+                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
         }
 
         private static GenderEnum CustomerGender(bool? gender)

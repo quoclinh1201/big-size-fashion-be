@@ -1,5 +1,7 @@
 ﻿using BigSizeFashion.Business.Helpers.Parameters;
+using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -25,6 +27,13 @@ namespace BigsizeFashion.API.Controllers
         //public async Task<IActionResult> GetListProductsWithAllStatus([FromQuery] SearchProductsParameter param)
         //{
         //    var result = await _service.GetListProductsWithAllStatus(param);
+        //    return Ok(result);
+        //}
+
+        //[Authorize]
+        //public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
+        //{
+        //    var result = await _service.CreateProduct(request);
         //    return Ok(result);
         //}
     }

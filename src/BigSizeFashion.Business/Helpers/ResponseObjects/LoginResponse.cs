@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.ResponseObjects
 {
-    public class StaffLoginResponse
+    public class LoginResponse
     {
         public string Token { get; set; }
         public string Role { get; set; }

@@ -1,6 +1,7 @@
 ﻿using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -31,7 +32,7 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="param"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllPromotion([FromQuery] SearchPromotionParameter param)
         {
@@ -43,7 +44,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get promotion by ID
         /// </summary>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpGet("{id}", Name = "GetPromotionByID")]
         public async Task<IActionResult> GetPromotionByID(int id)
         {
@@ -59,11 +60,10 @@ namespace BigsizeFashion.API.Controllers
         /// Create new promotion
         /// </summary>
         /// <remarks>
-        /// - Trước khi create thì gọi API validate trước
         /// - Promotion value là % giảm giá. Range từ 1 -> 100
         /// </remarks>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreatePromotion([FromBody] PromotionRequest request)
         {
@@ -79,40 +79,30 @@ namespace BigsizeFashion.API.Controllers
             return CreatedAtRoute(nameof(GetPromotionByID), new { id = result.Content.PromotionId }, result);
         }
 
-        /// <summary>
-        /// Validate range of apply time and expired time
-        /// </summary>
-        /// <remarks>
-        /// Kiểm tra xem trong khoảng thời gian này đã có sự kiện khuyến mãi nào chưa
-        /// Được gọi trước khi Create hoặc Update
-        /// - True nếu hợp lệ
-        /// </remarks>
-        /// <returns></returns>
         //[Authorize]
-        [HttpPost("validate")]
-        public async Task<IActionResult> ValidateTimeOfPromotion([FromBody] ValidateTimeOfPromotionRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await _service.ValidateTimeOfPromotion(request);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPost("validate")]
+        //public async Task<IActionResult> ValidateTimeOfPromotion([FromBody] ValidateTimeOfPromotionRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.ValidateTimeOfPromotion(request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Update promotion
         /// </summary>
         /// <remarks>
-        /// - Trước khi update thì gọi API validate trước
         /// - Promotion value là % giảm giá. Range từ 1 -> 100
         /// </remarks>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePromotion(int id, [FromBody] PromotionRequest request)
         {
@@ -133,7 +123,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        //[Authorize]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePromotion(int id)
         {

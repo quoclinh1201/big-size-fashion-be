@@ -1,5 +1,4 @@
 ﻿using BigSizeFashion.Business.Helpers.Common;
-using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using System;
@@ -10,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.IServices
 {
-    public interface IProductService
+    public interface IAdminService
     {
-        //Task<Result<IEnumerable<GetProductResponse>>> GetListProductsWithAllStatus(SearchProductsParameter param);
-        //Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request);
+        Task<Result<AdminProfileResponse>> GetOwnProfile(string token);
+        Task<Result<AdminProfileResponse>> UpdateProfile(string token, UpdateAdminProfileRequest request);
     }
 }

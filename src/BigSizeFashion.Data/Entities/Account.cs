@@ -20,7 +20,9 @@ namespace BigSizeFashion.Data.Entities
         public bool Status { get; set; }
 
         public virtual Role Role { get; set; }
+        public virtual Admin Admin { get; set; }
         public virtual Customer Customer { get; set; }
+        public virtual Owner Owner { get; set; }
         public virtual staff staff { get; set; }
         public virtual ICollection<Notification> Notifications { get; set; }
     }
