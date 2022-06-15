@@ -12,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
+using FirebaseAdmin;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,6 +20,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Google.Apis.Auth.OAuth2;
 
 namespace BigsizeFashion.API
 {
@@ -35,6 +37,13 @@ namespace BigsizeFashion.API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var path = Directory.GetCurrentDirectory();
+            FirebaseApp.Create(new AppOptions()
+            {
+                Credential = GoogleCredential.FromFile($"{path}\\Firebase\\firebase-config.json"),
+            });
+
+
             services.ConfigureServiceInjection(Configuration);
 
             services.AddCors(option =>
