@@ -10,7 +10,7 @@ namespace BigSizeFashion.Data.Entities
         public int ProductImageId { get; set; }
         public int ProductId { get; set; }
         public string ImageUrl { get; set; }
-        public bool IsReferenceImage { get; set; }
+        public bool IsMainImage { get; set; }
 
         public virtual Product Product { get; set; }
     }

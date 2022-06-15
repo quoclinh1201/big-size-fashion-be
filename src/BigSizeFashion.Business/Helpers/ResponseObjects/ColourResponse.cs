@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.ResponseObjects
 {
-    public class StaffLoginResponse
+    public class ColourResponse
     {
-        public string Token { get; set; }
-        public string Role { get; set; }
+        public int ColourId { get; set; }
+        public string ColourName { get; set; }
+        public bool Status { get; set; }
     }
 }

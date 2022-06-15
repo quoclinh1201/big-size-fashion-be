@@ -15,6 +15,7 @@ namespace BigSizeFashion.Data.Entities
         public int InvoiceId { get; set; }
         public int StaffId { get; set; }
         public int MainWarehouseId { get; set; }
+        public string InvoiceName { get; set; }
         public decimal TotalPrice { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? ApprovalDate { get; set; }

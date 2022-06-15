@@ -7,14 +7,10 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.RequestObjects
 {
-    public class StaffLoginRequest
+    public class ColourRequest
     {
         [Required(AllowEmptyStrings = false)]
-        [MaxLength(20)]
-        public string Username { get; set; }
-
-        [Required(AllowEmptyStrings = false)]
-        [MaxLength(20)]
-        public string Password { get; set; }
+        [MaxLength(50)]
+        public string ColourName { get; set; }
     }
 }

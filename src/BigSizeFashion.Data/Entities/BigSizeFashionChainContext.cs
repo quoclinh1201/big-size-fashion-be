@@ -19,8 +19,9 @@ namespace BigSizeFashion.Data.Entities
 
         public virtual DbSet<Account> Accounts { get; set; }
         public virtual DbSet<Address> Addresses { get; set; }
+        public virtual DbSet<Admin> Admins { get; set; }
         public virtual DbSet<Category> Categories { get; set; }
-        public virtual DbSet<Color> Colors { get; set; }
+        public virtual DbSet<Colour> Colours { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<CustomerCart> CustomerCarts { get; set; }
         public virtual DbSet<Feedback> Feedbacks { get; set; }
@@ -30,6 +31,7 @@ namespace BigSizeFashion.Data.Entities
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
+        public virtual DbSet<Owner> Owners { get; set; }
         public virtual DbSet<Product> Products { get; set; }
         public virtual DbSet<ProductImage> ProductImages { get; set; }
         public virtual DbSet<Promotion> Promotions { get; set; }
@@ -47,11 +49,11 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<Account>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__Account__DD701264152E319B");
+                    .HasName("PK__Account__DD7012643EA7051B");
 
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.Username, "UQ__Account__F3DBC57213CE48DD")
+                entity.HasIndex(e => e.Username, "UQ__Account__F3DBC572D4937E02")
                     .IsUnique();
 
                 entity.Property(e => e.Uid).HasColumnName("uid");
@@ -115,6 +117,44 @@ namespace BigSizeFashion.Data.Entities
                     .HasConstraintName("FK__Address__custome__2F10007B");
             });
 
+            modelBuilder.Entity<Admin>(entity =>
+            {
+                entity.HasKey(e => e.Uid)
+                    .HasName("PK__Admin__DD70126462142ABB");
+
+                entity.ToTable("Admin");
+
+                entity.Property(e => e.Uid)
+                    .ValueGeneratedNever()
+                    .HasColumnName("uid");
+
+                entity.Property(e => e.Birthday)
+                    .HasColumnType("datetime")
+                    .HasColumnName("birthday");
+
+                entity.Property(e => e.Email)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("email");
+
+                entity.Property(e => e.Fullname)
+                    .HasMaxLength(50)
+                    .HasColumnName("fullname");
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .HasColumnName("phone_number");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.HasOne(d => d.UidNavigation)
+                    .WithOne(p => p.Admin)
+                    .HasForeignKey<Admin>(d => d.Uid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Admin__uid__6C190EBB");
+            });
+
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.ToTable("Category");
@@ -125,24 +165,28 @@ namespace BigSizeFashion.Data.Entities
                     .IsRequired()
                     .HasMaxLength(50)
                     .HasColumnName("category");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
-            modelBuilder.Entity<Color>(entity =>
+            modelBuilder.Entity<Colour>(entity =>
             {
-                entity.ToTable("Color");
+                entity.ToTable("Colour");
 
-                entity.Property(e => e.ColorId).HasColumnName("color_id");
+                entity.Property(e => e.ColourId).HasColumnName("colour_id");
 
-                entity.Property(e => e.Color1)
+                entity.Property(e => e.Colour1)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasColumnName("color");
+                    .HasColumnName("colour");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__Customer__DD7012640CF62DE1");
+                    .HasName("PK__Customer__DD701264C954FDC6");
 
                 entity.ToTable("Customer");
 
@@ -191,7 +235,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<CustomerCart>(entity =>
             {
                 entity.HasKey(e => new { e.CustomerId, e.ProductId, e.StoreId })
-                    .HasName("PK__Customer__84B71EF978597847");
+                    .HasName("PK__Customer__84B71EF9D0A8D28D");
 
                 entity.ToTable("CustomerCart");
 
@@ -260,7 +304,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<ImportInvoice>(entity =>
             {
                 entity.HasKey(e => e.InvoiceId)
-                    .HasName("PK__ImportIn__F58DFD496F35253B");
+                    .HasName("PK__ImportIn__F58DFD49FEEB05BC");
 
                 entity.ToTable("ImportInvoice");
 
@@ -277,6 +321,11 @@ namespace BigSizeFashion.Data.Entities
                 entity.Property(e => e.DeliveryDate)
                     .HasColumnType("datetime")
                     .HasColumnName("delivery_date");
+
+                entity.Property(e => e.InvoiceName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("invoice_name");
 
                 entity.Property(e => e.MainWarehouseId).HasColumnName("main_warehouse_id");
 
@@ -308,7 +357,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<ImportInvoiceDetail>(entity =>
             {
                 entity.HasKey(e => new { e.ImportInvoiceId, e.ProductId })
-                    .HasName("PK__ImportIn__6E5DF0234401677C");
+                    .HasName("PK__ImportIn__6E5DF0234CB925F2");
 
                 entity.ToTable("ImportInvoiceDetail");
 
@@ -361,6 +410,11 @@ namespace BigSizeFashion.Data.Entities
                     .IsRequired()
                     .HasMaxLength(500)
                     .HasColumnName("message");
+
+                entity.Property(e => e.ReferenceUrl)
+                    .HasMaxLength(500)
+                    .IsUnicode(false)
+                    .HasColumnName("reference_url");
 
                 entity.Property(e => e.Title)
                     .IsRequired()
@@ -449,7 +503,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<OrderDetail>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK__OrderDet__022945F63D1FFE6B");
+                    .HasName("PK__OrderDet__022945F6EAC59139");
 
                 entity.ToTable("OrderDetail");
 
@@ -480,6 +534,44 @@ namespace BigSizeFashion.Data.Entities
                     .HasConstraintName("FK__OrderDeta__produ__4AB81AF0");
             });
 
+            modelBuilder.Entity<Owner>(entity =>
+            {
+                entity.HasKey(e => e.Uid)
+                    .HasName("PK__Owner__DD7012646DC0E3DF");
+
+                entity.ToTable("Owner");
+
+                entity.Property(e => e.Uid)
+                    .ValueGeneratedNever()
+                    .HasColumnName("uid");
+
+                entity.Property(e => e.Birthday)
+                    .HasColumnType("datetime")
+                    .HasColumnName("birthday");
+
+                entity.Property(e => e.Email)
+                    .HasMaxLength(50)
+                    .IsUnicode(false)
+                    .HasColumnName("email");
+
+                entity.Property(e => e.Fullname)
+                    .HasMaxLength(50)
+                    .HasColumnName("fullname");
+
+                entity.Property(e => e.PhoneNumber)
+                    .HasMaxLength(10)
+                    .IsUnicode(false)
+                    .HasColumnName("phone_number");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.HasOne(d => d.UidNavigation)
+                    .WithOne(p => p.Owner)
+                    .HasForeignKey<Owner>(d => d.Uid)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Owner__uid__6EF57B66");
+            });
+
             modelBuilder.Entity<Product>(entity =>
             {
                 entity.ToTable("Product");
@@ -488,7 +580,7 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.CategoryId).HasColumnName("category_id");
 
-                entity.Property(e => e.ColorId).HasColumnName("color_id");
+                entity.Property(e => e.ColourId).HasColumnName("colour_id");
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(500)
@@ -520,11 +612,11 @@ namespace BigSizeFashion.Data.Entities
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Product__categor__164452B1");
 
-                entity.HasOne(d => d.Color)
+                entity.HasOne(d => d.Colour)
                     .WithMany(p => p.Products)
-                    .HasForeignKey(d => d.ColorId)
+                    .HasForeignKey(d => d.ColourId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__Product__color_i__182C9B23");
+                    .HasConstraintName("FK__Product__colour___182C9B23");
 
                 entity.HasOne(d => d.Size)
                     .WithMany(p => p.Products)
@@ -544,7 +636,7 @@ namespace BigSizeFashion.Data.Entities
                     .IsUnicode(false)
                     .HasColumnName("image_url");
 
-                entity.Property(e => e.IsReferenceImage).HasColumnName("is_reference_image");
+                entity.Property(e => e.IsMainImage).HasColumnName("is_main_image");
 
                 entity.Property(e => e.ProductId).HasColumnName("product_id");
 
@@ -582,7 +674,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<PromotionDetail>(entity =>
             {
                 entity.HasKey(e => new { e.ProductId, e.PromotionId })
-                    .HasName("PK__Promotio__E5C9E8A355FC2873");
+                    .HasName("PK__Promotio__E5C9E8A3D99F1354");
 
                 entity.ToTable("PromotionDetail");
 
@@ -626,6 +718,8 @@ namespace BigSizeFashion.Data.Entities
                     .HasMaxLength(10)
                     .IsUnicode(false)
                     .HasColumnName("size");
+
+                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Store>(entity =>
@@ -651,7 +745,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<StoreWarehouse>(entity =>
             {
                 entity.HasKey(e => new { e.StoreId, e.ProductId })
-                    .HasName("PK__StoreWar__E68284D33E23AFAA");
+                    .HasName("PK__StoreWar__E68284D38CCEFEAA");
 
                 entity.ToTable("StoreWarehouse");
 
@@ -677,7 +771,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<staff>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__Staff__DD701264F4815873");
+                    .HasName("PK__Staff__DD701264D89E80CC");
 
                 entity.ToTable("Staff");
 

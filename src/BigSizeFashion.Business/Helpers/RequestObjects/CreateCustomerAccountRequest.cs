@@ -20,6 +20,11 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
         [MaxLength(50)]
         public string Fullname { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
+        [MaxLength(50)]
+        [DataType(DataType.EmailAddress)]
+        public string Email { get; set; }
+
         public GenderEnum Gender { get; set; }
 
         [Required]

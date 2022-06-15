@@ -4,12 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BigSizeFashion.Business.Helpers.Enums
+namespace BigSizeFashion.Business.Helpers.Parameters
 {
-    public enum AccountStatusEnum
+    public class SearchSizeParameter
     {
-        Inactive,
-        Active,
-        Both
+        public string Size { get; set; }
     }
 }

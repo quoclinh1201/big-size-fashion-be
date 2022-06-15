@@ -11,6 +11,7 @@ namespace BigSizeFashion.Data.Entities
         public int AccountId { get; set; }
         public string Title { get; set; }
         public string Message { get; set; }
+        public string ReferenceUrl { get; set; }
 
         public virtual Account Account { get; set; }
     }

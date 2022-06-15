@@ -17,22 +17,27 @@ using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.Enums;
+using BigSizeFashion.Business.Helpers.Constants;
 
 namespace BigSizeFashion.Business.Services
 {
-    public class AccountsService : IAccountsService
+    public class AccountService : IAccountService
     {
         private readonly IGenericRepository<Account> _accountRepository;
         private readonly IGenericRepository<Customer> _customerRepository;
         private readonly IGenericRepository<staff> _staffRepository;
+        private readonly IGenericRepository<Admin> _adminRepository;
+        private readonly IGenericRepository<Owner> _ownerRepository;
         private readonly IGenericRepository<Role> _roleRepository;
         private readonly IMapper _mapper;
         private IConfiguration _config;
 
-        public AccountsService(
+        public AccountService(
             IGenericRepository<Account> accountRepository,
             IGenericRepository<Customer> customerRepository,
             IGenericRepository<staff> staffRepository,
+            IGenericRepository<Admin> adminRepository,
+            IGenericRepository<Owner> ownerRepository,
             IGenericRepository<Role> roleRepository,
             IMapper mapper,
             IConfiguration config)
@@ -40,6 +45,8 @@ namespace BigSizeFashion.Business.Services
             _accountRepository = accountRepository;
             _customerRepository = customerRepository;
             _staffRepository = staffRepository;
+            _adminRepository = adminRepository;
+            _ownerRepository = ownerRepository;
             _roleRepository = roleRepository;
             _mapper = mapper;
             _config = config;
@@ -47,9 +54,9 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<CreateCustomerAccountResponse>> CreateCustomerAccount(CreateCustomerAccountRequest request)
         {
+            var result = new Result<CreateCustomerAccountResponse>();
             try
             {
-                var result = new Result<CreateCustomerAccountResponse>();
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals("Customer"));
                 account.RoleId = role.RoleId;
@@ -65,21 +72,35 @@ namespace BigSizeFashion.Business.Services
                 result.Content = new CreateCustomerAccountResponse { Token = token };
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<AccountResponse>> CreateStaffAccount(CreateStaffAccountRequest request)
         {
+            var result = new Result<AccountResponse>();
             try
             {
-                var result = new Result<AccountResponse>();
                 var account = _mapper.Map<Account>(request);
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
                 account.RoleId = role.RoleId;
+
+                if (role.Role1.Equals("Manager"))
+                {
+                    var checkExistedManager = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.staff.StoreId == request.StoreId && a.RoleId == role.RoleId && a.Status == true)
+                        .FirstOrDefaultAsync();
+                    if (checkExistedManager != null)
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.ExistedManagerInStore);
+                        return result;
+                    }
+                }
+
                 await _accountRepository.InsertAsync(account);
                 await _accountRepository.SaveAsync();
 
@@ -95,18 +116,18 @@ namespace BigSizeFashion.Business.Services
                 result.Content = response;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<CustomerLoginResponse>> CustomerLogin(CustomerLoginRequest request)
         {
+            var result = new Result<CustomerLoginResponse>();
             try
             {
-                var result = new Result<CustomerLoginResponse>();
                 var account = _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Username.Equals(request.PhoneNumber))
                     .Include(a => a.Role).FirstOrDefault(); 
@@ -123,9 +144,10 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
             
         }
@@ -136,13 +158,13 @@ namespace BigSizeFashion.Business.Services
             {
                 var role = await _roleRepository.FindAsync(r => r.Role1.Equals(param.Role.ToString()));
                 ICollection<Account> accounts = null;
-                if(param.Status.Equals(AccountStatusEnum.Both))
+                if(param.Status.Equals(StatusEnum.Both))
                 {
                     accounts = await _accountRepository.FindByAsync(a => a.RoleId.Equals(role.RoleId));
                 }
                 else
                 {
-                    var stt = param.Status == AccountStatusEnum.Active ? true : false;
+                    var stt = param.Status == StatusEnum.Active ? true : false;
                     accounts = await _accountRepository
                         .FindByAsync(a => a.RoleId.Equals(role.RoleId) && a.Status.Equals(stt));
                 }
@@ -176,6 +198,28 @@ namespace BigSizeFashion.Business.Services
                     FilterAccountByName(ref query, param.Fullname);
                     response = query.ToList();
                 }
+                else if(param.Role.ToString().Equals("Admin"))
+                {
+                    for (int i = 0; i < response.Count; i++)
+                    {
+                        var admin = await _adminRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
+                        response[i].Fullname = admin.Fullname;
+                    }
+                    var query = response.AsQueryable();
+                    FilterAccountByName(ref query, param.Fullname);
+                    response = query.ToList();
+                }
+                else if(param.Role.ToString().Equals("Owner"))
+                {
+                    for (int i = 0; i < response.Count; i++)
+                    {
+                        var owner = await _ownerRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
+                        response[i].Fullname = owner.Fullname;
+                    }
+                    var query = response.AsQueryable();
+                    FilterAccountByName(ref query, param.Fullname);
+                    response = query.ToList();
+                }
                 return PagedResult<GetListAccountsResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
             }
             catch (Exception)
@@ -185,30 +229,37 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<StaffLoginResponse>> StaffLogin(StaffLoginRequest request)
-        {
-            try
-            {
-                var result = new Result<StaffLoginResponse>();
-                var account = _accountRepository.GetAllByIQueryable()
-                    .Where(a => a.Username.Equals(request.Username) && a.Password.Equals(request.Password))
-                    .Include(a => a.Role).FirstOrDefault();
-                if(account != null)
-                {
-                    var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                    var token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.Role1);
+        //public async Task<Result<LoginResponse>> StaffLogin(UsernamePasswordLoginRequest request)
+        //{
+        //    var result = new Result<LoginResponse>();
+        //    try
+        //    {
+        //        var account = _accountRepository.GetAllByIQueryable()
+        //            .Where(a => a.Username.Equals(request.Username) && a.Password.Equals(request.Password))
+        //            .Include(a => a.Role).FirstOrDefault();
+        //        if(account != null)
+        //        {
+        //            if(account.Status == false)
+        //            {
+        //                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.BlockedAccount);
+        //                return result;
+        //            }
 
-                    result.Content = new StaffLoginResponse { Token = token, Role = account.Role.Role1 };
-                    return result;
-                }
-                return null;
-            }
-            catch (Exception)
-            {
+        //            var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
+        //            var token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.Role1);
 
-                throw;
-            }
-        }
+        //            result.Content = new LoginResponse { Token = token, Role = account.Role.Role1 };
+        //            return result;
+        //        }
+        //        result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.WrongUsernameOrPassword);
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+        //        return result;
+        //    }
+        //}
 
         private string GenerateJSONWebToken(string uid, string fullname, string role)
         {
@@ -233,7 +284,7 @@ namespace BigSizeFashion.Business.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private void FilterAccountByName(ref IQueryable<GetListAccountsResponse> query, string name)
+        private static void FilterAccountByName(ref IQueryable<GetListAccountsResponse> query, string name)
         {
             if (!query.Any() || String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
             {
@@ -245,9 +296,9 @@ namespace BigSizeFashion.Business.Services
 
         public async Task<Result<GetDetailUserByUidResponse>> GetDetailUserByUid(int uid)
         {
+            var result = new Result<GetDetailUserByUidResponse>();
             try
-            {
-                var result = new Result<GetDetailUserByUidResponse>();
+            { 
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
@@ -267,23 +318,36 @@ namespace BigSizeFashion.Business.Services
                     result.Content = response;
                     return result;
                 } 
-                else
+                else if(account.Role.Role1.Equals(AccountRoleEnum.Admin.ToString()))
                 {
-                    return null;
+                    var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var response = _mapper.Map<GetDetailUserByUidResponse>(admin);
+                    response.Role = account.Role.Role1;
+                    result.Content = response;
+                    return result;
                 }
+                else if (account.Role.Role1.Equals(AccountRoleEnum.Owner.ToString()))
+                {
+                    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var response = _mapper.Map<GetDetailUserByUidResponse>(owner);
+                    response.Role = account.Role.Role1;
+                    result.Content = response;
+                    return result;
+                }
+                return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> DisableAccount(int uid)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
@@ -302,21 +366,35 @@ namespace BigSizeFashion.Business.Services
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
                     staff.Status = false;
                     await _staffRepository.SaveAsync();
+                } 
+                else if(account.Role.Role1.Equals(AccountRoleEnum.Admin.ToString()))
+                {
+                    var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
+                    admin.Status = false;
+                    await _adminRepository.SaveAsync();
                 }
+                else if (account.Role.Role1.Equals(AccountRoleEnum.Owner.ToString()))
+                {
+                    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
+                    owner.Status = false;
+                    await _ownerRepository.SaveAsync();
+                }
+
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
         public async Task<Result<bool>> ActiveAccount(int uid)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<bool>();
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
@@ -336,25 +414,38 @@ namespace BigSizeFashion.Business.Services
                     staff.Status = true;
                     await _staffRepository.SaveAsync();
                 }
+                else if (account.Role.Role1.Equals(AccountRoleEnum.Admin.ToString()))
+                {
+                    var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
+                    admin.Status = true;
+                    await _adminRepository.SaveAsync();
+                }
+                else if (account.Role.Role1.Equals(AccountRoleEnum.Owner.ToString()))
+                {
+                    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
+                    owner.Status = true;
+                    await _ownerRepository.SaveAsync();
+                }
                 result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
-        public async Task<Result<string>> ChangePassword(string token, ChangePasswordRequest request)
+        public async Task<Result<bool>> ChangePassword(string token, ChangePasswordRequest request)
         {
+            var result = new Result<bool>();
             try
             {
-                var result = new Result<string>();
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
 
                 if(uid == 0)
                 {
-                    result.Content = "Invalid token";
+                    result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
                     return result;
                 }
 
@@ -362,19 +453,109 @@ namespace BigSizeFashion.Business.Services
 
                 if (account == null)
                 {
-                    result.Content = "Account is not exist or wrong old password";
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.WrongOldPassword);
                     return result;
                 }
 
                 account.Password = request.ConfirmNewPassword;
                 await _accountRepository.SaveAsync();
-                result.Content = "Successful";
+                result.Content = true;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
 
-                throw;
+        public async Task<Result<LoginResponse>> Login(UsernamePasswordLoginRequest request)
+        {
+            var result = new Result<LoginResponse>();
+            try
+            {
+                var account = _accountRepository.GetAllByIQueryable()
+                    .Where(a => a.Username.Equals(request.Username) && a.Password.Equals(request.Password))
+                    .Include(a => a.Role).FirstOrDefault();
+                if (account != null)
+                {
+                    if (account.Status == false)
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.BlockedAccount);
+                        return result;
+                    }
+
+                    var token = String.Empty;
+
+                    if(account.Role.Role1.Equals("Admin"))
+                    {
+                        var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(account.Uid));
+                        token = GenerateJSONWebToken(admin.Uid.ToString(), admin.Fullname, account.Role.Role1);
+                    }
+                    else if(account.Role.Role1.Equals("Manager") || account.Role.Role1.Equals("Staff"))
+                    {
+                        var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
+                        token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.Role1);
+                    }
+                    else if(account.Role.Role1.Equals("Owner"))
+                    {
+                        var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
+                        token = GenerateJSONWebToken(owner.Uid.ToString(), owner.Fullname, account.Role.Role1);
+                    }
+
+                    result.Content = new LoginResponse { Token = token, Role = account.Role.Role1 };
+                    return result;
+                }
+                result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.WrongUsernameOrPassword);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<AccountResponse>> CreateAccount(CreateAccountRequest request)
+        {
+            var result = new Result<AccountResponse>();
+            try
+            {
+                var account = _mapper.Map<Account>(request);
+                var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
+                account.RoleId = role.RoleId;
+
+                await _accountRepository.InsertAsync(account);
+                await _accountRepository.SaveAsync();
+
+                var fullname = string.Empty;
+                if (role.Role1.Equals("Admin"))
+                {
+                    var admin = _mapper.Map<Admin>(request);
+                    admin.Uid = account.Uid;
+                    await _adminRepository.InsertAsync(admin);
+                    await _adminRepository.SaveAsync();
+                    fullname = admin.Fullname;
+                } 
+                else if(role.Role1.Equals("Owner"))
+                {
+                    var owner = _mapper.Map<Owner>(request);
+                    owner.Uid = account.Uid;
+                    await _ownerRepository.InsertAsync(owner);
+                    await _ownerRepository.SaveAsync();
+                    fullname = owner.Fullname;
+                }
+
+                var response = _mapper.Map<AccountResponse>(account);
+                response.RoleAccount = request.RoleAccount;
+                response.Fullname = fullname;
+                result.Content = response;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }

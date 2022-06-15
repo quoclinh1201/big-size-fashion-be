@@ -17,13 +17,21 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
         public GetDetailUserByUidMapper()
         {
             CreateMap<Customer, GetDetailUserByUidResponse>()
-                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.Birthday)))
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
                 .ForMember(d => d.Gender, s => s.MapFrom(s => CustomerGender(s.Gender).ToString()))
-                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? AccountStatusEnum.Active : AccountStatusEnum.Inactive));
+                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
 
             CreateMap<staff, GetDetailUserByUidResponse>()
-                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.Birthday)))
-                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? AccountStatusEnum.Active : AccountStatusEnum.Inactive));
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
+                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
+
+            CreateMap<Admin, GetDetailUserByUidResponse>()
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
+                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
+
+            CreateMap<Owner, GetDetailUserByUidResponse>()
+                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)))
+                .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
         }
 
         private static GenderEnum CustomerGender(bool? gender)

@@ -10,16 +10,18 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.IServices
 {
-    public interface IAccountsService
+    public interface IAccountService
     {
         Task<Result<CustomerLoginResponse>> CustomerLogin(CustomerLoginRequest request);
-        Task<Result<StaffLoginResponse>> StaffLogin(StaffLoginRequest request);
+        //Task<Result<LoginResponse>> StaffLogin(UsernamePasswordLoginRequest request);
         Task<Result<CreateCustomerAccountResponse>> CreateCustomerAccount(CreateCustomerAccountRequest request);
         Task<Result<AccountResponse>> CreateStaffAccount(CreateStaffAccountRequest request);
         Task<PagedResult<GetListAccountsResponse>> GetListAccounts(GetListAccountsParameter param);
         Task<Result<GetDetailUserByUidResponse>> GetDetailUserByUid(int uid);
         Task<Result<bool>> DisableAccount(int uid);
         Task<Result<bool>> ActiveAccount(int uid);
-        Task<Result<string>> ChangePassword(string token, ChangePasswordRequest request);
+        Task<Result<bool>> ChangePassword(string token, ChangePasswordRequest request);
+        Task<Result<LoginResponse>> Login(UsernamePasswordLoginRequest request);
+        Task<Result<AccountResponse>> CreateAccount(CreateAccountRequest request);
     }
 }
