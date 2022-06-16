@@ -56,6 +56,7 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IColourService, ColourService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IPromotionService, PromotionService>();
+            services.AddScoped<IStoreService, StoreService>();
 
             return services;
         }

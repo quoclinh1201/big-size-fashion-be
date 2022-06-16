@@ -23,7 +23,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Get list product
+        /// Get list product (use for Admin and owner)
         /// </summary>
         /// <remarks>
         /// - orderByPrice = true => Sắp xếp theo giá giảm dần
@@ -70,6 +70,9 @@ namespace BigsizeFashion.API.Controllers
         /// <summary>
         /// Get product by ID (Get detail)
         /// </summary>
+        /// <remarks>
+        /// For Admin and Owner
+        /// </remarks>
         /// <returns></returns>
         //[Authorize]
         [HttpGet("{id}", Name = "GetProductByID")]
