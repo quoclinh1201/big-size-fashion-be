@@ -57,7 +57,7 @@ namespace BigSizeFashion.Business.Services
                     .Include(p => p.Size)
                     .Where(p => p.ProductId == product.ProductId)
                     .FirstOrDefaultAsync();
-                AddNewProductIntoAllStore(model.ProductId);
+                await AddNewProductIntoAllStore(model.ProductId);
                 result.Content = _mapper.Map<CreateProductResponse>(model);
                 return result;
             }
@@ -68,7 +68,7 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        private async void AddNewProductIntoAllStore(int productId)
+        private async Task AddNewProductIntoAllStore(int productId)
         {
             var allStoreId = await _storeRepository.GetAllByIQueryable().Where(s => s.Status == true).Select(s => s.StoreId).ToListAsync();
             if(allStoreId.Count > 0)

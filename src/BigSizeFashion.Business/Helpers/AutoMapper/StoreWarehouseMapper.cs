@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Helpers.RequestObjects;
+using BigSizeFashion.Data.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +13,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
     {
         public StoreWarehouseMapper()
         {
-            //CreateMap
+            CreateMap<AddNewProductIntoStoreRequest, StoreWarehouse>();
         }
     }
 }

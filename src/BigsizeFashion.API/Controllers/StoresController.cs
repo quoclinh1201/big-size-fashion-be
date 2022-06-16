@@ -26,7 +26,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get all store
         /// </summary>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllStore([FromQuery] SearchStoreParameter param)
         {
@@ -42,7 +42,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get store by ID
         /// </summary>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpGet("{id}", Name = "GetStoreByID")]
         public async Task<IActionResult> GetStoreByID(int id)
         {
@@ -58,7 +58,7 @@ namespace BigsizeFashion.API.Controllers
         /// Create new store
         /// </summary>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateStore([FromBody] CreateStoreRequest request)
         {

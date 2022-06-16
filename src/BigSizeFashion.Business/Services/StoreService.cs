@@ -44,7 +44,7 @@ namespace BigSizeFashion.Business.Services
                 await _genericRepository.InsertAsync(store);
                 await _genericRepository.SaveAsync();
 
-                InsertProductIntoStore(store.StoreId);
+                await InsertProductIntoStore(store.StoreId);
 
                 result.Content = _mapper.Map<StoreResponse>(store);
                 return result;
@@ -56,7 +56,7 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        private async void InsertProductIntoStore(int id)
+        private async Task InsertProductIntoStore(int id)
         {
             var allProductId = await  _productRepository.GetAllByIQueryable().Where(p => p.Status == true).Select(p => p.ProductId).ToListAsync();
             
@@ -64,15 +64,15 @@ namespace BigSizeFashion.Business.Services
             {
                 foreach (var productId in allProductId)
                 {
-                    var storeWarehouse = new StoreWarehouse
-                    {
+                    var newItem = new AddNewProductIntoStoreRequest {
                         StoreId = id,
                         ProductId = productId,
                         Quantity = 0
                     };
+                    var storeWarehouse = _mapper.Map<StoreWarehouse>(newItem);
                     await _storeWarehouseRepository.InsertAsync(storeWarehouse);
+                    await _storeWarehouseRepository.SaveAsync();
                 }
-                await _storeWarehouseRepository.SaveAsync();
             }
         }
 
