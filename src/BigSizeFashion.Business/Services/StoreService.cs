@@ -7,6 +7,7 @@ using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -57,7 +58,7 @@ namespace BigSizeFashion.Business.Services
 
         private async void InsertProductIntoStore(int id)
         {
-            var allProductId =  _productRepository.GetAllByIQueryable().Where(p => p.Status == true).Select(p => p.ProductId).ToList();
+            var allProductId = await  _productRepository.GetAllByIQueryable().Where(p => p.Status == true).Select(p => p.ProductId).ToListAsync();
             
             if(allProductId.Count > 0)
             {

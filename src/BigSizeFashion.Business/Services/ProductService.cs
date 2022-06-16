@@ -21,21 +21,24 @@ namespace BigSizeFashion.Business.Services
         private readonly static string _noImage = "https://firebasestorage.googleapis.com/v0/b/big-size-fashion-chain.appspot.com/o/assets%2Fimages%2FNo-Photo-Available.jpg?alt=media&token=ef1bc098-c179-4cf8-907d-a98a3a274633";
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<ProductImage> _imageRepository;
-        private readonly IGenericRepository<Promotion> _promotionRepository;
+        private readonly IGenericRepository<StoreWarehouse> _storeWarehoustRepository;
+        private readonly IGenericRepository<Store> _storeRepository;
         private readonly IGenericRepository<PromotionDetail> _promotionDetailRepository;
         private readonly IMapper _mapper;
 
         public ProductService(
             IGenericRepository<Product> productRepository,
             IGenericRepository<ProductImage> imageRepository,
-            IGenericRepository<Promotion> promotionRepository,
+            IGenericRepository<StoreWarehouse> storeWarehoustRepository,
             IGenericRepository<PromotionDetail> promotionDetailRepository,
+            IGenericRepository<Store> storeRepository,
             IMapper mapper)
         {
             _productRepository = productRepository;
             _imageRepository = imageRepository;
-            _promotionRepository = promotionRepository;
+            _storeWarehoustRepository = storeWarehoustRepository;
             _promotionDetailRepository = promotionDetailRepository;
+            _storeRepository = storeRepository;
             _mapper = mapper;
         }
 
@@ -54,6 +57,7 @@ namespace BigSizeFashion.Business.Services
                     .Include(p => p.Size)
                     .Where(p => p.ProductId == product.ProductId)
                     .FirstOrDefaultAsync();
+                AddNewProductIntoAllStore(model.ProductId);
                 result.Content = _mapper.Map<CreateProductResponse>(model);
                 return result;
             }
@@ -61,6 +65,20 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        private async void AddNewProductIntoAllStore(int productId)
+        {
+            var allStoreId = await _storeRepository.GetAllByIQueryable().Where(s => s.Status == true).Select(s => s.StoreId).ToListAsync();
+            if(allStoreId.Count > 0)
+            {
+                foreach (var id in allStoreId)
+                {
+                    var storeWarehoust = new StoreWarehouse { ProductId = productId, StoreId = id, Quantity = 0 };
+                    await _storeWarehoustRepository.InsertAsync(storeWarehoust);
+                }
+                await _storeWarehoustRepository.SaveAsync();
             }
         }
 
