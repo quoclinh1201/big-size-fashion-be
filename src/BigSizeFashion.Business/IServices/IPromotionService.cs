@@ -18,6 +18,5 @@ namespace BigSizeFashion.Business.IServices
         //Task<Result<bool>> ValidateTimeOfPromotion(ValidateTimeOfPromotionRequest request);
         Task<Result<PromotionResponse>> UpdatePromotion(int id, PromotionRequest request);
         Task<Result<bool>> DeletePromotion(int id);
-        //Task<Result<bool>> AddProductsIntoPromotion(AddProductsIntoPromotionRequest request);
     }
 }

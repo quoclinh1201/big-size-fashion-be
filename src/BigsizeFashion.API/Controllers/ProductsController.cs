@@ -26,6 +26,8 @@ namespace BigsizeFashion.API.Controllers
         /// Get list product
         /// </summary>
         /// <remarks>
+        /// - Get without quantity for admin, owner, customer
+        /// -------------------------------------------------
         /// - orderByPrice = true => Sắp xếp theo giá giảm dần
         /// - orderByPrice = false => Sắp xếp theo giá tăng
         /// - orderByPrice = null => Không sắp xếp
@@ -71,7 +73,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get product by ID (Get detail)
         /// </summary>
         /// <remarks>
-        /// For Admin and Owner
+        /// - Get without quantity for admin, owner, customer
         /// </remarks>
         /// <returns></returns>
         //[Authorize]
@@ -86,6 +88,77 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        
+        /// <summary>
+        /// Get list product of store
+        /// </summary>
+        /// <remarks>
+        /// - Get list product with quantity for staff and manager
+        /// - Status must be true
+        /// </remarks>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("store")]
+        public async Task<IActionResult> GetListProductOfStore([FromHeader] string authorization, [FromQuery] SearchProductsParameter param)
+        {
+            var result = await _service.GetListProductOfStore(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get product by ID (Get detail)
+        /// </summary>
+        /// <remarks>
+        /// - Get with quantity for manager and staff
+        /// </remarks>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("store/{id}")]
+        public async Task<IActionResult> GetProductOfStoreByID([FromHeader] string authorization, int id)
+        {
+            var result = await _service.GetProductOfStoreByID(authorization.Substring(7), id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update Product information
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.UpdateProduct(id, request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var result = await _service.DeleteProduct(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

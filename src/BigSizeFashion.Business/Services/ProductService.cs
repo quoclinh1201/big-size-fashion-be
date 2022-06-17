@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.ResponseObjects;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.Parameters;
@@ -24,6 +25,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<StoreWarehouse> _storeWarehoustRepository;
         private readonly IGenericRepository<Store> _storeRepository;
         private readonly IGenericRepository<PromotionDetail> _promotionDetailRepository;
+        private readonly IGenericRepository<staff> _staffRepository;
         private readonly IMapper _mapper;
 
         public ProductService(
@@ -32,6 +34,7 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<StoreWarehouse> storeWarehoustRepository,
             IGenericRepository<PromotionDetail> promotionDetailRepository,
             IGenericRepository<Store> storeRepository,
+            IGenericRepository<staff> staffRepository,
             IMapper mapper)
         {
             _productRepository = productRepository;
@@ -39,6 +42,7 @@ namespace BigSizeFashion.Business.Services
             _storeWarehoustRepository = storeWarehoustRepository;
             _promotionDetailRepository = promotionDetailRepository;
             _storeRepository = storeRepository;
+            _staffRepository = staffRepository;
             _mapper = mapper;
         }
 
@@ -277,6 +281,204 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Sản phẩm không tồn tại");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<PagedResult<GetListProductForStaffResponse>> GetListProductOfStore(string token, SearchProductsParameter param)
+        {
+            try
+            {
+                var accountUId = DecodeToken.DecodeTokenToGetUid(token);
+                var storeID = _staffRepository.GetAllByIQueryable().Where(s => s.Uid == accountUId).Select(s => s.StoreId).FirstOrDefault();
+                var response = new List<GetListProductForStaffResponse>();
+
+                var products = await _productRepository.GetAllByIQueryable()
+                                .Where(p => p.Status == true)
+                                .Include(p => p.Colour)
+                                .Include(p => p.Size)
+                                .Include(p => p.Category)
+                                .ToListAsync();
+
+                //var products = await _storeWarehoustRepository.GetAllByIQueryable()
+                //                    .Where(s => s.StoreId == storeID && s.Product.Status == true)
+                //                    .Include(p => p.Product)
+                //                    .Include(p => p.Product.Colour)
+                //                    .Include(p => p.Product.Category)
+                //                    .Include(p => p.Product.Size)
+                //                    .ToListAsync();
+
+                if (products.Count > 0)
+                {
+                    var query = products.AsQueryable();
+                    FilterProductByName(ref query, param.ProductName);
+                    FilterProductByCategory(ref query, param.Category);
+                    FilterProductBySize(ref query, param.Size);
+                    FilterProductByColour(ref query, param.Colour);
+                    OrderByPrice(ref query, param.OrderByPrice);
+                    response = _mapper.Map<List<GetListProductForStaffResponse>>(query.ToList());
+
+                    if (response.Count > 0)
+                    {
+                        for (int i = 0; i < response.Count; i++)
+                        {
+                            var image = await _imageRepository.FindAsync(x => x.ProductId == response[i].ProductId && x.IsMainImage == true);
+                            if (image != null)
+                            {
+                                response[i].ImageUrl = image.ImageUrl;
+                            }
+                            else
+                            {
+                                response[i].ImageUrl = _noImage;
+                            }
+
+                            var now = DateTime.UtcNow.AddHours(7);
+                            var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                            .Include(p => p.Promotion)
+                                            .Where(p => p.Promotion.ApplyDate <= now
+                                                        && p.Promotion.ExpiredDate >= now
+                                                        && p.Promotion.Status == true
+                                                        && p.PromotionId == response[i].ProductId)
+                                            .FirstOrDefaultAsync();
+                            if (pd != null)
+                            {
+                                var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * response[i].Price;
+                                response[i].PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
+                                response[i].PromotionValue = pd.Promotion.PromotionValue + "%";
+                            }
+                            else
+                            {
+                                response[i].PromotionPrice = response[i].Price;
+                            }
+
+                            var quantity = await _storeWarehoustRepository.GetAllByIQueryable()
+                                                .Where(s => s.ProductId == response[i].ProductId && s.StoreId == storeID)
+                                                .Select(s => s.Quantity)
+                                                .FirstOrDefaultAsync();
+                            response[i].Quantity = quantity > 0 ? quantity : 0;
+                        }
+                    }
+                }
+                return PagedResult<GetListProductForStaffResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<Result<GetDetailProductForStaffResponse>> GetProductOfStoreByID(string token, int id)
+        {
+            var result = new Result<GetDetailProductForStaffResponse>();
+            try
+            {
+                var accountUId = DecodeToken.DecodeTokenToGetUid(token);
+                var storeID = _staffRepository.GetAllByIQueryable().Where(s => s.Uid == accountUId).Select(s => s.StoreId).FirstOrDefault();
+                var product = await _productRepository.GetAllByIQueryable()
+                    .Include(p => p.Category)
+                    .Include(p => p.Colour)
+                    .Include(p => p.Size)
+                    .Where(p => p.ProductId == id)
+                    .FirstOrDefaultAsync();
+
+                if (product != null)
+                {
+                    var model = _mapper.Map<GetDetailProductForStaffResponse>(product);
+                    var images = await _imageRepository.FindByAsync(i => i.ProductId == model.ProductId);
+
+                    if (images.Count > 0)
+                    {
+                        model.Images = _mapper.Map<List<ProductImageResponse>>(images);
+                    }
+                    else
+                    {
+                        var image = new ProductImageResponse
+                        {
+                            ProductId = model.ProductId,
+                            ImageUrl = _noImage,
+                            IsMainImage = true
+                        };
+                        model.Images.Add(image);
+                    }
+
+                    var now = DateTime.UtcNow.AddHours(7);
+                    var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                    .Include(p => p.Promotion)
+                                    .Where(p => p.Promotion.ApplyDate <= now
+                                                && p.Promotion.ExpiredDate >= now
+                                                && p.Promotion.Status == true
+                                                && p.PromotionId == model.ProductId)
+                                    .FirstOrDefaultAsync();
+                    if (pd != null)
+                    {
+                        var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
+                        model.PromotionValue = pd.Promotion.PromotionValue + "%";
+                    }
+                    else
+                    {
+                        model.PromotionPrice = model.Price;
+                    }
+
+                    var quantity = await _storeWarehoustRepository.GetAllByIQueryable()
+                                                .Where(s => s.ProductId == model.ProductId && s.StoreId == storeID)
+                                                .Select(s => s.Quantity)
+                                                .FirstOrDefaultAsync();
+                    model.Quantity = quantity > 0 ? quantity : 0;
+
+                    result.Content = model;
+                    return result;
+                }
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Sản phẩm không tồn tại");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<CreateProductResponse>> UpdateProduct(int id, CreateProductRequest request)
+        {
+            var result = new Result<CreateProductResponse>();
+            try
+            {
+                var product = await _productRepository.FindAsync(p => p.ProductId == id);
+                var model = _mapper.Map(request, product);
+                await _productRepository.UpdateAsync(model);
+                result.Content = _mapper.Map<CreateProductResponse>(model);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> DeleteProduct(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var roduct = await _productRepository.FindAsync(s => s.ProductId == id);
+
+                if (roduct is null)
+                {
+                    result.Content = false;
+                    return result;
+                }
+
+                roduct.Status = false;
+                await _productRepository.UpdateAsync(roduct);
+                result.Content = true;
                 return result;
             }
             catch (Exception ex)

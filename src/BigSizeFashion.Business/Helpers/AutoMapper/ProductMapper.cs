@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.ResponseObjects;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -32,6 +33,14 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
             CreateMap<Product, GetListProductResponse>();
+
+            CreateMap<Product, GetListProductForStaffResponse>();
+
+            CreateMap<Product, GetDetailProductForStaffResponse>()
+                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.Category1))
+                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.Size1))
+                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.Colour1))
+                .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
         }
     }

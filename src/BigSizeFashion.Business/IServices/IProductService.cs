@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Common;
+﻿using BigSizeFashion.Business.Dtos.ResponseObjects;
+using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -15,5 +16,9 @@ namespace BigSizeFashion.Business.IServices
         Task<PagedResult<GetListProductResponse>> GetListProductsWithAllStatus(SearchProductsParameter param);
         Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request);
         Task<Result<GetDetailProductResponse>> GetProductByID(int id);
+        Task<PagedResult<GetListProductForStaffResponse>> GetListProductOfStore(string v, SearchProductsParameter param);
+        Task<Result<GetDetailProductForStaffResponse>> GetProductOfStoreByID(string v, int id);
+        Task<Result<CreateProductResponse>> UpdateProduct(int id, CreateProductRequest request);
+        Task<Result<bool>> DeleteProduct(int id);
     }
 }
