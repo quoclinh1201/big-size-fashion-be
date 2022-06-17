@@ -26,6 +26,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<Store> _storeRepository;
         private readonly IGenericRepository<PromotionDetail> _promotionDetailRepository;
         private readonly IGenericRepository<staff> _staffRepository;
+        private readonly IGenericRepository<Customer> _customerRepository;
         private readonly IMapper _mapper;
 
         public ProductService(
@@ -35,6 +36,7 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<PromotionDetail> promotionDetailRepository,
             IGenericRepository<Store> storeRepository,
             IGenericRepository<staff> staffRepository,
+            IGenericRepository<Customer> customerRepository,
             IMapper mapper)
         {
             _productRepository = productRepository;
@@ -43,6 +45,7 @@ namespace BigSizeFashion.Business.Services
             _promotionDetailRepository = promotionDetailRepository;
             _storeRepository = storeRepository;
             _staffRepository = staffRepository;
+            _customerRepository = customerRepository;
             _mapper = mapper;
         }
 
@@ -485,6 +488,113 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        public async Task<PagedResult<GetListProductResponse>> GetListProductFitWithCustomer(string token, QueryStringParameters param)
+        {
+            try
+            {
+                var accountUId = DecodeToken.DecodeTokenToGetUid(token);
+                var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
+                var height = customer.Heigth;
+                var weight = customer.Weigth;
+                var s = new SearchProductsParameter { PageNumber = param.PageNumber, PageSize = param.PageSize};
+
+                if (height == null || weight == null)
+                {
+                    return await GetListProductsWithAllStatus(s);
+                }
+
+                if(customer.Gender != null)
+                {
+                    if (customer.Gender == true)
+                    {
+                        s.Gender = "Male";
+                        if (height < 176 || weight < 76)
+                        {
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if(height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            s.Size = "XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 96)
+                        {
+                            s.Size = "XXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
+                        {
+                            s.Size = "XXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
+                        {
+                            s.Size = "XXXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 188 && weight >= 115 && height < 196 && weight < 121)
+                        {
+                            s.Size = "XXXXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else
+                        {
+                            s.Size = "XXXXXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                    }
+                    else
+                    {
+                        s.Gender = "Female";
+                        if (height < 168 || weight < 66)
+                        {
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 168 && weight >= 66 && height < 176 && weight < 76)
+                        {
+                            s.Size = "XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            s.Size = "XXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
+                        {
+                            s.Size = "XXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
+                        {
+                            s.Size = "XXXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 106 && height < 190 && weight < 111)
+                        {
+                            s.Size = "XXXXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else
+                        {
+                            s.Size = "XXXXXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                    }
+                }
+                else
+                {
+                    ////////////////////////////////
+                    return await GetListProductsWithAllStatus(s);
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

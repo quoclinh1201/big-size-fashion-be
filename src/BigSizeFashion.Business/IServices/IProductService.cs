@@ -20,5 +20,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<GetDetailProductForStaffResponse>> GetProductOfStoreByID(string v, int id);
         Task<Result<CreateProductResponse>> UpdateProduct(int id, CreateProductRequest request);
         Task<Result<bool>> DeleteProduct(int id);
+        Task<PagedResult<GetListProductResponse>> GetListProductFitWithCustomer(string v, QueryStringParameters param);
     }
 }

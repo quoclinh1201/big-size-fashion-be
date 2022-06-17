@@ -88,6 +88,7 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+
         /// <summary>
         /// Get list product of store
         /// </summary>
@@ -95,7 +96,8 @@ namespace BigsizeFashion.API.Controllers
         /// - Get list product with quantity for staff and manager
         /// - Status must be true
         /// </remarks>
-        /// <param name="id"></param>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
         [HttpGet("store")]
@@ -150,6 +152,12 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Delete product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
@@ -158,6 +166,24 @@ namespace BigsizeFashion.API.Controllers
             {
                 return BadRequest(result);
             }
+            return Ok(result);
+        }
+
+
+        /// <summary>
+        /// Get list product fit with customer
+        /// </summary>
+        /// <remarks>
+        /// Sau khi đăng nhập thành công thì gọi api này để lấy danh sách product phù hợp, còn muốn search thì gọi api khác
+        /// </remarks>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("fit-with-customer")]
+        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, QueryStringParameters param)
+        {
+            var result = await _service.GetListProductFitWithCustomer(authorization.Substring(7), param);
             return Ok(result);
         }
     }
