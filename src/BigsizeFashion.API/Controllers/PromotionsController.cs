@@ -134,5 +134,17 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        //[Authorize]
+        //[HttpPost("add-product-into-promotion")] 
+        //public async Task<IActionResult> AddProductsIntoPromotion([FromBody] AddProductsIntoPromotionRequest request)
+        //{
+        //    var result = await _service.AddProductsIntoPromotion(request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
     }
 }

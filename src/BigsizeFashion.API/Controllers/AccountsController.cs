@@ -108,7 +108,7 @@ namespace BigsizeFashion.API.Controllers
         /// Create Account for Customer
         /// </summary>
         /// <remarks>
-        /// Gender có 3 giá trị là Male, Female, Unknow
+        /// Gender có 2 giá trị là Male, Female
         /// </remarks>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -132,7 +132,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// [Admin] Create Account for Staff, Manager
+        /// Create Account for Staff, Manager
         /// </summary>
         /// <remarks>
         /// RoleAccount có 2 giá trị là Staff và Manager

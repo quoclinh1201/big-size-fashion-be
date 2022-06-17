@@ -23,7 +23,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Get list product (use for Admin and owner)
+        /// Get list product
         /// </summary>
         /// <remarks>
         /// - orderByPrice = true => Sắp xếp theo giá giảm dần
@@ -85,5 +85,7 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        
     }
 }

@@ -22,6 +22,7 @@ namespace BigSizeFashion.Data.Entities
         public DateTime? DeliveryDate { get; set; }
         public DateTime? ReceivedDate { get; set; }
         public byte Status { get; set; }
+        public DateTime? RejectedDate { get; set; }
 
         public virtual MainWarehouse MainWarehouse { get; set; }
         public virtual staff Staff { get; set; }

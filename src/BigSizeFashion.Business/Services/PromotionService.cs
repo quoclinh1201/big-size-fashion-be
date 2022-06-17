@@ -189,5 +189,10 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        //public Task<Result<bool>> AddProductsIntoPromotion(AddProductsIntoPromotionRequest request)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

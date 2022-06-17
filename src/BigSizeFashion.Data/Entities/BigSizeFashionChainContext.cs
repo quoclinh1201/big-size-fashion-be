@@ -333,6 +333,10 @@ namespace BigSizeFashion.Data.Entities
                     .HasColumnType("datetime")
                     .HasColumnName("received_date");
 
+                entity.Property(e => e.RejectedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rejected_date");
+
                 entity.Property(e => e.StaffId).HasColumnName("staff_id");
 
                 entity.Property(e => e.Status).HasColumnName("status");
@@ -461,6 +465,10 @@ namespace BigSizeFashion.Data.Entities
                 entity.Property(e => e.ReceivedDate)
                     .HasColumnType("datetime")
                     .HasColumnName("received_date");
+
+                entity.Property(e => e.RejectedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("rejected_date");
 
                 entity.Property(e => e.StaffId).HasColumnName("staff_id");
 
