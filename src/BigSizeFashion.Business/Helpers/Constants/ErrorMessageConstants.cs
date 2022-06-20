@@ -21,5 +21,6 @@ namespace BigSizeFashion.Business.Helpers.Constants
         public const string ApplyDateLessThanNow = "Ngày bắt đầu áp dụng khuyến mãi phải là một ngày trong tương lai.";
         public const string InvalidPromotionDatetime = "Ngày áp dụng hoặc ngày kết thúc khuyến mãi đã trùng với khoảng thời gian diễn ra khuyến mãi khác.";
         public const string CannotUploadImage = "Đã có lỗi xảy ra khi upload hình ảnh.";
+        public const string OutOfProduct = "Hiện tại sản phẩm tại cửa hàng này tạm thời hết hàng, vui lòng chọn lại ở cửa hàng khác.";
     }
 }

@@ -94,7 +94,7 @@ namespace BigSizeFashion.Business.Services
                 return;
             }
 
-            query = query.Where(q => q.Size1.ToLower().Contains(name.ToLower()));
+            query = query.Where(q => q.SizeName.ToLower().Contains(name.ToLower()));
         }
 
         public async Task<Result<SizeResponse>> GetSizeByID(int id)

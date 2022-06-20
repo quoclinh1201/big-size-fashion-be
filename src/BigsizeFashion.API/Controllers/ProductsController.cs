@@ -181,7 +181,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet("fit-with-customer")]
-        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, QueryStringParameters param)
+        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
         {
             var result = await _service.GetListProductFitWithCustomer(authorization.Substring(7), param);
             return Ok(result);

@@ -13,7 +13,7 @@ namespace BigSizeFashion.Data.Entities
         }
 
         public int SizeId { get; set; }
-        public string Size1 { get; set; }
+        public string SizeName { get; set; }
         public bool Status { get; set; }
 
         public virtual ICollection<Product> Products { get; set; }

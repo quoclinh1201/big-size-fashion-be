@@ -15,10 +15,10 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
         public CategoryMapper()
         {
             CreateMap<Category, CategoryResponse>()
-                .ForMember(d => d.CategoryName, s => s.MapFrom(s => s.Category1));
+                .ForMember(d => d.CategoryName, s => s.MapFrom(s => s.CategoryName));
 
             CreateMap<CategoryRequest, Category>()
-                .ForMember(d => d.Category1, s => s.MapFrom(s => s.Category))
+                .ForMember(d => d.CategoryName, s => s.MapFrom(s => s.Category))
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
         }
     }

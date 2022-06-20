@@ -161,10 +161,10 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.CategoryId).HasColumnName("category_id");
 
-                entity.Property(e => e.Category1)
+                entity.Property(e => e.CategoryName)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasColumnName("category");
+                    .HasColumnName("category_name");
 
                 entity.Property(e => e.Status).HasColumnName("status");
             });
@@ -175,10 +175,10 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.ColourId).HasColumnName("colour_id");
 
-                entity.Property(e => e.Colour1)
+                entity.Property(e => e.ColourName)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasColumnName("colour");
+                    .HasColumnName("colour_name");
 
                 entity.Property(e => e.Status).HasColumnName("status");
             });
@@ -249,6 +249,10 @@ namespace BigSizeFashion.Data.Entities
                     .HasColumnType("money")
                     .HasColumnName("price");
 
+                entity.Property(e => e.PromotionPrice)
+                    .HasColumnType("money")
+                    .HasColumnName("promotion_price");
+
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
                 entity.HasOne(d => d.Customer)
@@ -279,6 +283,10 @@ namespace BigSizeFashion.Data.Entities
                 entity.Property(e => e.Content)
                     .HasMaxLength(200)
                     .HasColumnName("content");
+
+                entity.Property(e => e.CreateDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("create_date");
 
                 entity.Property(e => e.CustomerId).HasColumnName("customer_id");
 
@@ -410,6 +418,10 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.AccountId).HasColumnName("account_id");
 
+                entity.Property(e => e.CreateDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("create_date");
+
                 entity.Property(e => e.Message)
                     .IsRequired()
                     .HasMaxLength(500)
@@ -419,6 +431,8 @@ namespace BigSizeFashion.Data.Entities
                     .HasMaxLength(500)
                     .IsUnicode(false)
                     .HasColumnName("reference_url");
+
+                entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.Title)
                     .IsRequired()
@@ -453,6 +467,8 @@ namespace BigSizeFashion.Data.Entities
                 entity.Property(e => e.DeliveryDate)
                     .HasColumnType("datetime")
                     .HasColumnName("delivery_date");
+
+                entity.Property(e => e.OrderType).HasColumnName("order_type");
 
                 entity.Property(e => e.PackagedDate)
                     .HasColumnType("datetime")
@@ -709,10 +725,10 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.RoleId).HasColumnName("role_id");
 
-                entity.Property(e => e.Role1)
+                entity.Property(e => e.RoleName)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasColumnName("role");
+                    .HasColumnName("role_name");
             });
 
             modelBuilder.Entity<Size>(entity =>
@@ -721,11 +737,11 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.SizeId).HasColumnName("size_id");
 
-                entity.Property(e => e.Size1)
+                entity.Property(e => e.SizeName)
                     .IsRequired()
                     .HasMaxLength(10)
                     .IsUnicode(false)
-                    .HasColumnName("size");
+                    .HasColumnName("size_name");
 
                 entity.Property(e => e.Status).HasColumnName("status");
             });

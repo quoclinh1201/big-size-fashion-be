@@ -15,10 +15,10 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
         public ColourMapper()
         {
             CreateMap<Colour, ColourResponse>()
-                .ForMember(d => d.ColourName, s => s.MapFrom(s => s.Colour1));
+                .ForMember(d => d.ColourName, s => s.MapFrom(s => s.ColourName));
 
             CreateMap<ColourRequest, Colour>()
-                .ForMember(d => d.Colour1, s => s.MapFrom(s => s.ColourName))
+                .ForMember(d => d.ColourName, s => s.MapFrom(s => s.ColourName))
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
         }
     }

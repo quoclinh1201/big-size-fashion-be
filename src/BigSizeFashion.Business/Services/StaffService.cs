@@ -42,7 +42,7 @@ namespace BigSizeFashion.Business.Services
                     result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
                     return result;
                 }
-                var staff = await _staffRepository.GetAllByIQueryable().Include(s => s.Store).Where(s => s.Uid == uid && s.Status == true).FirstOrDefaultAsync();
+                var staff = await _staffRepository.FindAsync(s => s.Uid == uid && s.Status == true);
 
                 if (staff is null)
                 {
@@ -52,7 +52,7 @@ namespace BigSizeFashion.Business.Services
 
                 var response = _mapper.Map<StaffProfileResponse>(staff);
                 var account = await _accountRepository.GetAllByIQueryable().Include(a => a.Role).Where(s => s.Uid == uid).FirstOrDefaultAsync();
-                response.Role = account.Role.Role1;
+                response.Role = account.Role.RoleName;
                 result.Content = response;
                 return result;
             }
@@ -87,7 +87,7 @@ namespace BigSizeFashion.Business.Services
 
                 var account = await _accountRepository.GetAllByIQueryable().Include(a => a.Role).Where(s => s.Uid == uid).FirstOrDefaultAsync();
                 var response = _mapper.Map<StaffProfileResponse>(model);
-                response.Role = account.Role.Role1;
+                response.Role = account.Role.RoleName;
 
                 result.Content = response;
                 return result;

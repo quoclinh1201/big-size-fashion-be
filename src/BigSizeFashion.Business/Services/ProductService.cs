@@ -190,7 +190,7 @@ namespace BigSizeFashion.Business.Services
                 return;
             }
 
-            query = query.Where(q => q.Size.Size1.ToLower().Equals(size.ToLower()));
+            query = query.Where(q => q.Size.SizeName.ToLower().Equals(size.ToLower()));
         }
 
         private static void FilterProductByColour(ref IQueryable<Product> query, string colour)
@@ -200,7 +200,7 @@ namespace BigSizeFashion.Business.Services
                 return;
             }
 
-            query = query.Where(q => q.Colour.Colour1.ToLower().Equals(colour.ToLower()));
+            query = query.Where(q => q.Colour.ColourName.ToLower().Equals(colour.ToLower()));
         }
 
         private static void FilterProductByCategory(ref IQueryable<Product> query, string category)
@@ -210,7 +210,7 @@ namespace BigSizeFashion.Business.Services
                 return;
             }
 
-            query = query.Where(q => q.Category.Category1.ToLower().Equals(category.ToLower()));
+            query = query.Where(q => q.Category.CategoryName.ToLower().Equals(category.ToLower()));
         }
 
         private void OrderByPrice(ref IQueryable<Product> query, bool? orderByPrice)
@@ -597,5 +597,18 @@ namespace BigSizeFashion.Business.Services
                 throw;
             }
         }
+
+        //public async Task<decimal> GetPromotionPrice(int productId)
+        //{
+        //    try
+        //    {
+
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
     }
 }

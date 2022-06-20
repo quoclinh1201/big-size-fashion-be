@@ -51,7 +51,7 @@ namespace BigSizeFashion.Business.Services
                 return;
             }
 
-            query = query.Where(q => q.Category1.ToLower().Contains(name.ToLower()));
+            query = query.Where(q => q.CategoryName.ToLower().Contains(name.ToLower()));
         }
 
         public async Task<Result<CategoryResponse>> GetCategoryByID(int id)

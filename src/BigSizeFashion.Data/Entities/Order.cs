@@ -27,6 +27,7 @@ namespace BigSizeFashion.Data.Entities
         public DateTime? ReceivedDate { get; set; }
         public byte Status { get; set; }
         public DateTime? RejectedDate { get; set; }
+        public bool OrderType { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Address DeliveryAddressNavigation { get; set; }

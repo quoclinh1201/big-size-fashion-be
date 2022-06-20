@@ -58,7 +58,7 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var account = _mapper.Map<Account>(request);
-                var role = await _roleRepository.FindAsync(r => r.Role1.Equals("Customer"));
+                var role = await _roleRepository.FindAsync(r => r.RoleName.Equals("Customer"));
                 account.RoleId = role.RoleId;
                 await _accountRepository.InsertAsync(account);
                 await _accountRepository.SaveAsync();
@@ -68,7 +68,7 @@ namespace BigSizeFashion.Business.Services
                 await _customerRepository.InsertAsync(customer);
                 await _customerRepository.SaveAsync();
 
-                var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.Role1);
+                var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.RoleName);
                 result.Content = new CreateCustomerAccountResponse { Token = token };
                 return result;
             }
@@ -85,10 +85,10 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var account = _mapper.Map<Account>(request);
-                var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
+                var role = await _roleRepository.FindAsync(r => r.RoleName.Equals(request.RoleAccount));
                 account.RoleId = role.RoleId;
 
-                if (role.Role1.Equals("Manager"))
+                if (role.RoleName.Equals("Manager"))
                 {
                     var checkExistedManager = await _accountRepository.GetAllByIQueryable()
                         .Include(a => a.staff)
@@ -134,7 +134,7 @@ namespace BigSizeFashion.Business.Services
                 if(account != null)
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                    var token = GenerateJSONWebToken(customer.Uid.ToString(), customer.Fullname, account.Role.Role1);
+                    var token = GenerateJSONWebToken(customer.Uid.ToString(), customer.Fullname, account.Role.RoleName);
                     result.Content = new CustomerLoginResponse { Token = token, IsNewCustomer = false };
                     return result;
                 }
@@ -156,7 +156,7 @@ namespace BigSizeFashion.Business.Services
         {
             try
             {
-                var role = await _roleRepository.FindAsync(r => r.Role1.Equals(param.Role.ToString()));
+                var role = await _roleRepository.FindAsync(r => r.RoleName.Equals(param.Role.ToString()));
                 ICollection<Account> accounts = null;
                 if(param.Status.Equals(StatusEnum.Both))
                 {
@@ -278,7 +278,7 @@ namespace BigSizeFashion.Business.Services
             var token = new JwtSecurityToken(_config["Jwt:Issuer"],
                                             _config["Jwt:Issuer"],
                                             claims,
-                                            expires: DateTime.Now.AddHours(24),
+                                            expires: DateTime.Now.AddMonths(3),
                                             signingCredentials: credentials);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -302,35 +302,35 @@ namespace BigSizeFashion.Business.Services
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
-                if(account.Role.Role1.Equals(AccountRoleEnum.Customer.ToString()))
+                if(account.Role.RoleName.Equals(AccountRoleEnum.Customer.ToString()))
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(customer);
-                    response.Role = account.Role.Role1;
+                    response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
                 } 
-                else if(account.Role.Role1.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.Role1.Equals(AccountRoleEnum.Staff.ToString()))
+                else if(account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
                 {
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(staff);
-                    response.Role = account.Role.Role1;
+                    response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
                 } 
-                else if(account.Role.Role1.Equals(AccountRoleEnum.Admin.ToString()))
+                else if(account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()))
                 {
                     var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(admin);
-                    response.Role = account.Role.Role1;
+                    response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
                 }
-                else if (account.Role.Role1.Equals(AccountRoleEnum.Owner.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
                     var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(owner);
-                    response.Role = account.Role.Role1;
+                    response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
                 }
@@ -355,25 +355,25 @@ namespace BigSizeFashion.Business.Services
                 account.Status = false;
                 await _accountRepository.SaveAsync();
 
-                if (account.Role.Role1.Equals(AccountRoleEnum.Customer.ToString()))
+                if (account.Role.RoleName.Equals(AccountRoleEnum.Customer.ToString()))
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
                     customer.Status = false;
                     await _customerRepository.SaveAsync();
                 }
-                else if (account.Role.Role1.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.Role1.Equals(AccountRoleEnum.Staff.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
                 {
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
                     staff.Status = false;
                     await _staffRepository.SaveAsync();
                 } 
-                else if(account.Role.Role1.Equals(AccountRoleEnum.Admin.ToString()))
+                else if(account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()))
                 {
                     var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
                     admin.Status = false;
                     await _adminRepository.SaveAsync();
                 }
-                else if (account.Role.Role1.Equals(AccountRoleEnum.Owner.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
                     var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
                     owner.Status = false;
@@ -402,25 +402,25 @@ namespace BigSizeFashion.Business.Services
                 account.Status = true;
                 await _accountRepository.SaveAsync();
 
-                if (account.Role.Role1.Equals(AccountRoleEnum.Customer.ToString()))
+                if (account.Role.RoleName.Equals(AccountRoleEnum.Customer.ToString()))
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
                     customer.Status = true;
                     await _customerRepository.SaveAsync();
                 }
-                else if (account.Role.Role1.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.Role1.Equals(AccountRoleEnum.Staff.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
                 {
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
                     staff.Status = true;
                     await _staffRepository.SaveAsync();
                 }
-                else if (account.Role.Role1.Equals(AccountRoleEnum.Admin.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()))
                 {
                     var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
                     admin.Status = true;
                     await _adminRepository.SaveAsync();
                 }
-                else if (account.Role.Role1.Equals(AccountRoleEnum.Owner.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
                     var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
                     owner.Status = true;
@@ -487,23 +487,23 @@ namespace BigSizeFashion.Business.Services
 
                     var token = String.Empty;
 
-                    if(account.Role.Role1.Equals("Admin"))
+                    if(account.Role.RoleName.Equals("Admin"))
                     {
                         var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                        token = GenerateJSONWebToken(admin.Uid.ToString(), admin.Fullname, account.Role.Role1);
+                        token = GenerateJSONWebToken(admin.Uid.ToString(), admin.Fullname, account.Role.RoleName);
                     }
-                    else if(account.Role.Role1.Equals("Manager") || account.Role.Role1.Equals("Staff"))
+                    else if(account.Role.RoleName.Equals("Manager") || account.Role.RoleName.Equals("Staff"))
                     {
                         var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                        token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.Role1);
+                        token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.RoleName);
                     }
-                    else if(account.Role.Role1.Equals("Owner"))
+                    else if(account.Role.RoleName.Equals("Owner"))
                     {
                         var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                        token = GenerateJSONWebToken(owner.Uid.ToString(), owner.Fullname, account.Role.Role1);
+                        token = GenerateJSONWebToken(owner.Uid.ToString(), owner.Fullname, account.Role.RoleName);
                     }
 
-                    result.Content = new LoginResponse { Token = token, Role = account.Role.Role1 };
+                    result.Content = new LoginResponse { Token = token, Role = account.Role.RoleName };
                     return result;
                 }
                 result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.WrongUsernameOrPassword);
@@ -522,14 +522,14 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var account = _mapper.Map<Account>(request);
-                var role = await _roleRepository.FindAsync(r => r.Role1.Equals(request.RoleAccount));
+                var role = await _roleRepository.FindAsync(r => r.RoleName.Equals(request.RoleAccount));
                 account.RoleId = role.RoleId;
 
                 await _accountRepository.InsertAsync(account);
                 await _accountRepository.SaveAsync();
 
                 var fullname = string.Empty;
-                if (role.Role1.Equals("Admin"))
+                if (role.RoleName.Equals("Admin"))
                 {
                     var admin = _mapper.Map<Admin>(request);
                     admin.Uid = account.Uid;
@@ -537,7 +537,7 @@ namespace BigSizeFashion.Business.Services
                     await _adminRepository.SaveAsync();
                     fullname = admin.Fullname;
                 } 
-                else if(role.Role1.Equals("Owner"))
+                else if(role.RoleName.Equals("Owner"))
                 {
                     var owner = _mapper.Map<Owner>(request);
                     owner.Uid = account.Uid;

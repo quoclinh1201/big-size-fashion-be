@@ -20,15 +20,15 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
 
             CreateMap<Product, CreateProductResponse>()
-                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.Category1))
-                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.Size1))
-                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.Colour1))
+                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.CategoryName))
+                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.SizeName))
+                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName))
                 .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
             CreateMap<Product, GetDetailProductResponse>()
-                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.Category1))
-                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.Size1))
-                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.Colour1))
+                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.CategoryName))
+                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.SizeName))
+                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName))
                 //.ForMember(d => d.Price, s => s.MapFrom(s => s.Price.ToString()))
                 .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
@@ -37,9 +37,9 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             CreateMap<Product, GetListProductForStaffResponse>();
 
             CreateMap<Product, GetDetailProductForStaffResponse>()
-                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.Category1))
-                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.Size1))
-                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.Colour1))
+                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.CategoryName))
+                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.SizeName))
+                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName))
                 .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
         }
