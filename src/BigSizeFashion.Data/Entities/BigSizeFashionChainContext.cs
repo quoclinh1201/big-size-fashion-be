@@ -92,21 +92,21 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.CustomerId).HasColumnName("customer_id");
 
-                entity.Property(e => e.RecieveAddress)
+                entity.Property(e => e.ReceiveAddress)
                     .IsRequired()
                     .HasMaxLength(200)
-                    .HasColumnName("recieve_address");
+                    .HasColumnName("receive_address");
 
-                entity.Property(e => e.RecieverName)
+                entity.Property(e => e.ReceiverName)
                     .IsRequired()
                     .HasMaxLength(50)
-                    .HasColumnName("reciever_name");
+                    .HasColumnName("receiver_name");
 
-                entity.Property(e => e.RecieverPhone)
+                entity.Property(e => e.ReceiverPhone)
                     .IsRequired()
                     .HasMaxLength(10)
                     .IsUnicode(false)
-                    .HasColumnName("reciever_phone");
+                    .HasColumnName("receiver_phone");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
