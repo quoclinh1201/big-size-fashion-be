@@ -497,8 +497,8 @@ namespace BigSizeFashion.Business.Services
             {
                 var accountUId = DecodeToken.DecodeTokenToGetUid(token);
                 var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
-                var height = customer.Heigth;
-                var weight = customer.Weigth;
+                var height = customer.Height;
+                var weight = customer.Weight;
                 var s = new SearchProductsParameter { PageNumber = param.PageNumber, PageSize = param.PageSize};
 
                 if (height == null || weight == null)

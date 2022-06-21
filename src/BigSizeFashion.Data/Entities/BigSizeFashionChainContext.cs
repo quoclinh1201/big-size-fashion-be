@@ -209,7 +209,7 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.Gender).HasColumnName("gender");
 
-                entity.Property(e => e.Heigth).HasColumnName("heigth");
+                entity.Property(e => e.Height).HasColumnName("height");
 
                 entity.Property(e => e.PhoneNumber)
                     .HasMaxLength(10)
@@ -223,7 +223,7 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.Status).HasColumnName("status");
 
-                entity.Property(e => e.Weigth).HasColumnName("weigth");
+                entity.Property(e => e.Weight).HasColumnName("weight");
 
                 entity.HasOne(d => d.UidNavigation)
                     .WithOne(p => p.Customer)

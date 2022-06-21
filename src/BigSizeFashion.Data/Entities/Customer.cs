@@ -22,8 +22,8 @@ namespace BigSizeFashion.Data.Entities
         public DateTime? Birthday { get; set; }
         public bool? Gender { get; set; }
         public string PinCode { get; set; }
-        public byte? Weigth { get; set; }
-        public byte? Heigth { get; set; }
+        public byte? Weight { get; set; }
+        public byte? Height { get; set; }
         public bool Status { get; set; }
 
         public virtual Account UidNavigation { get; set; }

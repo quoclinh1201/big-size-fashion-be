@@ -23,8 +23,6 @@ namespace BigSizeFashion.Business.AutoMapper
                 .ForMember(d => d.Fullname, s => s.MapFrom(s => s.Fullname))
                 .ForMember(d => d.PhoneNumber, s => s.MapFrom(s => s.PhoneNumber))
                 .ForMember(d => d.Gender, s => s.MapFrom(s => CustomerGender((int)s.Gender)))
-                .ForMember(d => d.Weigth, s => s.MapFrom(s => s.Weigth))
-                .ForMember(d => d.Heigth, s => s.MapFrom(s => s.Heigth))
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
         }
 

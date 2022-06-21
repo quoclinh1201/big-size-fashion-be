@@ -29,10 +29,10 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
 
         [Required]
         [Range(0,255)]
-        public int Weigth { get; set; }
+        public int Weight { get; set; }
 
         [Required]
         [Range(0, 255)]
-        public int Heigth { get; set; }
+        public int Height { get; set; }
     }
 }
