@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.RequestObjects;
@@ -17,12 +18,44 @@ namespace BigSizeFashion.Business.Services
     public class CustomerService : ICustomerService
     {
         private readonly IGenericRepository<Customer> _genericRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
+        private readonly IGenericRepository<Role> _roleRepository;
         private readonly IMapper _mapper;
 
-        public CustomerService(IGenericRepository<Customer> genericRepository, IMapper mapper)
+        public CustomerService(IGenericRepository<Customer> genericRepository,
+            IGenericRepository<Account> accountRepository,
+            IGenericRepository<Role> roleRepository,
+            IMapper mapper)
         {
             _genericRepository = genericRepository;
+            _accountRepository = accountRepository;
+            _roleRepository = roleRepository;
             _mapper = mapper;
+        }
+
+        public async Task<Result<CustomerProfileResponse>> AddNewCustomer(AddNewCustomerRequest request)
+        {
+            var result = new Result<CustomerProfileResponse>();
+            try
+            {
+                var role = await _roleRepository.FindAsync(r => r.RoleName.Equals("Customer"));
+                var account = new Account { Username = request.PhoneNumber, RoleId = role.RoleId, CreateAt = DateTime.UtcNow.AddHours(7), Status = true };
+                await _accountRepository.InsertAsync(account);
+                await _accountRepository.SaveAsync();
+
+                var customer = _mapper.Map<Customer>(request);
+                customer.Uid = account.Uid;
+                await _genericRepository.InsertAsync(customer);
+                await _genericRepository.SaveAsync();
+                var response = _mapper.Map<CustomerProfileResponse>(customer);
+                result.Content = response;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
         }
 
         public async Task<Result<bool>> ChangePINCode(string token, ChangePINCodeRequest request)
@@ -102,6 +135,28 @@ namespace BigSizeFashion.Business.Services
                 customer.PinCode = request.PinCode;
                 await _genericRepository.UpdateAsync(customer);
                 result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<CustomerProfileResponse>> GetCustomerByPhoneNumber(string phoneNumber)
+        {
+            var result = new Result<CustomerProfileResponse>();
+            try
+            {
+                var customer = await _genericRepository.FindAsync(c => c.PhoneNumber.Equals(phoneNumber) && c.Status == true);
+                if (customer == null)
+                {
+                    result.Error = ErrorHelpers.PopulateError(404, APITypeConstants.NotFound_404, ErrorMessageConstants.NotExistedUser);
+                    return result;
+                }
+                var response = _mapper.Map<CustomerProfileResponse>(customer);
+                result.Content = response;
                 return result;
             }
             catch (Exception ex)

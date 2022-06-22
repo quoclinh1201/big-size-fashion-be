@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Common;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using System;
@@ -17,5 +18,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> ChangePINCode(string token, ChangePINCodeRequest request);
         Task<Result<bool>> ValidatePINCode(string token, ValidatePINCodeRequest request);
         Task<Result<bool>> CheckPINCode(string token);
+        Task<Result<CustomerProfileResponse>> GetCustomerByPhoneNumber(string phoneNumber);
+        Task<Result<CustomerProfileResponse>> AddNewCustomer(AddNewCustomerRequest request);
     }
 }

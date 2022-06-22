@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.RequestObjects;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -205,6 +206,39 @@ namespace BigsizeFashion.API.Controllers
                 {
                     return BadRequest(result);
                 }
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get customer informaion by phone number
+        /// </summary>
+        /// <param name="phoneNumber"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("{phoneNumber}")]
+        public async Task<IActionResult> GetCustomerByPhoneNumber(string phoneNumber)
+        {
+            var result = await _service.GetCustomerByPhoneNumber(phoneNumber);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        //[Authorize]
+        [HttpPost("add-new-customer")]
+        public async Task<IActionResult> AddNewCustomer([FromBody] AddNewCustomerRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.AddNewCustomer(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
             }
             return Ok(result);
         }

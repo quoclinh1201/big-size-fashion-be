@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Helpers.Enums;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Data.Entities;
