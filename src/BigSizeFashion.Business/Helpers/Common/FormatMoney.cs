@@ -8,24 +8,28 @@ namespace BigSizeFashion.Business.Helpers.Common
 {
     public static class FormatMoney
     {
-        public static string FormatPrice(string price)
+        public static string FormatPrice(decimal? price)
         {
-            if (price.Length == 0)
-                return "0";
+            if (price == null)
+                return null;
 
+            if (price == 0)
+                return "0 VNĐ";
+
+            var priceString = price.ToString().Substring(0, price.ToString().Length - 5);
             var newPrice = "";
-            var count = 1;
-            for(int i = price.Length - 1; i >= 0; i--)
+            var count = 0;
+            for(int i = priceString.Length - 1; i >= 0; i--)
             {
-                newPrice = price[i] + newPrice;
+                newPrice = priceString[i] + newPrice;
                 count++;
-                if(count == 3)
+                if(count == 3 && i != 0)
                 {
                     newPrice = "." + newPrice;
-                    count = 1;
+                    count = 0;
                 }
             }
-            return newPrice;
+            return newPrice + " VNĐ";
         }
     }
 }

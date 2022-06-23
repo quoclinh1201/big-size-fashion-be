@@ -509,7 +509,6 @@ namespace BigSizeFashion.Data.Entities
                 entity.HasOne(d => d.DeliveryAddressNavigation)
                     .WithMany(p => p.Orders)
                     .HasForeignKey(d => d.DeliveryAddress)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Order__delivery___44FF419A");
 
                 entity.HasOne(d => d.Staff)

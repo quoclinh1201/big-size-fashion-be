@@ -19,7 +19,6 @@ namespace BigSizeFashion.Business.Services
 {
     public class ProductService : IProductService
     {
-        private readonly static string _noImage = "https://firebasestorage.googleapis.com/v0/b/big-size-fashion-chain.appspot.com/o/assets%2Fimages%2FNo-Photo-Available.jpg?alt=media&token=ef1bc098-c179-4cf8-907d-a98a3a274633";
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<ProductImage> _imageRepository;
         private readonly IGenericRepository<StoreWarehouse> _storeWarehoustRepository;
@@ -140,7 +139,7 @@ namespace BigSizeFashion.Business.Services
                             }
                             else
                             {
-                                response[i].ImageUrl = _noImage;
+                                response[i].ImageUrl = CommonConstants.NoImageUrl;
                             }
 
                             var now = DateTime.UtcNow.AddHours(7);
@@ -149,7 +148,7 @@ namespace BigSizeFashion.Business.Services
                                             .Where(p => p.Promotion.ApplyDate <= now
                                                         && p.Promotion.ExpiredDate >= now
                                                         && p.Promotion.Status == true
-                                                        && p.PromotionId == response[i].ProductId)
+                                                        && p.ProductId == response[i].ProductId)
                                             .FirstOrDefaultAsync();
                             if (pd != null)
                             {
@@ -256,7 +255,7 @@ namespace BigSizeFashion.Business.Services
                         var image = new ProductImageResponse
                         {
                             ProductId = model.ProductId,
-                            ImageUrl = _noImage,
+                            ImageUrl = CommonConstants.NoImageUrl,
                             IsMainImage = true
                         };
                         model.Images.Add(image);
@@ -268,7 +267,7 @@ namespace BigSizeFashion.Business.Services
                                     .Where(p => p.Promotion.ApplyDate <= now
                                                 && p.Promotion.ExpiredDate >= now
                                                 && p.Promotion.Status == true
-                                                && p.PromotionId == model.ProductId)
+                                                && p.ProductId == model.ProductId)
                                     .FirstOrDefaultAsync();
                     if(pd != null)
                     {
@@ -337,7 +336,7 @@ namespace BigSizeFashion.Business.Services
                             }
                             else
                             {
-                                response[i].ImageUrl = _noImage;
+                                response[i].ImageUrl = CommonConstants.NoImageUrl;
                             }
 
                             var now = DateTime.UtcNow.AddHours(7);
@@ -346,7 +345,7 @@ namespace BigSizeFashion.Business.Services
                                             .Where(p => p.Promotion.ApplyDate <= now
                                                         && p.Promotion.ExpiredDate >= now
                                                         && p.Promotion.Status == true
-                                                        && p.PromotionId == response[i].ProductId)
+                                                        && p.ProductId == response[i].ProductId)
                                             .FirstOrDefaultAsync();
                             if (pd != null)
                             {
@@ -404,7 +403,7 @@ namespace BigSizeFashion.Business.Services
                         var image = new ProductImageResponse
                         {
                             ProductId = model.ProductId,
-                            ImageUrl = _noImage,
+                            ImageUrl = CommonConstants.NoImageUrl,
                             IsMainImage = true
                         };
                         model.Images.Add(image);
@@ -416,7 +415,7 @@ namespace BigSizeFashion.Business.Services
                                     .Where(p => p.Promotion.ApplyDate <= now
                                                 && p.Promotion.ExpiredDate >= now
                                                 && p.Promotion.Status == true
-                                                && p.PromotionId == model.ProductId)
+                                                && p.ProductId == model.ProductId)
                                     .FirstOrDefaultAsync();
                     if (pd != null)
                     {
@@ -532,17 +531,17 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
                         {
-                            s.Size = "XXXXL";
+                            s.Size = "4XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                         else if (height >= 188 && weight >= 115 && height < 196 && weight < 121)
                         {
-                            s.Size = "XXXXXL";
+                            s.Size = "5XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                         else
                         {
-                            s.Size = "XXXXXXL";
+                            s.Size = "6XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                     }
@@ -570,17 +569,17 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
                         {
-                            s.Size = "XXXXL";
+                            s.Size = "4XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                         else if (height >= 182 && weight >= 106 && height < 190 && weight < 111)
                         {
-                            s.Size = "XXXXXL";
+                            s.Size = "5XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                         else
                         {
-                            s.Size = "XXXXXXL";
+                            s.Size = "6XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                     }
@@ -598,17 +597,48 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        //public async Task<decimal> GetPromotionPrice(int productId)
-        //{
-        //    try
-        //    {
+        public async Task<decimal> GetProductPrice(int id)
+        {
+            try
+            {
+                var price = await _productRepository.GetAllByIQueryable().Where(p => p.ProductId == id && p.Status == true).Select(p => p.Price).FirstOrDefaultAsync();
+                return price;
+            }
+            catch (Exception)
+            {
 
-        //    }
-        //    catch (Exception)
-        //    {
+                throw;
+            }
+        }
 
-        //        throw;
-        //    }
-        //}
+        public async Task<decimal?> GetProductPromotionPrice(int id)
+        {
+            try
+            {
+                var now = DateTime.UtcNow.AddHours(7);
+                var price = await _productRepository.GetAllByIQueryable().Where(p => p.ProductId == id && p.Status == true).Select(p => p.Price).FirstOrDefaultAsync();
+                var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                .Include(p => p.Promotion)
+                                .Where(p => p.Promotion.ApplyDate <= now
+                                            && p.Promotion.ExpiredDate >= now
+                                            && p.Promotion.Status == true
+                                            && p.ProductId == id)
+                                .FirstOrDefaultAsync();
+                if (pd != null)
+                {
+                    var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * price;
+                    return Math.Round(unroundPrice / 1000, 0) * 1000;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
     }
 }

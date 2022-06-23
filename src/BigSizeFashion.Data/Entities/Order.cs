@@ -14,7 +14,7 @@ namespace BigSizeFashion.Data.Entities
 
         public int OrderId { get; set; }
         public int CustomerId { get; set; }
-        public int DeliveryAddress { get; set; }
+        public int? DeliveryAddress { get; set; }
         public int StoreId { get; set; }
         public int? StaffId { get; set; }
         public DateTime CreateDate { get; set; }
