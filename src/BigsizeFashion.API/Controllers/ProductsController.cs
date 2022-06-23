@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Parameters;
+﻿using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +27,7 @@ namespace BigsizeFashion.API.Controllers
         /// Get list product
         /// </summary>
         /// <remarks>
-        /// - Get without quantity for admin, owner, customer
+        /// - Use for all role
         /// -------------------------------------------------
         /// - orderByPrice = true => Sắp xếp theo giá giảm dần
         /// - orderByPrice = false => Sắp xếp theo giá tăng
@@ -37,12 +38,12 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpGet]
-        //public async Task<IActionResult> GetListProductsWithAllStatus([FromQuery] SearchProductsParameter param)
-        //{
-        //    var result = await _service.GetListProductsWithAllStatus(param);
-        //    return Ok(result);
-        //}
+        [HttpGet]
+        public async Task<IActionResult> GetListProductsWithAllStatus([FromQuery] SearchProductsParameter param)
+        {
+            var result = await _service.GetListProductsWithAllStatus(param);
+            return Ok(result);
+        }
 
         /// <summary>
         /// Create product
@@ -73,20 +74,20 @@ namespace BigsizeFashion.API.Controllers
         /// Get product by ID (Get detail)
         /// </summary>
         /// <remarks>
-        /// - Get without quantity for admin, owner, customer
+        /// Use for all role
         /// </remarks>
         /// <returns></returns>
         //[Authorize]
-        //[HttpGet("{id}", Name = "GetProductByID")]
-        //public async Task<IActionResult> GetProductByID(int id)
-        //{
-        //    var result = await _service.GetProductByID(id);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [HttpGet("{id}", Name = "GetProductByID")]
+        public async Task<IActionResult> GetProductByID(int id)
+        {
+            var result = await _service.GetProductByID(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
 
         /// <summary>
@@ -157,17 +158,17 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        //[Authorize]
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteProduct(int id)
-        //{
-        //    var result = await _service.DeleteProduct(id);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProduct(int id)
+        {
+            var result = await _service.DeleteProduct(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
 
         /// <summary>

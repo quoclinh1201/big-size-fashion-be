@@ -25,14 +25,15 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             //    .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName))
             //    .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
-            //CreateMap<Product, GetDetailProductResponse>()
-            //    .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.CategoryName))
-            //    .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.SizeName))
-            //    .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName))
-            //    //.ForMember(d => d.Price, s => s.MapFrom(s => s.Price.ToString()))
-            //    .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
+            CreateMap<Product, GetDetailProductResponse>()
+                .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.CategoryName))
+                .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
-            //CreateMap<Product, GetListProductResponse>();
+            CreateMap<Product, GetListProductResponse>();
+                //.ForMember(d => d.ProductId, s => s.MapFrom(s => s.Product.ProductId))
+                //.ForMember(d => d.ProductName, s => s.MapFrom(s => s.Product.ProductName))
+                //.ForMember(d => d.Price, s => s.MapFrom(s => s.Product.Price))
+                //.ForMember(d => d.Status, s => s.MapFrom(s => s.Product.Status));
 
             //CreateMap<Product, GetListProductForStaffResponse>();
 
