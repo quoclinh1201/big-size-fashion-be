@@ -20,14 +20,14 @@ namespace BigSizeFashion.Data.Entities
         public DateTime CreateDate { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal? TotalPriceAfterDiscount { get; set; }
+        public bool OrderType { get; set; }
         public string PaymentMethod { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public DateTime? PackagedDate { get; set; }
         public DateTime? DeliveryDate { get; set; }
         public DateTime? ReceivedDate { get; set; }
-        public byte Status { get; set; }
         public DateTime? RejectedDate { get; set; }
-        public bool OrderType { get; set; }
+        public byte Status { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Address DeliveryAddressNavigation { get; set; }

@@ -12,8 +12,8 @@ namespace BigSizeFashion.Data.Entities
         public int ProductId { get; set; }
         public string Content { get; set; }
         public byte? Rate { get; set; }
-        public bool Status { get; set; }
         public DateTime CreateDate { get; set; }
+        public bool Status { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Product Product { get; set; }

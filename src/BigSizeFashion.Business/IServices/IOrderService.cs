@@ -12,8 +12,8 @@ namespace BigSizeFashion.Business.IServices
 {
     public interface IOrderService
     {
-        Task<Result<OrderIdResponse>> CreateOrderForCustomer(string v, CreateOrderForCustomerRequest request);
-        Task<Result<GetOrderDetailResponse>> GetOrderDetailById(int id);
+        //Task<Result<OrderIdResponse>> CreateOrderForCustomer(string v, CreateOrderForCustomerRequest request);
+        //Task<Result<GetOrderDetailResponse>> GetOrderDetailById(int id);
         //Task<PagedResult<ListOrderResponse>> GetListOrderForCustomer(string v, FilterOrderParameter param);
     }
 }

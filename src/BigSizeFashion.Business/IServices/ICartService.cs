@@ -11,10 +11,10 @@ namespace BigSizeFashion.Business.IServices
 {
     public interface ICartService
     {
-        Task<Result<IEnumerable<CartItemResponse>>> GetAllProductInCartByCustomerID(string token);
-        Task<Result<bool>> AddProductToCart(string token, ManageProductInCartRequest request);
-        Task<Result<IEnumerable<CartItemResponse>>> IncreaseProductInCart(string token, ManageProductInCartRequest request);
-        Task<Result<IEnumerable<CartItemResponse>>> DecreaseProductInCart(string token, ManageProductInCartRequest request);
-        Task<Result<IEnumerable<CartItemResponse>>> RemoveProductInCart(string token, ManageProductInCartRequest request);
+        //Task<Result<IEnumerable<CartItemResponse>>> GetAllProductInCartByCustomerID(string token);
+        //Task<Result<bool>> AddProductToCart(string token, ManageProductInCartRequest request);
+        //Task<Result<IEnumerable<CartItemResponse>>> IncreaseProductInCart(string token, ManageProductInCartRequest request);
+        //Task<Result<IEnumerable<CartItemResponse>>> DecreaseProductInCart(string token, ManageProductInCartRequest request);
+        //Task<Result<IEnumerable<CartItemResponse>>> RemoveProductInCart(string token, ManageProductInCartRequest request);
     }
 }

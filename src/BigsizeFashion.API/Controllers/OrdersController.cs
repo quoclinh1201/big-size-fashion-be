@@ -31,20 +31,20 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpPost("create-order-for-customer")]
-        public async Task<IActionResult> CreateOrderForCustomer([FromHeader] string authorization, [FromBody] CreateOrderForCustomerRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await _service.CreateOrderForCustomer(authorization.Substring(7), request);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPost("create-order-for-customer")]
+        //public async Task<IActionResult> CreateOrderForCustomer([FromHeader] string authorization, [FromBody] CreateOrderForCustomerRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.CreateOrderForCustomer(authorization.Substring(7), request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Get order detail by order id
@@ -52,16 +52,16 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpGet("detail/{id}")]
-        public async Task<IActionResult> GetOrderDetailById(int id)
-        {
-            var result = await _service.GetOrderDetailById(id);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpGet("detail/{id}")]
+        //public async Task<IActionResult> GetOrderDetailById(int id)
+        //{
+        //    var result = await _service.GetOrderDetailById(id);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Customer get list order

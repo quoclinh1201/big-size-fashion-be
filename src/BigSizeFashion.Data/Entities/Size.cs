@@ -9,13 +9,13 @@ namespace BigSizeFashion.Data.Entities
     {
         public Size()
         {
-            Products = new HashSet<Product>();
+            ProductDetails = new HashSet<ProductDetail>();
         }
 
         public int SizeId { get; set; }
         public string SizeName { get; set; }
         public bool Status { get; set; }
 
-        public virtual ICollection<Product> Products { get; set; }
+        public virtual ICollection<ProductDetail> ProductDetails { get; set; }
     }
 }
