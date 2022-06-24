@@ -11,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.AutoMapper
 {
-    public class AdminProfileMapper :  Profile
+    public class UserProfileMapper :  Profile
     {
-        public AdminProfileMapper()
+        public UserProfileMapper()
         {
-            CreateMap<Admin, AdminProfileResponse>()
+            CreateMap<User, UserProfileResponse>()
                 .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)));
 
-            CreateMap<UpdateAdminProfileRequest, Admin>()
+            CreateMap<UpdateUserProfileRequest, User>()
                 .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertStringToDate(s.Birthday)));
         }
     }

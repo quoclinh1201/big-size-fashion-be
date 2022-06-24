@@ -26,8 +26,9 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<Account> _accountRepository;
         private readonly IGenericRepository<Customer> _customerRepository;
         private readonly IGenericRepository<staff> _staffRepository;
-        private readonly IGenericRepository<Admin> _adminRepository;
-        private readonly IGenericRepository<Owner> _ownerRepository;
+        private readonly IGenericRepository<User> _userRepository;
+        //private readonly IGenericRepository<Admin> _adminRepository;
+        //private readonly IGenericRepository<Owner> _ownerRepository;
         private readonly IGenericRepository<Role> _roleRepository;
         private readonly IMapper _mapper;
         private IConfiguration _config;
@@ -36,8 +37,9 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<Account> accountRepository,
             IGenericRepository<Customer> customerRepository,
             IGenericRepository<staff> staffRepository,
-            IGenericRepository<Admin> adminRepository,
-            IGenericRepository<Owner> ownerRepository,
+            IGenericRepository<User> userRepository,
+            //IGenericRepository<Admin> adminRepository,
+            //IGenericRepository<Owner> ownerRepository,
             IGenericRepository<Role> roleRepository,
             IMapper mapper,
             IConfiguration config)
@@ -45,8 +47,9 @@ namespace BigSizeFashion.Business.Services
             _accountRepository = accountRepository;
             _customerRepository = customerRepository;
             _staffRepository = staffRepository;
-            _adminRepository = adminRepository;
-            _ownerRepository = ownerRepository;
+            _userRepository = userRepository;
+            //_adminRepository = adminRepository;
+            //_ownerRepository = ownerRepository;
             _roleRepository = roleRepository;
             _mapper = mapper;
             _config = config;
@@ -130,8 +133,8 @@ namespace BigSizeFashion.Business.Services
             {
                 var account = _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Username.Equals(request.PhoneNumber))
-                    .Include(a => a.Role).FirstOrDefault(); 
-                if(account != null)
+                    .Include(a => a.Role).FirstOrDefault();
+                if (account != null)
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
                     var token = GenerateJSONWebToken(customer.Uid.ToString(), customer.Fullname, account.Role.RoleName);
@@ -149,7 +152,7 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
-            
+
         }
 
         public async Task<PagedResult<GetListAccountsResponse>> GetListAccounts(GetListAccountsParameter param)
@@ -158,7 +161,7 @@ namespace BigSizeFashion.Business.Services
             {
                 var role = await _roleRepository.FindAsync(r => r.RoleName.Equals(param.Role.ToString()));
                 ICollection<Account> accounts = null;
-                if(param.Status.Equals(StatusEnum.Both))
+                if (param.Status.Equals(StatusEnum.Both))
                 {
                     accounts = await _accountRepository.FindByAsync(a => a.RoleId.Equals(role.RoleId));
                 }
@@ -169,14 +172,14 @@ namespace BigSizeFashion.Business.Services
                         .FindByAsync(a => a.RoleId.Equals(role.RoleId) && a.Status.Equals(stt));
                 }
 
-                if(accounts == null)
+                if (accounts == null)
                 {
                     return null;
                 }
 
                 var response = _mapper.Map<List<GetListAccountsResponse>>(accounts);
 
-                if(param.Role.ToString().Equals("Customer"))
+                if (param.Role.ToString().Equals("Customer"))
                 {
                     for (int i = 0; i < response.Count; i++)
                     {
@@ -186,8 +189,8 @@ namespace BigSizeFashion.Business.Services
                     var query = response.AsQueryable();
                     FilterAccountByName(ref query, param.Fullname);
                     response = query.ToList();
-                } 
-                else if(param.Role.ToString().Equals("Manager") || param.Role.ToString().Equals("Staff"))
+                }
+                else if (param.Role.ToString().Equals("Manager") || param.Role.ToString().Equals("Staff"))
                 {
                     for (int i = 0; i < response.Count; i++)
                     {
@@ -198,28 +201,28 @@ namespace BigSizeFashion.Business.Services
                     FilterAccountByName(ref query, param.Fullname);
                     response = query.ToList();
                 }
-                else if(param.Role.ToString().Equals("Admin"))
+                else if (param.Role.ToString().Equals("Admin") || param.Role.ToString().Equals("Owner"))
                 {
                     for (int i = 0; i < response.Count; i++)
                     {
-                        var admin = await _adminRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
-                        response[i].Fullname = admin.Fullname;
+                        var user = await _userRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
+                        response[i].Fullname = user.Fullname;
                     }
                     var query = response.AsQueryable();
                     FilterAccountByName(ref query, param.Fullname);
                     response = query.ToList();
                 }
-                else if(param.Role.ToString().Equals("Owner"))
-                {
-                    for (int i = 0; i < response.Count; i++)
-                    {
-                        var owner = await _ownerRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
-                        response[i].Fullname = owner.Fullname;
-                    }
-                    var query = response.AsQueryable();
-                    FilterAccountByName(ref query, param.Fullname);
-                    response = query.ToList();
-                }
+                //else if(param.Role.ToString().Equals("Owner"))
+                //{
+                //    for (int i = 0; i < response.Count; i++)
+                //    {
+                //        var owner = await _ownerRepository.FindAsync(m => m.Uid.Equals(response[i].Uid));
+                //        response[i].Fullname = owner.Fullname;
+                //    }
+                //    var query = response.AsQueryable();
+                //    FilterAccountByName(ref query, param.Fullname);
+                //    response = query.ToList();
+                //}
                 return PagedResult<GetListAccountsResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
             }
             catch (Exception)
@@ -298,42 +301,42 @@ namespace BigSizeFashion.Business.Services
         {
             var result = new Result<GetDetailUserByUidResponse>();
             try
-            { 
+            {
                 var account = await _accountRepository.GetAllByIQueryable()
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
-                if(account.Role.RoleName.Equals(AccountRoleEnum.Customer.ToString()))
+                if (account.Role.RoleName.Equals(AccountRoleEnum.Customer.ToString()))
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(customer);
                     response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
-                } 
-                else if(account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
+                }
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
                 {
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(staff);
                     response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
-                } 
-                else if(account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()))
+                }
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
-                    var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
-                    var response = _mapper.Map<GetDetailUserByUidResponse>(admin);
+                    var user = await _userRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var response = _mapper.Map<GetDetailUserByUidResponse>(user);
                     response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
                 }
-                else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
-                {
-                    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
-                    var response = _mapper.Map<GetDetailUserByUidResponse>(owner);
-                    response.Role = account.Role.RoleName;
-                    result.Content = response;
-                    return result;
-                }
+                //else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
+                //{
+                //    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
+                //    var response = _mapper.Map<GetDetailUserByUidResponse>(owner);
+                //    response.Role = account.Role.RoleName;
+                //    result.Content = response;
+                //    return result;
+                //}
                 return null;
             }
             catch (Exception ex)
@@ -366,19 +369,19 @@ namespace BigSizeFashion.Business.Services
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
                     staff.Status = false;
                     await _staffRepository.SaveAsync();
-                } 
-                else if(account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()))
+                }
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
-                    var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var admin = await _userRepository.FindAsync(c => c.Uid.Equals(uid));
                     admin.Status = false;
-                    await _adminRepository.SaveAsync();
+                    await _userRepository.SaveAsync();
                 }
-                else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
-                {
-                    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
-                    owner.Status = false;
-                    await _ownerRepository.SaveAsync();
-                }
+                //else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
+                //{
+                //    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
+                //    owner.Status = false;
+                //    await _ownerRepository.SaveAsync();
+                //}
 
                 result.Content = true;
                 return result;
@@ -414,18 +417,18 @@ namespace BigSizeFashion.Business.Services
                     staff.Status = true;
                     await _staffRepository.SaveAsync();
                 }
-                else if (account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()))
+                else if (account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
-                    var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var admin = await _userRepository.FindAsync(c => c.Uid.Equals(uid));
                     admin.Status = true;
-                    await _adminRepository.SaveAsync();
+                    await _userRepository.SaveAsync();
                 }
-                else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
-                {
-                    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
-                    owner.Status = true;
-                    await _ownerRepository.SaveAsync();
-                }
+                //else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
+                //{
+                //    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(uid));
+                //    owner.Status = true;
+                //    await _ownerRepository.SaveAsync();
+                //}
                 result.Content = true;
                 return result;
             }
@@ -443,7 +446,7 @@ namespace BigSizeFashion.Business.Services
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
 
-                if(uid == 0)
+                if (uid == 0)
                 {
                     result.Error = ErrorHelpers.PopulateError(401, APITypeConstants.Unauthorized_401, ErrorMessageConstants.Unauthenticate);
                     return result;
@@ -487,21 +490,21 @@ namespace BigSizeFashion.Business.Services
 
                     var token = String.Empty;
 
-                    if(account.Role.RoleName.Equals("Admin"))
+                    if (account.Role.RoleName.Equals("Admin") || account.Role.RoleName.Equals("Owner"))
                     {
-                        var admin = await _adminRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                        token = GenerateJSONWebToken(admin.Uid.ToString(), admin.Fullname, account.Role.RoleName);
+                        var user = await _userRepository.FindAsync(c => c.Uid.Equals(account.Uid));
+                        token = GenerateJSONWebToken(user.Uid.ToString(), user.Fullname, account.Role.RoleName);
                     }
-                    else if(account.Role.RoleName.Equals("Manager") || account.Role.RoleName.Equals("Staff"))
+                    else if (account.Role.RoleName.Equals("Manager") || account.Role.RoleName.Equals("Staff"))
                     {
                         var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(account.Uid));
                         token = GenerateJSONWebToken(staff.Uid.ToString(), staff.Fullname, account.Role.RoleName);
                     }
-                    else if(account.Role.RoleName.Equals("Owner"))
-                    {
-                        var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
-                        token = GenerateJSONWebToken(owner.Uid.ToString(), owner.Fullname, account.Role.RoleName);
-                    }
+                    //else if (account.Role.RoleName.Equals("Owner"))
+                    //{
+                    //    var owner = await _ownerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
+                    //    token = GenerateJSONWebToken(owner.Uid.ToString(), owner.Fullname, account.Role.RoleName);
+                    //}
 
                     result.Content = new LoginResponse { Token = token, Role = account.Role.RoleName };
                     return result;
@@ -528,23 +531,23 @@ namespace BigSizeFashion.Business.Services
                 await _accountRepository.InsertAsync(account);
                 await _accountRepository.SaveAsync();
 
-                var fullname = string.Empty;
-                if (role.RoleName.Equals("Admin"))
-                {
-                    var admin = _mapper.Map<Admin>(request);
-                    admin.Uid = account.Uid;
-                    await _adminRepository.InsertAsync(admin);
-                    await _adminRepository.SaveAsync();
-                    fullname = admin.Fullname;
-                } 
-                else if(role.RoleName.Equals("Owner"))
-                {
-                    var owner = _mapper.Map<Owner>(request);
-                    owner.Uid = account.Uid;
-                    await _ownerRepository.InsertAsync(owner);
-                    await _ownerRepository.SaveAsync();
-                    fullname = owner.Fullname;
-                }
+                
+                //if (role.RoleName.Equals("Admin"))
+                //{
+                var user = _mapper.Map<User>(request);
+                user.Uid = account.Uid;
+                await _userRepository.InsertAsync(user);
+                await _userRepository.SaveAsync();
+                var fullname = user.Fullname;
+                //}
+                //else if (role.RoleName.Equals("Owner"))
+                //{
+                //    var owner = _mapper.Map<Owner>(request);
+                //    owner.Uid = account.Uid;
+                //    await _ownerRepository.InsertAsync(owner);
+                //    await _ownerRepository.SaveAsync();
+                //    fullname = owner.Fullname;
+                //}
 
                 var response = _mapper.Map<AccountResponse>(account);
                 response.RoleAccount = request.RoleAccount;

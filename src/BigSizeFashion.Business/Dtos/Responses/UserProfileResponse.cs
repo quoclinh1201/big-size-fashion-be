@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.ResponseObjects
 {
-    public class AdminProfileResponse
+    public class UserProfileResponse
     {
         public int Uid { get; set; }
         public string Fullname { get; set; }

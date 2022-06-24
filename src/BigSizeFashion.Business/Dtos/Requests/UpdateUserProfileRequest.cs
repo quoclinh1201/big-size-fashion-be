@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Helpers.RequestObjects
 {
-    public class UpdateAdminProfileRequest
+    public class UpdateUserProfileRequest
     {
         [MaxLength(50)]
         public string Fullname { get; set; }

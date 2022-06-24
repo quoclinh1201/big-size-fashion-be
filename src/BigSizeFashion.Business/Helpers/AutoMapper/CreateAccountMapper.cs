@@ -24,11 +24,11 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.CreateAt, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.CreateAt)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == true ? StatusEnum.Active : StatusEnum.Inactive));
 
-            CreateMap<CreateAccountRequest, Admin>()
+            CreateMap<CreateAccountRequest, User>()
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
 
-            CreateMap<CreateAccountRequest, Owner>()
-                .ForMember(d => d.Status, s => s.MapFrom(s => true));
+            //CreateMap<CreateAccountRequest, Owner>()
+            //    .ForMember(d => d.Status, s => s.MapFrom(s => true));
         }
     }
 }
