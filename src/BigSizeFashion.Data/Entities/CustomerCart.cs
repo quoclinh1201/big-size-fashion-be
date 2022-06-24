@@ -11,8 +11,6 @@ namespace BigSizeFashion.Data.Entities
         public int ProductDetailId { get; set; }
         public int StoreId { get; set; }
         public int Quantity { get; set; }
-        public decimal Price { get; set; }
-        public decimal? PromotionPrice { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual ProductDetail ProductDetail { get; set; }

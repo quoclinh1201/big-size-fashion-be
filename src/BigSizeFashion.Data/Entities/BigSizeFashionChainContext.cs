@@ -213,14 +213,6 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.StoreId).HasColumnName("store_id");
 
-                entity.Property(e => e.Price)
-                    .HasColumnType("money")
-                    .HasColumnName("price");
-
-                entity.Property(e => e.PromotionPrice)
-                    .HasColumnType("money")
-                    .HasColumnName("promotion_price");
-
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
                 entity.HasOne(d => d.Customer)
