@@ -10,6 +10,7 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
     {
         public int ColourId { get; set; }
         public string ColourName { get; set; }
+        public string ColourCode { get; set; }
         public bool Status { get; set; }
     }
 }

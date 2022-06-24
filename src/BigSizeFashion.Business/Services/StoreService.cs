@@ -20,18 +20,18 @@ namespace BigSizeFashion.Business.Services
     {
         private readonly IGenericRepository<Store> _genericRepository;
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
-        private readonly IGenericRepository<Product> _productRepository;
+        private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IMapper _mapper;
 
         public StoreService(
             IGenericRepository<Store> genericRepository,
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
-            IGenericRepository<Product> productRepository,
+            IGenericRepository<ProductDetail> productDetailRepository,
             IMapper mapper)
         {
             _genericRepository = genericRepository;
             _storeWarehouseRepository = storeWarehouseRepository;
-            _productRepository = productRepository;
+            _productDetailRepository = productDetailRepository;
             _mapper = mapper;
         }
 
@@ -58,15 +58,19 @@ namespace BigSizeFashion.Business.Services
 
         private async Task InsertProductIntoStore(int id)
         {
-            var allProductId = await  _productRepository.GetAllByIQueryable().Where(p => p.Status == true).Select(p => p.ProductId).ToListAsync();
-            
-            if(allProductId.Count > 0)
+            //var allProductId = await  _productRepository.GetAllByIQueryable().Where(p => p.Status == true).Select(p => p.ProductId).ToListAsync();
+            var allProductId = await _productDetailRepository.GetAllByIQueryable()
+                                    .Include(p => p.Product)
+                                    .Where(p => p.Product.Status == true)
+                                    .Select(p => p.ProductDetailId).ToListAsync();
+
+            if (allProductId.Count > 0)
             {
                 foreach (var productId in allProductId)
                 {
                     var newItem = new AddNewProductIntoStoreRequest {
                         StoreId = id,
-                        ProductId = productId,
+                        ProductDetailId = productId,
                         Quantity = 0
                     };
                     var storeWarehouse = _mapper.Map<StoreWarehouse>(newItem);

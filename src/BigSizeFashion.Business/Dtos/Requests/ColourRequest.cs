@@ -12,5 +12,9 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
         [Required(AllowEmptyStrings = false)]
         [MaxLength(50)]
         public string ColourName { get; set; }
+
+        [Required(AllowEmptyStrings = false)]
+        [MaxLength(7)]
+        public string ColourCode { get; set; }
     }
 }

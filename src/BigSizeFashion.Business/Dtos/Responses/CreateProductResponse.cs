@@ -12,10 +12,8 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public string Category { get; set; }
-        public string Size { get; set; }
-        public string Colour { get; set; }
         public string Gender { get; set; }
-        public string SupplierName { get; set; }
+        public string Brand { get; set; }
         public string Description { get; set; }
         public bool Status { get; set; }
     }
