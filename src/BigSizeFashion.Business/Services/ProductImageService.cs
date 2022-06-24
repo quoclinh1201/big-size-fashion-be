@@ -69,7 +69,7 @@ namespace BigSizeFashion.Business.Services
                                 }
                             ).Child("assets")
                             .Child("images")
-                            .Child(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss") + "_" + $"{file.FileName}")
+                            .Child(DateTime.Now.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss"))
                             .PutAsync(ms, cancellation.Token);
 
                             var iamgeUrl = await upload;

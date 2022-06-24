@@ -204,5 +204,7 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        //bổ xung GetQuantityOfProduct in store
     }
 }

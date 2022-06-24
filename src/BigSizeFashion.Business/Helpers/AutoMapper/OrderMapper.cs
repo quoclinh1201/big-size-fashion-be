@@ -28,21 +28,13 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.DeliveryDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.DeliveryDate)))
                 .ForMember(d => d.ReceivedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.ReceivedDate)))
                 .ForMember(d => d.RejectedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.RejectedDate)))
-                .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatusToString(s.Status)));
+                .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
+
+            CreateMap<Order, ListOrderResponse>()
+                .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))
+                .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
         }
 
-        private static string ConvertOrderStatusToString(byte status)
-        {
-            return status switch
-            {
-                0 => OrderStatusConstants.Cancel,
-                1 => OrderStatusConstants.Pending,
-                2 => OrderStatusConstants.Approved,
-                3 => OrderStatusConstants.Packaged,
-                4 => OrderStatusConstants.Delivery,
-                5 => OrderStatusConstants.Received,
-                _ => OrderStatusConstants.Reject,
-            };
-        }
+        
     }
 }

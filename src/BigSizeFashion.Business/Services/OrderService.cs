@@ -146,18 +146,72 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        ////public Task<PagedResult<ListOrderResponse>> GetListOrderForCustomer(string token, FilterOrderParameter param)
-        ////{
-        ////    try
-        ////    {
+        public async Task<PagedResult<ListOrderResponse>> GetListOrderForCustomer(string token, FilterOrderParameter param)
+        {
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var orders = await _orderRepository.FindByAsync(o => o.CustomerId == uid);
+                var query = orders.AsQueryable();
+                FilterOrderByType(ref query, param.OrderType);
+                FilterOrderStatus(ref query, param.OrderStatus.ToString());
+                OrderByCreateDate(ref query, param.OrderByCreateDate);
+                var list = query.ToList();
+                var response = _mapper.Map<List<ListOrderResponse>>(list);
+                return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
 
-        ////    }
-        ////    catch (Exception)
-        ////    {
+                throw;
+            }
+        }
 
-        ////        throw;
-        ////    }
-        ////}
+        private static void FilterOrderStatus(ref IQueryable<Order> query, string status)
+        {
+            if (!query.Any() || String.IsNullOrEmpty(status) || String.IsNullOrWhiteSpace(status) || status.Equals(OrderStatusEnum.All.ToString()))
+            {
+                return;
+            }
+
+            var s = ConvertOrderStatus.ConvertStringToOrderStatus(status);
+            query = query.Where(q => q.Status == s);
+        }
+
+        private static void FilterOrderByType(ref IQueryable<Order> query, bool? type)
+        {
+            if (!query.Any() || type is null)
+            {
+                return;
+            }
+
+            if(type is true)
+            {
+                query = query.Where(q => q.OrderType == true);
+            }
+
+            if (type is false)
+            {
+                query = query.Where(q => q.OrderType == false);
+            }
+        }
+
+        private void OrderByCreateDate(ref IQueryable<Order> query, bool? orderByCreateDate)
+        {
+            if (!query.Any())
+            {
+                return;
+            }
+
+            if (orderByCreateDate is true || orderByCreateDate is null)
+            {
+                query = query.OrderByDescending(x => x.CreateDate);
+            }
+            else
+            {
+                query = query.OrderBy(x => x.CreateDate);
+            }
+        }
 
         public async Task<Result<GetOrderDetailResponse>> GetOrderDetailById(int id)
         {
@@ -221,6 +275,47 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        public async Task<Result<bool>> ApproveOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.ApprovalDate = DateTime.UtcNow.AddHours(7);
+                order.Status = (byte)OrderStatusEnum.Approved;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForManager(string token, FilterOrderParameter param)
+        {
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository.GetAllByIQueryable().Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
+                var orders = await _orderRepository.FindByAsync(o => o.StoreId == storeId);
+                var query = orders.AsQueryable();
+                FilterOrderByType(ref query, param.OrderType);
+                FilterOrderStatus(ref query, param.OrderStatus.ToString());
+                OrderByCreateDate(ref query, param.OrderByCreateDate);
+                var list = query.ToList();
+                var response = _mapper.Map<List<ListOrderResponse>>(list);
+                return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }
