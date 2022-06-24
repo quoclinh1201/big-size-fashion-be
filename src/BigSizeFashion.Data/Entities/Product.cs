@@ -10,7 +10,6 @@ namespace BigSizeFashion.Data.Entities
         public Product()
         {
             Feedbacks = new HashSet<Feedback>();
-            OrderDetails = new HashSet<OrderDetail>();
             ProductDetails = new HashSet<ProductDetail>();
             ProductImages = new HashSet<ProductImage>();
             PromotionDetails = new HashSet<PromotionDetail>();
@@ -27,7 +26,6 @@ namespace BigSizeFashion.Data.Entities
 
         public virtual Category Category { get; set; }
         public virtual ICollection<Feedback> Feedbacks { get; set; }
-        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         public virtual ICollection<ProductDetail> ProductDetails { get; set; }
         public virtual ICollection<ProductImage> ProductImages { get; set; }
         public virtual ICollection<PromotionDetail> PromotionDetails { get; set; }

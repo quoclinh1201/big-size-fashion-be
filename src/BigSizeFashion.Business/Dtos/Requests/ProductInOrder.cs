@@ -8,7 +8,7 @@ namespace BigSizeFashion.Business.Dtos.Requests
 {
     public class ProductInOrder
     {
-        public int ProductId { get; set; }
+        public int ProductDetailId { get; set; }
         public int Quantity { get; set; }
     }
 }
