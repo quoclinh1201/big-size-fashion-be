@@ -5,6 +5,7 @@ using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.Enums;
+using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Data.Entities;
@@ -316,6 +317,162 @@ namespace BigSizeFashion.Business.Services
             {
 
                 throw;
+            }
+        }
+
+        public async Task<Result<bool>> AssignOrder(AssignOrderRequest request)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == request.OrderId);
+                order.StaffId = request.StaffId;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<PagedResult<ListOrderResponse>> GetListAssignedOrder(string token, QueryStringParameters param)
+        {
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid && o.Status == (byte)OrderStatusEnum.Approved);
+                var query = orders.AsQueryable();
+                OrderByCreateDate(ref query, false);
+                var list = _mapper.Map<List<ListOrderResponse>>(query.ToList());
+                return PagedResult<ListOrderResponse>.ToPagedList(list, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForStaff(string token, FilterOrderParameter param)
+        {
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid);
+                var query = orders.AsQueryable();
+                FilterOrderByType(ref query, param.OrderType);
+                FilterOrderStatus(ref query, param.OrderStatus.ToString());
+                OrderByCreateDate(ref query, param.OrderByCreateDate);
+                var response = _mapper.Map<List<ListOrderResponse>>(query.ToList());
+                return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Result<bool>> PackagedOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.PackagedDate = DateTime.UtcNow.AddHours(7);
+                order.Status = (byte)OrderStatusEnum.Packaged;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> DeliveryOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.DeliveryDate = DateTime.UtcNow.AddHours(7);
+                order.Status = (byte)OrderStatusEnum.Delivery;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> ReceivedOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.ReceivedDate = DateTime.UtcNow.AddHours(7);
+                order.Status = (byte)OrderStatusEnum.Received;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> RejectOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.RejectedDate = DateTime.UtcNow.AddHours(7);
+                order.Status = (byte)OrderStatusEnum.Reject;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> CancelOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id && o.Status == (byte)OrderStatusEnum.Pending);
+                if(order != null)
+                {
+                    order.Status = (byte)OrderStatusEnum.Cancel;
+                    await _orderRepository.UpdateAsync(order);
+                    result.Content = true;
+                    return result;
+                }
+                else
+                {
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.CannotCancelOrder);
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }

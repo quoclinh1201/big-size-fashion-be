@@ -205,6 +205,21 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        //bổ xung GetQuantityOfProduct in store
+        /// <summary>
+        /// Staff and manager get quantity of product in store
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("quantity-of-store")]
+        public async Task<IActionResult> GetQuantityOfProductInStore([FromHeader] string authorization, [FromQuery] GetQuantityOfProductInStoreParameter param)
+        {
+            var result = await _service.GetQuantityOfProductInStore(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

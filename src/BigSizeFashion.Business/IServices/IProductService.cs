@@ -26,5 +26,6 @@ namespace BigSizeFashion.Business.IServices
         Task<decimal> GetProductPrice(int id);
         Task<decimal?> GetProductPromotionPrice(int id);
         Task<Result<GetQuantityOfProductResponse>> GetQuantityOfProduct(GetQuantityOfProductParameter param);
+        Task<Result<GetQuantityOfProductResponse>> GetQuantityOfProductInStore(string v, GetQuantityOfProductInStoreParameter param);
     }
 }

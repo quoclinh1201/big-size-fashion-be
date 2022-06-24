@@ -1,5 +1,7 @@
 ﻿using BigSizeFashion.Business.Dtos.Parameters;
 using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Dtos.Responses;
+using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -125,6 +127,159 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> ApproveOrder(int id)
         {
             var result = await _service.ApproveOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Manager assign order to staff
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("assign-order")]
+        public async Task<IActionResult> AssignOrder([FromBody] AssignOrderRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.AssignOrder(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get list assign order for staff
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("assigned-order")]
+        public async Task<IActionResult> GetListAssignedOrder([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
+        {
+            var result = await _service.GetListAssignedOrder(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get list order of staff
+        /// </summary>
+        /// <remarks>
+        /// - Order type = null => get mọi type
+        /// - Order type = true => get đơn online
+        /// - Order type = false => get đơn offlice
+        /// ---------------------------------
+        /// - OrderByCreateDate = true hoặc null => đơn hàng mới nhắt nằm trên
+        /// - OrderByCreateDate = false => đơn hàng cũ nhắt nằm trên
+        /// </remarks>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("for-staff")]
+        public async Task<IActionResult> GetListOrderOfStoreForStaff([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
+        {
+            var result = await _service.GetListOrderOfStoreForStaff(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Staff update order status to packaged
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("packaged/{id}")]
+        public async Task<IActionResult> PackagedOrder(int id)
+        {
+            var result = await _service.PackagedOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Staff update order status to delivery
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("delivery/{id}")]
+        public async Task<IActionResult> DeliveryOrder(int id)
+        {
+            var result = await _service.DeliveryOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Update status to received
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("received/{id}")]
+        public async Task<IActionResult> ReceivedOrder(int id)
+        {
+            var result = await _service.ReceivedOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Manager reject order
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("reject/{id}")]
+        public async Task<IActionResult> RejectOrder(int id)
+        {
+            var result = await _service.RejectOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Cancel order
+        /// </summary>
+        /// <remarks>
+        /// chỉ hủy được những đơn hàng có trạng thái là "Chờ xác nhận"
+        /// </remarks>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("cancel/{id}")]
+        public async Task<IActionResult> CancelOrder(int id)
+        {
+            var result = await _service.CancelOrder(id);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

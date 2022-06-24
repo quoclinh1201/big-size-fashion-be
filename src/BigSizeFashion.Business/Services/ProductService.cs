@@ -704,5 +704,35 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<GetQuantityOfProductResponse>> GetQuantityOfProductInStore(string token, GetQuantityOfProductInStoreParameter param)
+        {
+            var result = new Result<GetQuantityOfProductResponse>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository.GetAllByIQueryable()
+                     .Where(s => s.Uid == uid)
+                     .Select(s => s.StoreId)
+                     .FirstOrDefaultAsync();
+                var productDetailId = await _productDetailRepository
+                    .GetAllByIQueryable()
+                    .Where(p => p.ProductId == param.ProductId && p.ColourId == param.ColourId && p.SizeId == param.SizeId)
+                    .Select(p => p.ProductDetailId).FirstOrDefaultAsync();
+
+                var quantity = await _storeWarehouseRepository.GetAllByIQueryable()
+                                .Where(s => s.StoreId == storeId && s.ProductDetailId == productDetailId)
+                                .Select(s => s.Quantity)
+                                .FirstOrDefaultAsync();
+
+                result.Content = new GetQuantityOfProductResponse { ProductDetailId = productDetailId, StoreId = storeId, Quantity = quantity };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
