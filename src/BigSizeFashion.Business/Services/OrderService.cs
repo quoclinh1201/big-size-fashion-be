@@ -92,7 +92,7 @@ namespace BigSizeFashion.Business.Services
                         totalDiscount += p * item.Quantity;
                     }
 
-                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == staff.StoreId && s.ProductDetailId == ProductId);
+                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == staff.StoreId && s.ProductDetailId == item.ProductDetailId);
                     storeWarehouse.Quantity -= item.Quantity;
                     await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
                 }
