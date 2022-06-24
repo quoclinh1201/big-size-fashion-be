@@ -51,6 +51,8 @@ namespace BigSizeFashion.Business.Services
             _mapper = mapper;
         }
 
+        
+
         //public async Task<Result<OrderIdResponse>> CreateOrderForCustomer(string token, CreateOrderForCustomerRequest request)
         //{
         //    var result = new Result<OrderIdResponse>();
@@ -74,7 +76,7 @@ namespace BigSizeFashion.Business.Services
         //            var dp = await _productService.GetProductPromotionPrice(item.ProductId);
 
         //            totalPrice += p * item.Quantity;
-                    
+
         //            if (dp != null)
         //            {
         //                totalDiscount += dp * item.Quantity;

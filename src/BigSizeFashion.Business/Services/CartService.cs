@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Dtos.RequestObjects;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Dtos.ResponseObjects;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.IServices;
@@ -20,16 +22,116 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<CustomerCart> _genericRepository;
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
         private readonly IMapper _mapper;
+        private readonly IProductService _productService;
 
         public CartService(
             IGenericRepository<CustomerCart> genericRepository,
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IProductService productService
+            )
         {
             _genericRepository = genericRepository;
             _storeWarehouseRepository = storeWarehouseRepository;
             _mapper = mapper;
+            _productService = productService;
         }
+
+        
+
+        public async Task<Result<AddToCartResponse>> AddToCart(AddToCartRequest request, string token)
+        {
+            var uid = DecodeToken.DecodeTokenToGetUid(token);
+            var result = new Result<AddToCartResponse>();
+            try
+            {
+                var customerOrder = _mapper.Map<CustomerCart>(request);
+                customerOrder.CustomerId = uid;
+                //var price = customerOrder.ProductDetail.Product.Price;
+                await _genericRepository.InsertAsync(customerOrder);
+                await _genericRepository.SaveAsync();
+
+                //var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.RoleName);
+                result.Content = new AddToCartResponse
+                {
+                    CustomerId = uid,
+                    ProductDetailId = request.ProductDetailId,
+                    StoreId = request.StoreId
+                };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<List<AddToCartResponse>>> AddToListCart(List<AddToCartRequest> request, string token)
+        {
+            var uid = DecodeToken.DecodeTokenToGetUid(token);
+            var result = new Result<List<AddToCartResponse>>();
+            result.Content = new List<AddToCartResponse>();
+            try
+            {
+                await deleteCart(uid);
+                foreach(var customerCart in request)
+                {
+                    var combineProductCart = _genericRepository.GetAllByIQueryable().
+                    Include(c => c.ProductDetail).
+                    ThenInclude(pd => pd.Product).
+                    Where(c => c.ProductDetailId == customerCart.ProductDetailId).FirstOrDefault();
+
+                    var price = combineProductCart.ProductDetail.Product.Price;
+                    var promotionPrice = await _productService.GetProductPromotionPrice(combineProductCart.ProductDetail.Product.ProductId);
+
+
+                    var customerOrder = new CustomerCart
+                    {
+                        Price = price,
+                        CustomerId = uid,
+                        ProductDetailId = customerCart.ProductDetailId,
+                        PromotionPrice = promotionPrice,
+                        StoreId = customerCart.StoreId,
+                        Quantity = customerCart.Quantity,
+                    };
+
+                    //var price = customerOrder.ProductDetail.Product.Price;
+                    await _genericRepository.InsertAsync(customerOrder);
+                    await _genericRepository.SaveAsync();
+
+                    //var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.RoleName);
+                    result.Content.Add(new AddToCartResponse
+                    {
+                        CustomerId = uid,
+                        Price = price,
+                        ProductDetailId = customerCart.ProductDetailId,
+                        PromotionPrice = promotionPrice,
+                        StoreId = customerCart.StoreId
+                    });
+                }
+                //var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.RoleName);
+
+                
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task deleteCart(int uid)
+        {
+            await _genericRepository.DeleteSpecificFieldByAsync(p => p.CustomerId == uid);
+            await _genericRepository.SaveAsync();
+
+        }
+
+
+
+
 
         //public async Task<Result<bool>> AddProductToCart(string token, ManageProductInCartRequest request)
         //{

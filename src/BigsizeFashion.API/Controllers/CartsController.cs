@@ -1,4 +1,5 @@
 ﻿using BigSizeFashion.Business.Dtos.RequestObjects;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +20,42 @@ namespace BigsizeFashion.API.Controllers
         public CartsController(ICartService service)
         {
             _service = service;
+        }
+
+        [HttpPost("add-cart")]
+        public async Task<IActionResult> CreateCart([FromBody] AddToCartRequest request, [FromHeader] string authorization)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var result = await _service.AddToCart(request, authorization.Substring(7));
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
+        [HttpPost("add-list-cart")]
+        public async Task<IActionResult> CreateListCart([FromBody] List<AddToCartRequest> request, [FromHeader] string authorization)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+
+            var result = await _service.AddToListCart(request, authorization.Substring(7));
+
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
 
         /// <summary>

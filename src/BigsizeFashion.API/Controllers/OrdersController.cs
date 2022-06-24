@@ -1,6 +1,7 @@
 ﻿using BigSizeFashion.Business.Dtos.Parameters;
 using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace BigsizeFashion.API.Controllers
 {
-    [Route("api/v1/orders")]
+    [Route("api/v1/orders-s")]
     [ApiController]
     public class OrdersController : ControllerBase
     {
@@ -20,6 +21,9 @@ namespace BigsizeFashion.API.Controllers
         {
             _service = service;
         }
+
+       
+        
 
         /// <summary>
         /// Staff create order for customer (offline shop)

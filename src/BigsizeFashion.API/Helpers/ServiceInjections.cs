@@ -60,7 +60,6 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IPromotionDetailService, PromotionDetailService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IOrderService, OrderService>();
-
             return services;
         }
     }
