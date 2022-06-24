@@ -137,6 +137,12 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.ColourId).HasColumnName("colour_id");
 
+                entity.Property(e => e.ColourCode)
+                    .IsRequired()
+                    .HasMaxLength(7)
+                    .IsUnicode(false)
+                    .HasColumnName("colour_code");
+
                 entity.Property(e => e.ColourName)
                     .IsRequired()
                     .HasMaxLength(50)
