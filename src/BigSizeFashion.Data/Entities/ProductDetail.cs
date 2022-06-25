@@ -10,7 +10,7 @@ namespace BigSizeFashion.Data.Entities
         public ProductDetail()
         {
             CustomerCarts = new HashSet<CustomerCart>();
-            ImportInvoiceDetails = new HashSet<ImportInvoiceDetail>();
+            DeliveryNoteDetails = new HashSet<DeliveryNoteDetail>();
             OrderDetails = new HashSet<OrderDetail>();
             StoreWarehouses = new HashSet<StoreWarehouse>();
         }
@@ -24,7 +24,7 @@ namespace BigSizeFashion.Data.Entities
         public virtual Product Product { get; set; }
         public virtual Size Size { get; set; }
         public virtual ICollection<CustomerCart> CustomerCarts { get; set; }
-        public virtual ICollection<ImportInvoiceDetail> ImportInvoiceDetails { get; set; }
+        public virtual ICollection<DeliveryNoteDetail> DeliveryNoteDetails { get; set; }
         public virtual ICollection<OrderDetail> OrderDetails { get; set; }
         public virtual ICollection<StoreWarehouse> StoreWarehouses { get; set; }
     }

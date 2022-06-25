@@ -5,13 +5,14 @@ using System.Collections.Generic;
 
 namespace BigSizeFashion.Data.Entities
 {
-    public partial class CustomerCart
+    public partial class DeliveryNoteDetail
     {
-        public int CustomerId { get; set; }
+        public int DeliveryNoteId { get; set; }
         public int ProductDetailId { get; set; }
         public int Quantity { get; set; }
+        public decimal Price { get; set; }
 
-        public virtual Customer Customer { get; set; }
+        public virtual DeliveryNote DeliveryNote { get; set; }
         public virtual ProductDetail ProductDetail { get; set; }
     }
 }

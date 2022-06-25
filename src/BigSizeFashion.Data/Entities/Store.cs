@@ -9,7 +9,8 @@ namespace BigSizeFashion.Data.Entities
     {
         public Store()
         {
-            CustomerCarts = new HashSet<CustomerCart>();
+            DeliveryNoteFromStoreNavigations = new HashSet<DeliveryNote>();
+            DeliveryNoteToStoreNavigations = new HashSet<DeliveryNote>();
             Orders = new HashSet<Order>();
             StoreWarehouses = new HashSet<StoreWarehouse>();
             staff = new HashSet<staff>();
@@ -20,7 +21,8 @@ namespace BigSizeFashion.Data.Entities
         public string StorePhone { get; set; }
         public bool Status { get; set; }
 
-        public virtual ICollection<CustomerCart> CustomerCarts { get; set; }
+        public virtual ICollection<DeliveryNote> DeliveryNoteFromStoreNavigations { get; set; }
+        public virtual ICollection<DeliveryNote> DeliveryNoteToStoreNavigations { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<StoreWarehouse> StoreWarehouses { get; set; }
         public virtual ICollection<staff> staff { get; set; }

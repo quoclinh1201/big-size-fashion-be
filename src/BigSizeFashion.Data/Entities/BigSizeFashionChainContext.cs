@@ -23,10 +23,9 @@ namespace BigSizeFashion.Data.Entities
         public virtual DbSet<Colour> Colours { get; set; }
         public virtual DbSet<Customer> Customers { get; set; }
         public virtual DbSet<CustomerCart> CustomerCarts { get; set; }
+        public virtual DbSet<DeliveryNote> DeliveryNotes { get; set; }
+        public virtual DbSet<DeliveryNoteDetail> DeliveryNoteDetails { get; set; }
         public virtual DbSet<Feedback> Feedbacks { get; set; }
-        public virtual DbSet<ImportInvoice> ImportInvoices { get; set; }
-        public virtual DbSet<ImportInvoiceDetail> ImportInvoiceDetails { get; set; }
-        public virtual DbSet<MainWarehouse> MainWarehouses { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
@@ -202,8 +201,8 @@ namespace BigSizeFashion.Data.Entities
 
             modelBuilder.Entity<CustomerCart>(entity =>
             {
-                entity.HasKey(e => new { e.CustomerId, e.ProductDetailId, e.StoreId })
-                    .HasName("PK__Customer__ED1C73F59956813E");
+                entity.HasKey(e => new { e.CustomerId, e.ProductDetailId })
+                    .HasName("PK__Customer__E0BE815666CDC460");
 
                 entity.ToTable("CustomerCart");
 
@@ -211,27 +210,99 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.ProductDetailId).HasColumnName("product_detail_id");
 
-                entity.Property(e => e.StoreId).HasColumnName("store_id");
-
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.CustomerCarts)
                     .HasForeignKey(d => d.CustomerId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__CustomerC__custo__44FF419A");
+                    .HasConstraintName("FK__CustomerC__custo__31B762FC");
 
                 entity.HasOne(d => d.ProductDetail)
                     .WithMany(p => p.CustomerCarts)
                     .HasForeignKey(d => d.ProductDetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__CustomerC__produ__45F365D3");
+                    .HasConstraintName("FK__CustomerC__produ__32AB8735");
+            });
 
-                entity.HasOne(d => d.Store)
-                    .WithMany(p => p.CustomerCarts)
-                    .HasForeignKey(d => d.StoreId)
+            modelBuilder.Entity<DeliveryNote>(entity =>
+            {
+                entity.ToTable("DeliveryNote");
+
+                entity.Property(e => e.DeliveryNoteId).HasColumnName("delivery_note_id");
+
+                entity.Property(e => e.ApprovalDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("approval_date");
+
+                entity.Property(e => e.CreateDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("create_date");
+
+                entity.Property(e => e.DeliveryNoteName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("delivery_note_name");
+
+                entity.Property(e => e.FromStore).HasColumnName("from_store");
+
+                entity.Property(e => e.StaffId).HasColumnName("staff_id");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.ToStore).HasColumnName("to_store");
+
+                entity.Property(e => e.TotalPrice)
+                    .HasColumnType("money")
+                    .HasColumnName("total_price");
+
+                entity.HasOne(d => d.FromStoreNavigation)
+                    .WithMany(p => p.DeliveryNoteFromStoreNavigations)
+                    .HasForeignKey(d => d.FromStore)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__CustomerC__store__46E78A0C");
+                    .HasConstraintName("FK__DeliveryN__from___2A164134");
+
+                entity.HasOne(d => d.Staff)
+                    .WithMany(p => p.DeliveryNotes)
+                    .HasForeignKey(d => d.StaffId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__DeliveryN__staff__29221CFB");
+
+                entity.HasOne(d => d.ToStoreNavigation)
+                    .WithMany(p => p.DeliveryNoteToStoreNavigations)
+                    .HasForeignKey(d => d.ToStore)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__DeliveryN__to_st__2B0A656D");
+            });
+
+            modelBuilder.Entity<DeliveryNoteDetail>(entity =>
+            {
+                entity.HasKey(e => new { e.DeliveryNoteId, e.ProductDetailId })
+                    .HasName("PK__Delivery__154BEB55BB8BF52C");
+
+                entity.ToTable("DeliveryNoteDetail");
+
+                entity.Property(e => e.DeliveryNoteId).HasColumnName("delivery_note_id");
+
+                entity.Property(e => e.ProductDetailId).HasColumnName("product_detail_id");
+
+                entity.Property(e => e.Price)
+                    .HasColumnType("money")
+                    .HasColumnName("price");
+
+                entity.Property(e => e.Quantity).HasColumnName("quantity");
+
+                entity.HasOne(d => d.DeliveryNote)
+                    .WithMany(p => p.DeliveryNoteDetails)
+                    .HasForeignKey(d => d.DeliveryNoteId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__DeliveryN__deliv__2DE6D218");
+
+                entity.HasOne(d => d.ProductDetail)
+                    .WithMany(p => p.DeliveryNoteDetails)
+                    .HasForeignKey(d => d.ProductDetailId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__DeliveryN__produ__2EDAF651");
             });
 
             modelBuilder.Entity<Feedback>(entity =>
@@ -267,107 +338,6 @@ namespace BigSizeFashion.Data.Entities
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Feedback__produc__35BCFE0A");
-            });
-
-            modelBuilder.Entity<ImportInvoice>(entity =>
-            {
-                entity.HasKey(e => e.InvoiceId)
-                    .HasName("PK__ImportIn__F58DFD4991E24878");
-
-                entity.ToTable("ImportInvoice");
-
-                entity.Property(e => e.InvoiceId).HasColumnName("invoice_id");
-
-                entity.Property(e => e.ApprovalDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("approval_date");
-
-                entity.Property(e => e.CreateDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("create_date");
-
-                entity.Property(e => e.DeliveryDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("delivery_date");
-
-                entity.Property(e => e.InvoiceName)
-                    .IsRequired()
-                    .HasMaxLength(100)
-                    .HasColumnName("invoice_name");
-
-                entity.Property(e => e.MainWarehouseId).HasColumnName("main_warehouse_id");
-
-                entity.Property(e => e.ReceivedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("received_date");
-
-                entity.Property(e => e.RejectedDate)
-                    .HasColumnType("datetime")
-                    .HasColumnName("rejected_date");
-
-                entity.Property(e => e.StaffId).HasColumnName("staff_id");
-
-                entity.Property(e => e.Status).HasColumnName("status");
-
-                entity.Property(e => e.TotalPrice)
-                    .HasColumnType("money")
-                    .HasColumnName("total_price");
-
-                entity.HasOne(d => d.MainWarehouse)
-                    .WithMany(p => p.ImportInvoices)
-                    .HasForeignKey(d => d.MainWarehouseId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__ImportInv__main___5629CD9C");
-
-                entity.HasOne(d => d.Staff)
-                    .WithMany(p => p.ImportInvoices)
-                    .HasForeignKey(d => d.StaffId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__ImportInv__staff__5535A963");
-            });
-
-            modelBuilder.Entity<ImportInvoiceDetail>(entity =>
-            {
-                entity.HasKey(e => new { e.ImportInvoiceId, e.ProductDetailId })
-                    .HasName("PK__ImportIn__07F69D2F19EB6B02");
-
-                entity.ToTable("ImportInvoiceDetail");
-
-                entity.Property(e => e.ImportInvoiceId).HasColumnName("import_invoice_id");
-
-                entity.Property(e => e.ProductDetailId).HasColumnName("product_detail_id");
-
-                entity.Property(e => e.Price)
-                    .HasColumnType("money")
-                    .HasColumnName("price");
-
-                entity.Property(e => e.Quantity).HasColumnName("quantity");
-
-                entity.HasOne(d => d.ImportInvoice)
-                    .WithMany(p => p.ImportInvoiceDetails)
-                    .HasForeignKey(d => d.ImportInvoiceId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__ImportInv__impor__59063A47");
-
-                entity.HasOne(d => d.ProductDetail)
-                    .WithMany(p => p.ImportInvoiceDetails)
-                    .HasForeignKey(d => d.ProductDetailId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__ImportInv__produ__59FA5E80");
-            });
-
-            modelBuilder.Entity<MainWarehouse>(entity =>
-            {
-                entity.ToTable("MainWarehouse");
-
-                entity.Property(e => e.MainWarehouseId).HasColumnName("main_warehouse_id");
-
-                entity.Property(e => e.Address)
-                    .IsRequired()
-                    .HasMaxLength(200)
-                    .HasColumnName("address");
-
-                entity.Property(e => e.Status).HasColumnName("status");
             });
 
             modelBuilder.Entity<Notification>(entity =>

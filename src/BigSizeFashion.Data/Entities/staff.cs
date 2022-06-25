@@ -9,7 +9,7 @@ namespace BigSizeFashion.Data.Entities
     {
         public staff()
         {
-            ImportInvoices = new HashSet<ImportInvoice>();
+            DeliveryNotes = new HashSet<DeliveryNote>();
             Orders = new HashSet<Order>();
         }
 
@@ -23,7 +23,7 @@ namespace BigSizeFashion.Data.Entities
 
         public virtual Store Store { get; set; }
         public virtual Account UidNavigation { get; set; }
-        public virtual ICollection<ImportInvoice> ImportInvoices { get; set; }
+        public virtual ICollection<DeliveryNote> DeliveryNotes { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
     }
 }
