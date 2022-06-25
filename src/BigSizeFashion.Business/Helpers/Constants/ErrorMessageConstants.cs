@@ -23,5 +23,6 @@ namespace BigSizeFashion.Business.Helpers.Constants
         public const string CannotUploadImage = "Đã có lỗi xảy ra khi upload hình ảnh.";
         public const string OutOfProduct = "Hiện tại sản phẩm tại cửa hàng này tạm thời hết hàng, vui lòng chọn lại ở cửa hàng khác.";
         public const string NotExistedOrder = "Đơn hàng không tồn tại.";
+        public const string CannotCancelOrder = "Không thể hủy đơn hàng đã xác nhận.";
     }
 }
