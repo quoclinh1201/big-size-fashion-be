@@ -58,6 +58,13 @@ namespace BigsizeFashion.API.Controllers
 
         }
 
+        [HttpGet("get-list-cart")]
+        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization)
+        {
+            var result = await _service.getListCart(authorization.Substring(7));
+            return Ok(result);
+        }
+
         /// <summary>
         /// Get all product in cart
         /// </summary>

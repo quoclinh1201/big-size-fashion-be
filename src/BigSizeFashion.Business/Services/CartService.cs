@@ -113,6 +113,49 @@ namespace BigSizeFashion.Business.Services
 
         }
 
+        public async Task<Result<List<CartResponse>>> getListCart(string authorization)
+        {
+            var uid = DecodeToken.DecodeTokenToGetUid(authorization);
+            var result = new Result<List<CartResponse>>();
+            result.Content = new List<CartResponse>();
+            try
+            {
+                var listCart = await _genericRepository.GetAllByIQueryable().Where(c => c.CustomerId == uid)
+                .Include(c => c.ProductDetail)
+                .ThenInclude(pd => pd.Product).
+                ThenInclude(p => p.PromotionDetails).
+                ThenInclude(pp => pp.Promotion).ToListAsync();
+                
+                foreach (var cart in listCart)
+                {
+                    var product = await _productService.
+                    GetProductByID(cart.ProductDetail.Product.ProductId);
+
+                  
+
+                    var cartResponse = new CartResponse()
+                    {
+                        ProductDetailId = cart.ProductDetailId,
+                        ProductImage = product.Content.Images.Where(image => image.IsMainImage == true).FirstOrDefault().ImageUrl,
+                        ProductName = product.Content.ProductName,
+                        ProductPrice = product.Content.Price,
+                        ProductPromotion = product.Content.PromotionPrice,
+                        StoreId = cart.StoreId
+                    };
+
+                    result.Content.Add(cartResponse);
+                }
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+
+
 
 
 

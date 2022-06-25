@@ -20,5 +20,7 @@ namespace BigSizeFashion.Business.IServices
         //Task<Result<IEnumerable<CartItemResponse>>> RemoveProductInCart(string token, ManageProductInCartRequest request);
         Task<Result<AddToCartResponse>> AddToCart(AddToCartRequest request, string authorization);
         Task<Result<List<AddToCartResponse>>> AddToListCart(List<AddToCartRequest> request, string authorization);
+        Task<Result<List<CartResponse>>> getListCart(string authorization);
+        
     }
 }

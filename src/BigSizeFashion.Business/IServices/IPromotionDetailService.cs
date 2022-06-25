@@ -1,6 +1,7 @@
 ﻿using BigSizeFashion.Business.Dtos.RequestObjects;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
+using BigSizeFashion.Business.Helpers.ResponseObjects;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,6 @@ namespace BigSizeFashion.Business.IServices
     {
         Task<Result<bool>> AddProductsIntoPromotion(AddProductsIntoPromotionRequest request);
         Task<Result<bool>> RemoveProductOutOfPromotion(RemoveProductOutOfPromotionnRequest request);
+        
     }
 }
