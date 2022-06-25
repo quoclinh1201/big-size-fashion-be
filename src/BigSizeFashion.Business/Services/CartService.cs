@@ -56,8 +56,7 @@ namespace BigSizeFashion.Business.Services
                 {
                     CustomerId = uid,
                     ProductDetailId = request.ProductDetailId,
-                    Quantity = request.Quantity,
-                    StoreId = request.StoreId
+                    Quantity = request.Quantity
                 };
                 return result;
             }
@@ -90,8 +89,7 @@ namespace BigSizeFashion.Business.Services
                     {
                         CustomerId = uid,
                         ProductDetailId = customerCart.ProductDetailId,
-                        Quantity = customerCart.Quantity,
-                        StoreId = customerCart.StoreId
+                        Quantity = customerCart.Quantity
                     });
                 }
                 //var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.RoleName);
@@ -139,8 +137,7 @@ namespace BigSizeFashion.Business.Services
                         ProductImage = product.Content.Images.Where(image => image.IsMainImage == true).FirstOrDefault().ImageUrl,
                         ProductName = product.Content.ProductName,
                         ProductPrice = product.Content.Price,
-                        ProductPromotion = product.Content.PromotionPrice,
-                        StoreId = cart.StoreId
+                        ProductPromotion = product.Content.PromotionPrice
                     };
 
                     result.Content.Add(cartResponse);

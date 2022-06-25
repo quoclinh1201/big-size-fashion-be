@@ -12,7 +12,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public int ProductDetailId { get; set; }
         public decimal ProductPrice { get; set; }
         public decimal? ProductPromotion { get; set; }
-        public int StoreId { get; set; }
         public string ProductImage { get; set; }
     }
 }

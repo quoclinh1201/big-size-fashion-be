@@ -10,7 +10,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
     {
         public int CustomerId { get; set; }
         public int ProductDetailId { get; set; }
-        public int StoreId { get; set; }
         public int Quantity { get; set; }
     }
 }
