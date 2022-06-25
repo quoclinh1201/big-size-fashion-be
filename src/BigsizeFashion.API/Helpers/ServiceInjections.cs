@@ -46,8 +46,8 @@ namespace BigsizeFashion.API.Helpers
             // Config for Services Dependency Injection
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAccountService, AccountService>();
-            services.AddScoped<IAdminService, AdminService>();
-            services.AddScoped<IOwnerService, OwnerService>();
+            services.AddScoped<IUserService, UserService>();
+            //services.AddScoped<IOwnerService, OwnerService>();
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<IStaffService, StaffService>();
             services.AddScoped<IProductService, ProductService>();
@@ -60,6 +60,7 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IPromotionDetailService, PromotionDetailService>();
             services.AddScoped<ICartService, CartService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IProductDetailService, ProductDetailService>();
             return services;
         }
     }

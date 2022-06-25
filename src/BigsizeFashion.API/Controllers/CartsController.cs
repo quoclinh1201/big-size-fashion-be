@@ -37,7 +37,7 @@ namespace BigsizeFashion.API.Controllers
                 return BadRequest(result);
             }
 
-            return Ok(result);
+            return CreatedAtAction(nameof(CreateListCart),result);
         }
 
         [HttpPost("add-list-cart")]
@@ -54,8 +54,8 @@ namespace BigsizeFashion.API.Controllers
             {
                 return BadRequest(result);
             }
+            return CreatedAtAction(nameof(CreateListCart), result);
 
-            return Ok(result);
         }
 
         /// <summary>

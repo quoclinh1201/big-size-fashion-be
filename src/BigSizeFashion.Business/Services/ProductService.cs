@@ -23,7 +23,7 @@ namespace BigSizeFashion.Business.Services
     {
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<ProductImage> _imageRepository;
-        private readonly IGenericRepository<StoreWarehouse> _storeWarehoustRepository;
+        private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
         private readonly IGenericRepository<Store> _storeRepository;
         private readonly IGenericRepository<PromotionDetail> _promotionDetailRepository;
         private readonly IGenericRepository<staff> _staffRepository;
@@ -36,7 +36,7 @@ namespace BigSizeFashion.Business.Services
         public ProductService(
             IGenericRepository<Product> productRepository,
             IGenericRepository<ProductImage> imageRepository,
-            IGenericRepository<StoreWarehouse> storeWarehoustRepository,
+            IGenericRepository<StoreWarehouse> storeWarehouseRepository,
             IGenericRepository<PromotionDetail> promotionDetailRepository,
             IGenericRepository<Store> storeRepository,
             IGenericRepository<staff> staffRepository,
@@ -48,7 +48,7 @@ namespace BigSizeFashion.Business.Services
         {
             _productRepository = productRepository;
             _imageRepository = imageRepository;
-            _storeWarehoustRepository = storeWarehoustRepository;
+            _storeWarehouseRepository = storeWarehouseRepository;
             _promotionDetailRepository = promotionDetailRepository;
             _storeRepository = storeRepository;
             _staffRepository = staffRepository;
@@ -59,45 +59,30 @@ namespace BigSizeFashion.Business.Services
             _mapper = mapper;
         }
 
-        //public async Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request)
-        //{
-        //    var result = new Result<CreateProductResponse>();
-        //    try
-        //    {
-        //        var product = _mapper.Map<Product>(request);
-        //        await _productRepository.InsertAsync(product);
-        //        await _productRepository.SaveAsync();
+        public async Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request)
+        {
+            var result = new Result<CreateProductResponse>();
+            try
+            {
+                var product = _mapper.Map<Product>(request);
+                await _productRepository.InsertAsync(product);
+                await _productRepository.SaveAsync();
 
-        //        var model = await _productRepository.GetAllByIQueryable()
-        //            .Include(p => p.Category)
-        //            .Include(p => p.Colour)
-        //            .Include(p => p.Size)
-        //            .Where(p => p.ProductId == product.ProductId)
-        //            .FirstOrDefaultAsync();
-        //        await AddNewProductIntoAllStore(model.ProductId);
-        //        result.Content = _mapper.Map<CreateProductResponse>(model);
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-        //        return result;
-        //    }
-        //}
+                var model = await _productRepository.GetAllByIQueryable()
+                    .Include(p => p.Category)
+                    .Where(p => p.ProductId == product.ProductId)
+                    .FirstOrDefaultAsync();
+                result.Content = _mapper.Map<CreateProductResponse>(model);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
 
-        //private async Task AddNewProductIntoAllStore(int productId)
-        //{
-        //    var allStoreId = await _storeRepository.GetAllByIQueryable().Where(s => s.Status == true).Select(s => s.StoreId).ToListAsync();
-        //    if(allStoreId.Count > 0)
-        //    {
-        //        foreach (var id in allStoreId)
-        //        {
-        //            var storeWarehoust = new StoreWarehouse { ProductId = productId, StoreId = id, Quantity = 0 };
-        //            await _storeWarehoustRepository.InsertAsync(storeWarehoust);
-        //        }
-        //        await _storeWarehoustRepository.SaveAsync();
-        //    }
-        //}
+        
 
         public async Task<PagedResult<GetListProductResponse>> GetListProductsWithAllStatus(SearchProductsParameter param)
         {
@@ -500,23 +485,24 @@ namespace BigSizeFashion.Business.Services
         //    }
         //}
 
-        //public async Task<Result<CreateProductResponse>> UpdateProduct(int id, CreateProductRequest request)
-        //{
-        //    var result = new Result<CreateProductResponse>();
-        //    try
-        //    {
-        //        var product = await _productRepository.FindAsync(p => p.ProductId == id);
-        //        var model = _mapper.Map(request, product);
-        //        await _productRepository.UpdateAsync(model);
-        //        result.Content = _mapper.Map<CreateProductResponse>(model);
-        //        return result;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-        //        return result;
-        //    }
-        //}
+        public async Task<Result<CreateProductResponse>> UpdateProduct(int id, CreateProductRequest request)
+        {
+            var result = new Result<CreateProductResponse>();
+            try
+            {
+                var product = await _productRepository.FindAsync(p => p.ProductId == id);
+                var model = _mapper.Map(request, product);
+                await _productRepository.UpdateAsync(model);
+                var p = await _productRepository.GetAllByIQueryable().Include(p => p.Category).Where(p => p.ProductId == id).FirstOrDefaultAsync();
+                result.Content = _mapper.Map<CreateProductResponse>(p);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
 
         public async Task<Result<bool>> DeleteProduct(int id)
         {
@@ -543,112 +529,112 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        //public async Task<PagedResult<GetListProductResponse>> GetListProductFitWithCustomer(string token, QueryStringParameters param)
-        //{
-        //    try
-        //    {
-        //        var accountUId = DecodeToken.DecodeTokenToGetUid(token);
-        //        var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
-        //        var height = customer.Height;
-        //        var weight = customer.Weight;
-        //        var s = new SearchProductsParameter { PageNumber = param.PageNumber, PageSize = param.PageSize};
+        public async Task<PagedResult<GetListProductResponse>> GetListProductFitWithCustomer(string token, QueryStringParameters param)
+        {
+            try
+            {
+                var accountUId = DecodeToken.DecodeTokenToGetUid(token);
+                var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
+                var height = customer.Height;
+                var weight = customer.Weight;
+                var s = new SearchProductsParameter { PageNumber = param.PageNumber, PageSize = param.PageSize };
 
-        //        if (height == null || weight == null)
-        //        {
-        //            return await GetListProductsWithAllStatus(s);
-        //        }
+                if (height == null || weight == null)
+                {
+                    return await GetListProductsWithAllStatus(s);
+                }
 
-        //        if(customer.Gender != null)
-        //        {
-        //            if (customer.Gender == true)
-        //            {
-        //                s.Gender = "Male";
-        //                if (height < 176 || weight < 76)
-        //                {
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if(height >= 176 && weight >= 76 && height < 182 && weight < 86)
-        //                {
-        //                    s.Size = "XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 182 && weight >= 86 && height < 188 && weight < 96)
-        //                {
-        //                    s.Size = "XXL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
-        //                {
-        //                    s.Size = "XXXL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
-        //                {
-        //                    s.Size = "4XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 188 && weight >= 115 && height < 196 && weight < 121)
-        //                {
-        //                    s.Size = "5XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else
-        //                {
-        //                    s.Size = "6XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //            }
-        //            else
-        //            {
-        //                s.Gender = "Female";
-        //                if (height < 168 || weight < 66)
-        //                {
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 168 && weight >= 66 && height < 176 && weight < 76)
-        //                {
-        //                    s.Size = "XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
-        //                {
-        //                    s.Size = "XXL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
-        //                {
-        //                    s.Size = "XXXL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
-        //                {
-        //                    s.Size = "4XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else if (height >= 182 && weight >= 106 && height < 190 && weight < 111)
-        //                {
-        //                    s.Size = "5XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //                else
-        //                {
-        //                    s.Size = "6XL";
-        //                    return await GetListProductsWithAllStatus(s);
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            ////////////////////////////////
-        //            return await GetListProductsWithAllStatus(s);
-        //        }
-        //    }
-        //    catch (Exception)
-        //    {
+                if (customer.Gender != null)
+                {
+                    if (customer.Gender == true)
+                    {
+                        s.Gender = "Male";
+                        if (height < 176 || weight < 76)
+                        {
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            s.Size = "XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 96)
+                        {
+                            s.Size = "XXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
+                        {
+                            s.Size = "XXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
+                        {
+                            s.Size = "4XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 188 && weight >= 115 && height < 196 && weight < 121)
+                        {
+                            s.Size = "5XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else
+                        {
+                            s.Size = "6XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                    }
+                    else
+                    {
+                        s.Gender = "Female";
+                        if (height < 168 || weight < 66)
+                        {
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 168 && weight >= 66 && height < 176 && weight < 76)
+                        {
+                            s.Size = "XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            s.Size = "XXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
+                        {
+                            s.Size = "XXXL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
+                        {
+                            s.Size = "4XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else if (height >= 182 && weight >= 106 && height < 190 && weight < 111)
+                        {
+                            s.Size = "5XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                        else
+                        {
+                            s.Size = "6XL";
+                            return await GetListProductsWithAllStatus(s);
+                        }
+                    }
+                }
+                else
+                {
+                    ////////////////////////////////
+                    return await GetListProductsWithAllStatus(s);
+                }
+            }
+            catch (Exception)
+            {
 
-        //        throw;
-        //    }
-        //}
+                throw;
+            }
+        }
 
         public async Task<decimal> GetProductPrice(int id)
         {
@@ -691,6 +677,31 @@ namespace BigSizeFashion.Business.Services
             {
 
                 throw;
+            }
+        }
+
+        public async Task<Result<GetQuantityOfProductResponse>> GetQuantityOfProduct(GetQuantityOfProductParameter param)
+        {
+            var result = new Result<GetQuantityOfProductResponse>();
+            try
+            {
+                var productDetailId = await _productDetailRepository
+                    .GetAllByIQueryable()
+                    .Where(p => p.ProductId == param.ProductId && p.ColourId == param.ColourId && p.SizeId == param.SizeId)
+                    .Select(p => p.ProductDetailId).FirstOrDefaultAsync();
+
+                var quantity = await _storeWarehouseRepository.GetAllByIQueryable()
+                                .Where(s => s.StoreId == param.StoreId && s.ProductDetailId == productDetailId)
+                                .Select(s => s.Quantity)
+                                .FirstOrDefaultAsync();
+
+                result.Content = new GetQuantityOfProductResponse { ProductDetailId = productDetailId, StoreId = param.StoreId, Quantity = quantity };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }

@@ -20,12 +20,6 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
         public int CategoryId { get; set; }
 
         [Required]
-        public int SizeId { get; set; }
-
-        [Required]
-        public int ColourId { get; set; }
-
-        [Required]
         [MaxLength(500)]
         public string Description { get; set; }
 
@@ -34,6 +28,6 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
 
         [Required]
         [MaxLength(50)]
-        public string SupplierName { get; set; }
+        public string Brand { get; set; }
     }
 }

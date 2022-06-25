@@ -35,20 +35,20 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpPost("create-order-for-customer")]
-        //public async Task<IActionResult> CreateOrderForCustomer([FromHeader] string authorization, [FromBody] CreateOrderForCustomerRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    var result = await _service.CreateOrderForCustomer(authorization.Substring(7), request);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [HttpPost("create-order-for-customer")]
+        public async Task<IActionResult> CreateOrderForCustomer([FromHeader] string authorization, [FromBody] CreateOrderForCustomerRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.CreateOrderForCustomer(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
         /// <summary>
         /// Get order detail by order id
@@ -56,16 +56,16 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpGet("detail/{id}")]
-        //public async Task<IActionResult> GetOrderDetailById(int id)
-        //{
-        //    var result = await _service.GetOrderDetailById(id);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [HttpGet("detail/{id}")]
+        public async Task<IActionResult> GetOrderDetailById(int id)
+        {
+            var result = await _service.GetOrderDetailById(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
         /// <summary>
         /// Customer get list order
@@ -74,20 +74,66 @@ namespace BigsizeFashion.API.Controllers
         /// - Order type = null => get mọi type
         /// - Order type = true => get đơn online
         /// - Order type = false => get đơn offlice
+        /// ---------------------------------
+        /// - OrderByCreateDate = true hoặc null => đơn hàng mới nhắt nằm trên
+        /// - OrderByCreateDate = false => đơn hàng cũ nhắt nằm trên
         /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpGet("customer")]
-        //public async Task<IActionResult> GetListOrderForCustomer([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
-        //{
-        //    var result = await _service.GetListOrderForCustomer(authorization.Substring(7), param);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [HttpGet("customer")]
+        public async Task<IActionResult> GetListOrderForCustomer([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
+        {
+            var result = await _service.GetListOrderForCustomer(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Manager get list orders of store
+        /// </summary>
+        /// <remarks>
+        /// - Order type = null => get mọi type
+        /// - Order type = true => get đơn online
+        /// - Order type = false => get đơn offlice
+        /// ---------------------------------
+        /// - OrderByCreateDate = true hoặc null => đơn hàng mới nhắt nằm trên
+        /// - OrderByCreateDate = false => đơn hàng cũ nhắt nằm trên
+        /// </remarks>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("for-manager")]
+        public async Task<IActionResult> GetListOrderOfStoreForManager([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
+        {
+            var result = await _service.GetListOrderOfStoreForManager(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Manager approve order
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("approve/{id}")]
+        public async Task<IActionResult> ApproveOrder(int id)
+        {
+            var result = await _service.ApproveOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

@@ -56,6 +56,7 @@ namespace BigSizeFashion.Business.Services
                 {
                     CustomerId = uid,
                     ProductDetailId = request.ProductDetailId,
+                    Quantity = request.Quantity,
                     StoreId = request.StoreId
                 };
                 return result;
@@ -75,26 +76,10 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 await deleteCart(uid);
-                foreach(var customerCart in request)
+                foreach (var customerCart in request)
                 {
-                    var combineProductCart = _genericRepository.GetAllByIQueryable().
-                    Include(c => c.ProductDetail).
-                    ThenInclude(pd => pd.Product).
-                    Where(c => c.ProductDetailId == customerCart.ProductDetailId).FirstOrDefault();
-
-                    var price = combineProductCart.ProductDetail.Product.Price;
-                    var promotionPrice = await _productService.GetProductPromotionPrice(combineProductCart.ProductDetail.Product.ProductId);
-
-
-                    var customerOrder = new CustomerCart
-                    {
-                        Price = price,
-                        CustomerId = uid,
-                        ProductDetailId = customerCart.ProductDetailId,
-                        PromotionPrice = promotionPrice,
-                        StoreId = customerCart.StoreId,
-                        Quantity = customerCart.Quantity,
-                    };
+                    var customerOrder = _mapper.Map<CustomerCart>(customerCart);
+                    customerOrder.CustomerId = uid;
 
                     //var price = customerOrder.ProductDetail.Product.Price;
                     await _genericRepository.InsertAsync(customerOrder);
@@ -104,15 +89,14 @@ namespace BigSizeFashion.Business.Services
                     result.Content.Add(new AddToCartResponse
                     {
                         CustomerId = uid,
-                        Price = price,
                         ProductDetailId = customerCart.ProductDetailId,
-                        PromotionPrice = promotionPrice,
+                        Quantity = customerCart.Quantity,
                         StoreId = customerCart.StoreId
                     });
                 }
                 //var token = GenerateJSONWebToken(account.Uid.ToString(), customer.Fullname, account.Role.RoleName);
 
-                
+
                 return result;
             }
             catch (Exception ex)

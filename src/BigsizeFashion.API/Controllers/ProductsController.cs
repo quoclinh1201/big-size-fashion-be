@@ -55,20 +55,20 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpPost]
-        //public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    var result = await _service.CreateProduct(request);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return CreatedAtRoute(nameof(GetProductByID), new { id = result.Content.ProductId }, result);
-        //}
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.CreateProduct(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return CreatedAtRoute(nameof(GetProductByID), new { id = result.Content.ProductId }, result);
+        }
 
         /// <summary>
         /// Get product by ID (Get detail)
@@ -138,20 +138,20 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductRequest request)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
-        //    var result = await _service.UpdateProduct(id, request);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] CreateProductRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.UpdateProduct(id, request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
         /// <summary>
         /// Delete product
@@ -181,11 +181,30 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
-        //[HttpGet("fit-with-customer")]
-        //public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
-        //{
-        //    var result = await _service.GetListProductFitWithCustomer(authorization.Substring(7), param);
-        //    return Ok(result);
-        //}
+        [HttpGet("fit-with-customer")]
+        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
+        {
+            var result = await _service.GetListProductFitWithCustomer(authorization.Substring(7), param);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get quantity of product
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("quantity")]
+        public async Task<IActionResult> GetQuantityOfProduct([FromQuery] GetQuantityOfProductParameter param)
+        {
+            var result = await _service.GetQuantityOfProduct(param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        //bổ xung GetQuantityOfProduct in store
     }
 }

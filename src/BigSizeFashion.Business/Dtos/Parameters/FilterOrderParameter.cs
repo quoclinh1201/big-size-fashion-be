@@ -10,7 +10,8 @@ namespace BigSizeFashion.Business.Dtos.Parameters
 {
     public class FilterOrderParameter : QueryStringParameters
     {
-        public OrderStatusEnum OrderStatus { get; set; }
+        public OrderStatusEnum? OrderStatus { get; set; }
         public bool? OrderType { get; set; }
+        public bool? OrderByCreateDate { get; set; }
     }
 }

@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Dtos.Responses
 {
-    public class AddToCartResponse
+    public class GetQuantityOfProductResponse
     {
-        public int CustomerId { get; set; }
-        public int ProductDetailId { get; set; }
         public int StoreId { get; set; }
+        public int ProductDetailId { get; set; }
         public int Quantity { get; set; }
     }
 }

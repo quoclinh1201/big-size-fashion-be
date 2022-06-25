@@ -139,7 +139,7 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost("create-staff-account")]
         public async Task<IActionResult> CreateStaffAccount([FromBody] CreateStaffAccountRequest request)
         {
@@ -161,7 +161,7 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [Authorize]
+        //[Authorize]
         [HttpPost("create-account")]
         public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest request)
         {

@@ -9,7 +9,7 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
     public class AddNewProductIntoStoreRequest
     {
         public int StoreId { get; set; }
-        public int ProductId { get; set; }
+        public int ProductDetailId { get; set; }
         public int Quantity { get; set; }
     }
 }

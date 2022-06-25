@@ -137,6 +137,12 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.ColourId).HasColumnName("colour_id");
 
+                entity.Property(e => e.ColourCode)
+                    .IsRequired()
+                    .HasMaxLength(7)
+                    .IsUnicode(false)
+                    .HasColumnName("colour_code");
+
                 entity.Property(e => e.ColourName)
                     .IsRequired()
                     .HasMaxLength(50)
@@ -206,14 +212,6 @@ namespace BigSizeFashion.Data.Entities
                 entity.Property(e => e.ProductDetailId).HasColumnName("product_detail_id");
 
                 entity.Property(e => e.StoreId).HasColumnName("store_id");
-
-                entity.Property(e => e.Price)
-                    .HasColumnType("money")
-                    .HasColumnName("price");
-
-                entity.Property(e => e.PromotionPrice)
-                    .HasColumnType("money")
-                    .HasColumnName("promotion_price");
 
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
@@ -487,22 +485,30 @@ namespace BigSizeFashion.Data.Entities
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK__OrderDet__022945F6019977AD");
+                entity.HasKey(e => new { e.OrderId, e.ProductDetailId })
+                    .HasName("PK__OrderDet__6B8228FAB5E8AF72");
 
                 entity.ToTable("OrderDetail");
 
                 entity.Property(e => e.OrderId).HasColumnName("order_id");
 
-                entity.Property(e => e.ProductId).HasColumnName("product_id");
+                entity.Property(e => e.ProductDetailId).HasColumnName("product_detail_id");
 
                 entity.Property(e => e.DiscountPrice)
                     .HasColumnType("money")
                     .HasColumnName("discount_price");
 
+                entity.Property(e => e.DiscountPricePerOne)
+                    .HasColumnType("money")
+                    .HasColumnName("discount_price_per_one");
+
                 entity.Property(e => e.Price)
                     .HasColumnType("money")
                     .HasColumnName("price");
+
+                entity.Property(e => e.PricePerOne)
+                    .HasColumnType("money")
+                    .HasColumnName("price_per_one");
 
                 entity.Property(e => e.Quantity).HasColumnName("quantity");
 
@@ -510,13 +516,13 @@ namespace BigSizeFashion.Data.Entities
                     .WithMany(p => p.OrderDetails)
                     .HasForeignKey(d => d.OrderId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderDeta__order__4F7CD00D");
+                    .HasConstraintName("FK__OrderDeta__order__02FC7413");
 
-                entity.HasOne(d => d.Product)
+                entity.HasOne(d => d.ProductDetail)
                     .WithMany(p => p.OrderDetails)
-                    .HasForeignKey(d => d.ProductId)
+                    .HasForeignKey(d => d.ProductDetailId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK__OrderDeta__produ__5070F446");
+                    .HasConstraintName("FK__OrderDeta__produ__03F0984C");
             });
 
             modelBuilder.Entity<Product>(entity =>
