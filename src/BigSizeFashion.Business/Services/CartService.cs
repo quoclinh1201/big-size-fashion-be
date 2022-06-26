@@ -137,7 +137,8 @@ namespace BigSizeFashion.Business.Services
                         ProductImage = product.Content.Images.Where(image => image.IsMainImage == true).FirstOrDefault().ImageUrl,
                         ProductName = product.Content.ProductName,
                         ProductPrice = product.Content.Price,
-                        ProductPromotion = product.Content.PromotionPrice
+                        ProductPromotion = product.Content.PromotionPrice,
+                        Quantity = cart.Quantity
                     };
 
                     result.Content.Add(cartResponse);

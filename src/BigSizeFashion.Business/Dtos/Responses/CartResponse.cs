@@ -13,5 +13,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public decimal ProductPrice { get; set; }
         public decimal? ProductPromotion { get; set; }
         public string ProductImage { get; set; }
+        public int Quantity { get; set; }
     }
 }
