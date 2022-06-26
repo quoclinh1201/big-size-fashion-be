@@ -5,11 +5,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FirebaseAdmin.Messaging;
+using BigSizeFashion.Business.Dtos.Requests;
 
 namespace BigSizeFashion.Business.Services
 {
     public class FirebaseNotificationService : IFirebaseNotificationService
     {
+        private readonly INotificationService _service;
+
+        public FirebaseNotificationService(INotificationService service)
+        {
+            _service = service;
+        }
+
         public async Task<string> SendNotification(string user, string title, string body, string channel)
         {
             try
@@ -29,6 +37,10 @@ namespace BigSizeFashion.Business.Services
                     Topic = user
                 };
                 var messaging = FirebaseMessaging.DefaultInstance;
+
+                var notify = new CreateNotificationRequest {AccountId = Convert.ToInt32(user), Title = title, Message = body };
+                await _service.CreateNotification(notify);
+
                 return await messaging.SendAsync(message);
             }
             catch (Exception e)
