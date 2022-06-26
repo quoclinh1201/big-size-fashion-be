@@ -10,5 +10,6 @@ namespace BigSizeFashion.Business.Helpers.Parameters
     {
         public string PromotionName { get; set; }
         public bool? OrderByApplyDate { get; set; }
+        public bool? Status { get; set; }
     }
 }

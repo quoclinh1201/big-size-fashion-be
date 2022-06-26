@@ -9,5 +9,6 @@ namespace BigSizeFashion.Business.Helpers.Parameters
     public class SearchColourParameter
     {
         public string Colour { get; set; }
+        public bool? Status { get; set; }
     }
 }

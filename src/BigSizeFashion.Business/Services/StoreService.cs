@@ -88,6 +88,7 @@ namespace BigSizeFashion.Business.Services
                 var stores = await _genericRepository.GetAllAsync();
                 var query = stores.AsQueryable();
                 FilterStoreByAddress(ref query, param.StoreAddress);
+                FilterStoreByStatus(ref query, param.Status);
                 result.Content = _mapper.Map<List<StoreResponse>>(query.ToList());
                 return result;
             }
@@ -95,6 +96,23 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        private void FilterStoreByStatus(ref IQueryable<Store> query, bool? status)
+        {
+            if (!query.Any() || status is null)
+            {
+                return;
+            }
+
+            if (status is true)
+            {
+                query = query.Where(x => x.Status == true);
+            }
+            else
+            {
+                query = query.Where(x => x.Status == false);
             }
         }
 

@@ -33,6 +33,7 @@ namespace BigSizeFashion.Business.Services
                 var promotions = await _genericRepository.GetAllAsync();
                 var query = promotions.AsQueryable();
                 FilterPromotionByName(ref query, param.PromotionName);
+                FilterPromotionByStatus(ref query, param.Status);
                 OrderByCreatedDate(ref query, param.OrderByApplyDate);
                 var response = _mapper.Map<List<PromotionResponse>>(query.ToList());
                 return PagedResult<PromotionResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
@@ -67,6 +68,23 @@ namespace BigSizeFashion.Business.Services
             else
             {
                 query = query.OrderBy(x => x.ApplyDate);
+            }
+        }
+
+        private void FilterPromotionByStatus(ref IQueryable<Promotion> query, bool? status)
+        {
+            if (!query.Any() || status is null)
+            {
+                return;
+            }
+
+            if (status is true)
+            {
+                query = query.Where(x => x.Status == true);
+            }
+            else
+            {
+                query = query.Where(x => x.Status == false);
             }
         }
 
