@@ -252,6 +252,7 @@ namespace BigSizeFashion.Business.Services
                                           .ThenInclude(p => p.Category)
                                           .FirstOrDefaultAsync();
 
+                    response.ProductList[i].ProductId = product.Product.ProductId;
                     response.ProductList[i].ProductName = product.Product.ProductName;
                     response.ProductList[i].Category = product.Product.Category.CategoryName;
                     response.ProductList[i].Colour = product.Colour.ColourName;
