@@ -194,16 +194,16 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpGet("quantity")]
-        public async Task<IActionResult> GetQuantityOfProduct([FromQuery] GetQuantityOfProductParameter param)
-        {
-            var result = await _service.GetQuantityOfProduct(param);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpGet("quantity")]
+        //public async Task<IActionResult> GetQuantityOfProduct([FromQuery] GetQuantityOfProductParameter param)
+        //{
+        //    var result = await _service.GetQuantityOfProduct(param);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Staff and manager get quantity of product in store

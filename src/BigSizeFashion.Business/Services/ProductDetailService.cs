@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Parameters;
 using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
@@ -51,6 +52,25 @@ namespace BigSizeFashion.Business.Services
                 }
                 
                 result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<int>> GetProductDetailId(GetProductDetailIdParameter param)
+        {
+            var result = new Result<int>();
+            try
+            {
+                var productDetailId = await _genericRepository.GetAllByIQueryable()
+                    .Where(p => p.ProductId == param.ProductId && p.SizeId == param.SizeId && p.ColourId == param.ColourId)
+                    .Select(p => p.ProductDetailId).FirstOrDefaultAsync();
+
+                result.Content = productDetailId;
                 return result;
             }
             catch (Exception ex)

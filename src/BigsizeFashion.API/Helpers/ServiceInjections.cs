@@ -64,6 +64,7 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IAddressService, AddressService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<IStoreWarehouseService, StoreWarehouseService>();
 
             return services;
         }
