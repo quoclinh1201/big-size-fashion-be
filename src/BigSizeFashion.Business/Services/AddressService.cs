@@ -82,7 +82,7 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var address = await _genericRepository.FindByAsync(a => a.CustomerId == uid && a.AddressId == id && a.Status == true);
+                var address = await _genericRepository.FindAsync(a => a.CustomerId == uid && a.AddressId == id && a.Status == true);
                 result.Content = _mapper.Map<AddressResponse>(address);
                 return result;
             }
