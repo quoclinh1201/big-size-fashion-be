@@ -30,6 +30,11 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<ProductImage> _productImageRepository;
         private readonly IProductService _productService;
+        private readonly ICartService _cartService;
+        private readonly IStoreService _storeService;
+        private readonly IAddressService _addressService;
+
+
         private readonly IMapper _mapper;
 
         public OrderService(IGenericRepository<Order> orderRepository,
@@ -41,6 +46,9 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<ProductImage> productImageRepository,
             IGenericRepository<ProductDetail> productDetailRepository,
             IProductService productService,
+            ICartService cartService,
+            IStoreService storeService,
+            IAddressService addressService,
             IMapper mapper)
         {
             _orderRepository = orderRepository;
@@ -52,6 +60,9 @@ namespace BigSizeFashion.Business.Services
             _productDetailRepository = productDetailRepository;
             _productImageRepository = productImageRepository;
             _productService = productService;
+            _cartService = cartService;
+            _storeService = storeService;
+            _addressService = addressService;
             _mapper = mapper;
         }
 
@@ -475,6 +486,39 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
+        }
+
+        public async Task<Result<List<OrderResponse>>> AddOrder(string authorization, OrderRequest request)
+        {
+            var uid = DecodeToken.DecodeTokenToGetUid(authorization);
+            var listCart = await _cartService.getListCart(authorization);
+            var listOrderResponse = new List<OrderResponse>();
+            var addressResponse = await _addressService.GetAddressById(authorization, request.DeliveryAddress);
+            var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress);
+            foreach (var cart in listCart.Content)
+            {
+                var orderResponse = new OrderResponse()
+                {
+                    CreateDate = DateTime.UtcNow.AddHours(7),
+                    CustomerId = uid,
+                    DeliveryAddress = 1,
+                    PaymentMethod = request.PaymentMethod,
+                    Status = (byte)OrderStatusEnum.Pending,
+                    StoreId = storeId,
+                    OrderType = request.OrderType,
+                    TotalPrice = request.TotalPrice,
+                    TotalPriceAfterDiscount = request.PromotionPrice,
+                };
+                listOrderResponse.Add(orderResponse);
+            }
+            //deleteCart
+            await _cartService.AddToListCart(new List<AddToCartRequest>(), authorization);
+            ///
+
+            var result = new Result<List<OrderResponse>>();
+            result.Content = new List<OrderResponse>();
+            result.Content = listOrderResponse;
+            return result;
         }
     }
 }

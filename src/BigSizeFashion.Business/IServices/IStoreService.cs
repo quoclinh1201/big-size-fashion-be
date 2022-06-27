@@ -17,7 +17,8 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<StoreResponse>> CreateStore(CreateStoreRequest request);
         Task<Result<StoreResponse>> UpdateStore(int id, CreateStoreRequest request);
         Task<Result<bool>> DeleteStore(int id);
-        Task<int> GetNearestStore(string receiveAddress);
+        public Task<int> GetNearestStore(string receiveAddress);
+
         
     }
 }
