@@ -9,5 +9,6 @@ namespace BigSizeFashion.Business.Helpers.Parameters
     public class SearchStoreParameter
     {
         public string StoreAddress { get; set; }
+        public bool? Status { get; set; }
     }
 }

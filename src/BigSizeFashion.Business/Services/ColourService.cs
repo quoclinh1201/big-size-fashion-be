@@ -34,6 +34,7 @@ namespace BigSizeFashion.Business.Services
                 var colours = await _genericRepository.GetAllAsync();
                 var query = colours.AsQueryable();
                 FilterColourByName(ref query, param.Colour);
+                FilterColourByStatus(ref query, param.Status);
                 result.Content = _mapper.Map<List<ColourResponse>>(query.ToList());
                 return result;
             }
@@ -41,6 +42,23 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        private void FilterColourByStatus(ref IQueryable<Colour> query, bool? status)
+        {
+            if (!query.Any() || status is null)
+            {
+                return;
+            }
+
+            if (status is true)
+            {
+                query = query.Where(x => x.Status == true);
+            }
+            else
+            {
+                query = query.Where(x => x.Status == false);
             }
         }
 

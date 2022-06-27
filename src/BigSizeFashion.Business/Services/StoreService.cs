@@ -7,6 +7,10 @@ using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
+using GoogleApi;
+using GoogleApi.Entities.Interfaces;
+using GoogleApi.Entities.Maps.Common;
+using GoogleApi.Entities.Maps.DistanceMatrix.Request;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -88,6 +92,7 @@ namespace BigSizeFashion.Business.Services
                 var stores = await _genericRepository.GetAllAsync();
                 var query = stores.AsQueryable();
                 FilterStoreByAddress(ref query, param.StoreAddress);
+                FilterStoreByStatus(ref query, param.Status);
                 result.Content = _mapper.Map<List<StoreResponse>>(query.ToList());
                 return result;
             }
@@ -95,6 +100,23 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        private void FilterStoreByStatus(ref IQueryable<Store> query, bool? status)
+        {
+            if (!query.Any() || status is null)
+            {
+                return;
+            }
+
+            if (status is true)
+            {
+                query = query.Where(x => x.Status == true);
+            }
+            else
+            {
+                query = query.Where(x => x.Status == false);
             }
         }
 
@@ -164,6 +186,51 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        public async Task<int> GetNearestStore(string receiveAddress)
+        {
+            try
+            {
+                var storeAddressList = await _genericRepository.GetAllByIQueryable()
+                        .Where(s => s.Status == true)
+                        .ToListAsync();
+
+                var list = new List<LocationEx>();
+                var listAddress = new Dictionary<int, int?>();
+
+                foreach (var item in storeAddressList)
+                {
+                    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
+                    listAddress.Add(item.StoreId, null);
+                }
+                
+                var request = new DistanceMatrixRequest
+                {
+                    Key = "AIzaSyCdi8RHHu_74wHf7I2MaoljFTm5nAjWPc4",
+                    Origins = new[]
+                    {
+                        new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
+                    },
+                    Destinations = list
+                };
+
+                var result = await GoogleMaps.DistanceMatrix.QueryAsync(request);
+                var index = 0;
+
+                foreach (var item in listAddress)
+                {
+                    listAddress[item.Key] = result.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
+                    index++;
+                }
+                var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+                return storeId;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

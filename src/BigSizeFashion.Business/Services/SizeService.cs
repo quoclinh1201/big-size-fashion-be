@@ -77,6 +77,7 @@ namespace BigSizeFashion.Business.Services
                 var sizes = await _genericRepository.GetAllAsync();
                 var query = sizes.AsQueryable();
                 FilterSizeByName(ref query, param.Size);
+                FilterSizeByStatus(ref query, param.Status);
                 result.Content = _mapper.Map<List<SizeResponse>>(query.ToList());
                 return result;
             }
@@ -84,6 +85,23 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        private void FilterSizeByStatus(ref IQueryable<Size> query, bool? status)
+        {
+            if (!query.Any() || status is null)
+            {
+                return;
+            }
+
+            if (status is true)
+            {
+                query = query.Where(x => x.Status == true);
+            }
+            else
+            {
+                query = query.Where(x => x.Status == false);
             }
         }
 
