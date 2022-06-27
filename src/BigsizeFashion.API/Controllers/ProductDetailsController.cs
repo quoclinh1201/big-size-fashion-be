@@ -36,5 +36,17 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        //[HttpGet("get-product-detail")]
+        //public async Task<IActionResult> GetProductDetail([FromQuery] GetProductDetailParameter param)
+        //{
+        //    var result = await _service.GetProductDetail(param);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
+
     }
 }

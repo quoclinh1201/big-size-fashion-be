@@ -60,6 +60,14 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
+        //public async Task<Result<int>> GetProductDetail(GetProductDetailParameter request)
+        //{
+        //    var result = new Result<int>();
+        //    var productDetail = await _genericRepository.FindAsync(pd => pd.ColourId == request.ColourId && pd.SizeId == request.SizeId);
+        //        result.Content = productDetail.ProductDetailId;
+        //    return result;
+        //}
+
         private async Task AddNewProductIntoAllStore(int productDetailId)
         {
             var allStoreId = await _storeRepository.GetAllByIQueryable().Where(s => s.Status == true).Select(s => s.StoreId).ToListAsync();
