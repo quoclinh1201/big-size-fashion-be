@@ -238,10 +238,31 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// get list sizes of product based on colour
+        /// </summary>
+        /// <param name="productId"></param>
+        /// <param name="colourId"></param>
+        /// <returns></returns>
         [HttpGet("sizes/{productId}/{colourId}")]
         public async Task<IActionResult> GetAllSizeOfProduct(int productId, int colourId)
         {
             var result = await _service.GetAllSizeOfProduct(productId, colourId);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get top 10 best seller products of previous month
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("best-seller")]
+        public async Task<IActionResult> GetTopTenBestSeller()
+        {
+            var result = await _service.GetTopTenBestSeller();
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
