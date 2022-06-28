@@ -275,15 +275,16 @@ namespace BigsizeFashion.API.Controllers
         /// Cancel order
         /// </summary>
         /// <remarks>
-        /// chỉ hủy được những đơn hàng có trạng thái là "Chờ xác nhận"
+        /// customer chỉ hủy được những đơn hàng có trạng thái là "Chờ xác nhận", manager thì full quyền
         /// </remarks>
+        /// <param name="authorization"></param>
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
         [HttpPut("cancel/{id}")]
-        public async Task<IActionResult> CancelOrder(int id)
+        public async Task<IActionResult> CancelOrder([FromHeader] string authorization, int id)
         {
-            var result = await _service.CancelOrder(id);
+            var result = await _service.CancelOrder(authorization.Substring(7), id);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

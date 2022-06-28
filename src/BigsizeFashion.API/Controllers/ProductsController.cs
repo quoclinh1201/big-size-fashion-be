@@ -221,5 +221,32 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get all colour of product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("colours/{id}")]
+        public async Task<IActionResult> GetAllColourOfProduct(int id)
+        {
+            var result = await _service.GetAllColourOfProduct(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        [HttpGet("sizes/{productId}/{colourId}")]
+        public async Task<IActionResult> GetAllSizeOfProduct(int productId, int colourId)
+        {
+            var result = await _service.GetAllSizeOfProduct(productId, colourId);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

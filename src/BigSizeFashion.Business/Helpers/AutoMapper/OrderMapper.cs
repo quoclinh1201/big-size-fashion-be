@@ -33,6 +33,11 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             CreateMap<Order, ListOrderResponse>()
                 .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))
                 .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
+            
+            CreateMap<Order, ListOrderForStaffResponse>()
+                .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))
+                .ForMember(d => d.CustomerName, s => s.MapFrom(s => s.Customer.Fullname))
+                .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
         }
 
         

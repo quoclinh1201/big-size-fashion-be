@@ -20,7 +20,7 @@ namespace BigSizeFashion.Data.Entities
         public decimal TotalPrice { get; set; }
         public DateTime CreateDate { get; set; }
         public DateTime? ApprovalDate { get; set; }
-        public bool Status { get; set; }
+        public byte Status { get; set; }
 
         public virtual Store FromStoreNavigation { get; set; }
         public virtual staff Staff { get; set; }

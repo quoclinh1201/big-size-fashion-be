@@ -734,5 +734,53 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<IEnumerable<ColourResponse>>> GetAllColourOfProduct(int id)
+        {
+            var result = new Result<IEnumerable<ColourResponse>>();
+            try
+            {
+                var listId = await _productDetailRepository.GetAllByIQueryable()
+                    .Where(p => p.ProductId == id)
+                    .Select(p => p.ColourId).Distinct().ToListAsync();
+                var colours = new List<ColourResponse>();
+                foreach (var i in listId)
+                {
+                    var c = await _colourRepository.FindAsync(cc => cc.ColourId == i && cc.Status == true);
+                    colours.Add(_mapper.Map<ColourResponse>(c));
+                }
+                result.Content = colours;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<SizeResponse>>> GetAllSizeOfProduct(int productId, int colourId)
+        {
+            var result = new Result<IEnumerable<SizeResponse>>();
+            try
+            {
+                var listId = await _productDetailRepository.GetAllByIQueryable()
+                    .Where(p => p.ProductId == productId && p.ColourId == colourId)
+                    .Select(p => p.SizeId).Distinct().ToListAsync();
+                var sizes = new List<SizeResponse>();
+                foreach (var i in listId)
+                {
+                    var c = await _sizeRepository.FindAsync(cc => cc.SizeId == i && cc.Status == true);
+                    sizes.Add(_mapper.Map<SizeResponse>(c));
+                }
+                result.Content = sizes;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
