@@ -26,7 +26,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<staff> _staffRepository;
         private readonly IGenericRepository<Customer> _customerRepository;
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
-        private readonly IGenericRepository<Product> _productRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<ProductImage> _productImageRepository;
     
@@ -45,7 +45,7 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<staff> staffRepository,
             IGenericRepository<Customer> customerRepository,
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
-            IGenericRepository<Product> productRepository,
+            IGenericRepository<Account> accountRepository,
             IGenericRepository<ProductImage> productImageRepository,
             IGenericRepository<ProductDetail> productDetailRepository,
             IProductService productService,
@@ -60,7 +60,7 @@ namespace BigSizeFashion.Business.Services
             _staffRepository = staffRepository;
             _customerRepository = customerRepository;
             _storeWarehouseRepository = storeWarehouseRepository;
-            _productRepository = productRepository;
+            _accountRepository = accountRepository;
             _productDetailRepository = productDetailRepository;
             _productImageRepository = productImageRepository;
             _productService = productService;
@@ -355,7 +355,7 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListOrderResponse>> GetListAssignedOrder(string token, QueryStringParameters param)
+        public async Task<PagedResult<ListOrderForStaffResponse>> GetListAssignedOrder(string token, QueryStringParameters param)
         {
             try
             {
@@ -363,8 +363,13 @@ namespace BigSizeFashion.Business.Services
                 var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid && o.Status == (byte)OrderStatusEnum.Approved);
                 var query = orders.AsQueryable();
                 OrderByCreateDate(ref query, false);
-                var list = _mapper.Map<List<ListOrderResponse>>(query.ToList());
-                return PagedResult<ListOrderResponse>.ToPagedList(list, param.PageNumber, param.PageSize);
+                var list = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == list[i].OrderId).Select(o => o.Quantity).Sum();
+                    list[i].TotalQuantity = totalQuantity;
+                }
+                return PagedResult<ListOrderForStaffResponse>.ToPagedList(list, param.PageNumber, param.PageSize);
             }
             catch (Exception)
             {
@@ -372,18 +377,23 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForStaff(string token, FilterOrderParameter param)
+        public async Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string token, FilterOrderParameter param)
         {
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid);
+                var orders = await _orderRepository.GetAllByIQueryable().Where(o => o.StaffId == uid).Include(o => o.Customer).ToListAsync();
                 var query = orders.AsQueryable();
                 FilterOrderByType(ref query, param.OrderType);
                 FilterOrderStatus(ref query, param.OrderStatus.ToString());
                 OrderByCreateDate(ref query, param.OrderByCreateDate);
-                var response = _mapper.Map<List<ListOrderResponse>>(query.ToList());
-                return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+                var response = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
+                for (int i = 0; i < response.Count; i++)
+                {
+                    var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == response[i].OrderId).Select(o => o.Quantity).Sum();
+                    response[i].TotalQuantity = totalQuantity;
+                }
+                return PagedResult<ListOrderForStaffResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
             }
             catch (Exception)
             {
@@ -467,22 +477,43 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> CancelOrder(int id)
+        public async Task<Result<bool>> CancelOrder(string token, int id)
         {
             var result = new Result<bool>();
             try
             {
-                var order = await _orderRepository.FindAsync(o => o.OrderId == id && o.Status == (byte)OrderStatusEnum.Pending);
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var role = await _accountRepository.GetAllByIQueryable().Include(a => a.Role).Where(a => a.Uid == uid).Select(a => a.Role.RoleName).FirstOrDefaultAsync();
+
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
                 if(order != null)
                 {
-                    order.Status = (byte)OrderStatusEnum.Cancel;
-                    await _orderRepository.UpdateAsync(order);
-                    result.Content = true;
-                    return result;
+                    if(role.Equals("Customer"))
+                    {
+                        if(order.Status == (byte)OrderStatusEnum.Pending)
+                        {
+                            order.Status = (byte)OrderStatusEnum.Cancel;
+                            await _orderRepository.UpdateAsync(order);
+                            result.Content = true;
+                            return result;
+                        }
+                        else
+                        {
+                            result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.CannotCancelOrder);
+                            return result;
+                        }
+                    }
+                    else
+                    {
+                        order.Status = (byte)OrderStatusEnum.Cancel;
+                        await _orderRepository.UpdateAsync(order);
+                        result.Content = true;
+                        return result;
+                    }
                 }
                 else
                 {
-                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.CannotCancelOrder);
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.NotExistedOrder);
                     return result;
                 }
             }

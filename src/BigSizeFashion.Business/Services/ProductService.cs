@@ -31,6 +31,8 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<Colour> _colourRepository;
         private readonly IGenericRepository<Size> _sizeRepository;
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
+        private readonly IGenericRepository<Order> _orderRepository;
+        private readonly IGenericRepository<OrderDetail> _orderDetailRepository;
         private readonly IMapper _mapper;
 
         public ProductService(
@@ -44,6 +46,8 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<Colour> colourRepository,
             IGenericRepository<Size> sizeRepository,
             IGenericRepository<ProductDetail> productDetailRepository,
+            IGenericRepository<Order> orderRepository,
+            IGenericRepository<OrderDetail> orderDetailRepository,
             IMapper mapper)
         {
             _productRepository = productRepository;
@@ -56,6 +60,8 @@ namespace BigSizeFashion.Business.Services
             _colourRepository = colourRepository;
             _sizeRepository = sizeRepository;
             _productDetailRepository = productDetailRepository;
+            _orderRepository = orderRepository;
+            _orderDetailRepository = orderDetailRepository;
             _mapper = mapper;
         }
 
@@ -726,6 +732,150 @@ namespace BigSizeFashion.Business.Services
                                 .FirstOrDefaultAsync();
 
                 result.Content = new GetQuantityOfProductResponse { ProductDetailId = productDetailId, StoreId = storeId, Quantity = quantity };
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<ColourResponse>>> GetAllColourOfProduct(int id)
+        {
+            var result = new Result<IEnumerable<ColourResponse>>();
+            try
+            {
+                var listId = await _productDetailRepository.GetAllByIQueryable()
+                    .Where(p => p.ProductId == id)
+                    .Select(p => p.ColourId).Distinct().ToListAsync();
+                var colours = new List<ColourResponse>();
+                foreach (var i in listId)
+                {
+                    var c = await _colourRepository.FindAsync(cc => cc.ColourId == i && cc.Status == true);
+                    colours.Add(_mapper.Map<ColourResponse>(c));
+                }
+                result.Content = colours;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<SizeResponse>>> GetAllSizeOfProduct(int productId, int colourId)
+        {
+            var result = new Result<IEnumerable<SizeResponse>>();
+            try
+            {
+                var listId = await _productDetailRepository.GetAllByIQueryable()
+                    .Where(p => p.ProductId == productId && p.ColourId == colourId)
+                    .Select(p => p.SizeId).Distinct().ToListAsync();
+                var sizes = new List<SizeResponse>();
+                foreach (var i in listId)
+                {
+                    var c = await _sizeRepository.FindAsync(cc => cc.SizeId == i && cc.Status == true);
+                    sizes.Add(_mapper.Map<SizeResponse>(c));
+                }
+                result.Content = sizes;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<GetListProductResponse>>> GetTopTenBestSeller()
+        {
+            var result = new Result<IEnumerable<GetListProductResponse>>();
+            try
+            {
+                var month = DateTime.UtcNow.AddHours(7).Month;
+                var year = DateTime.UtcNow.AddHours(7).Year;
+                if(month == 1)
+                {
+                    month = 12;
+                }
+                else
+                {
+                    month -= 1;
+                }
+                //var orders = await _orderRepository.GetAllByIQueryable()
+                //    .Include(o => o.OrderDetails)
+                //    .Where(o => o.CreateDate.Month == month && o.CreateDate.Year == year && o.Status == 5)
+                //    .ToListAsync();
+
+                var o = await _orderDetailRepository.GetAllByIQueryable().Include(o => o.Order)
+                    .Where(o => o.Order.CreateDate.Month == month && o.Order.CreateDate.Year == year && o.Order.Status == 5)
+                    .ToListAsync();
+
+                var listproductdetail = new Dictionary<int, int>();
+                var listproduct = new Dictionary<int, int>();
+                
+                foreach (var item in o)
+                {
+                    if(listproductdetail.ContainsKey(item.ProductDetailId))
+                    {
+                        listproductdetail[item.ProductDetailId] += item.Quantity;
+                    }
+                    else
+                    {
+                        listproductdetail.Add(item.ProductDetailId, item.Quantity);
+                    }
+                }
+
+                foreach (var item in listproductdetail)
+                {
+                    var pd = await _productDetailRepository.FindAsync(p => p.ProductDetailId == item.Key);
+
+                    if(listproduct.ContainsKey(pd.ProductId))
+                    {
+                        listproduct[pd.ProductId] += item.Value;
+                    }
+                    else
+                    {
+                        listproduct.Add(pd.ProductId, item.Value);
+                    }
+                }
+                var cc = listproduct.OrderByDescending(s => s.Value);
+                var list = new List<GetListProductResponse>();
+
+                for (int i = 0; i < cc.Count(); i++)
+                {
+                    var product = await _productRepository.FindAsync(p => p.ProductId == cc.ElementAt(i).Key);
+                    var pp = _mapper.Map<GetListProductResponse>(product);
+                    var image = await _imageRepository.FindAsync(x => x.ProductId == pp.ProductId && x.IsMainImage == true);
+                    if (image != null)
+                    {
+                        pp.ImageUrl = image.ImageUrl;
+                    }
+                    else
+                    {
+                        pp.ImageUrl = CommonConstants.NoImageUrl;
+                    }
+
+                    var now = DateTime.UtcNow.AddHours(7);
+                    var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                    .Include(p => p.Promotion)
+                                    .Where(p => p.Promotion.ApplyDate <= now
+                                                && p.Promotion.ExpiredDate >= now
+                                                && p.Promotion.Status == true
+                                                && p.ProductId == pp.ProductId)
+                                    .FirstOrDefaultAsync();
+                    if (pd != null)
+                    {
+                        var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * pp.Price;
+                        pp.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
+                        pp.PromotionValue = pd.Promotion.PromotionValue + "%";
+                    }
+                    list.Add(pp);
+                }
+                var response = list.Skip(0).Take(10);
+                result.Content = response;
                 return result;
             }
             catch (Exception ex)

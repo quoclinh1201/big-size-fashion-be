@@ -19,13 +19,13 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> ApproveOrder(int id);
         Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForManager(string v, FilterOrderParameter param);
         Task<Result<bool>> AssignOrder(AssignOrderRequest request);
-        Task<PagedResult<ListOrderResponse>> GetListAssignedOrder(string v, QueryStringParameters param);
-        Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForStaff(string v, FilterOrderParameter param);
+        Task<PagedResult<ListOrderForStaffResponse>> GetListAssignedOrder(string v, QueryStringParameters param);
+        Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string v, FilterOrderParameter param);
         Task<Result<bool>> PackagedOrder(int id);
         Task<Result<bool>> DeliveryOrder(int id);
         Task<Result<bool>> ReceivedOrder(int id);
         Task<Result<bool>> RejectOrder(int id);
-        Task<Result<bool>> CancelOrder(int id);
         Task<bool> AddOrder(string authorization, OrderRequest request);
+        Task<Result<bool>> CancelOrder(string v, int id);
     }
 }

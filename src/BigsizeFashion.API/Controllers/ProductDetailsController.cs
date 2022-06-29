@@ -22,6 +22,11 @@ namespace BigsizeFashion.API.Controllers
             _service = service;
         }
 
+        /// <summary>
+        /// Add colour and size for product
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
         //[Authorize]
         [HttpPost]
         public async Task<IActionResult> AddDetailForProduct([FromBody] ProductDetailRequest request)

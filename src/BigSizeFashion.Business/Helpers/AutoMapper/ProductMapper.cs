@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Dtos.ResponseObjects;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -28,6 +29,12 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Male" : "Female"));
 
             CreateMap<Product, GetListProductResponse>();
+
+            CreateMap<ProductDetail, DeliveryNoteDetailItem>()
+                .ForMember(d => d.Category, s => s.MapFrom(s => s.Product.Category.CategoryName))
+                .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.SizeName))
+                .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName));
+
                 //.ForMember(d => d.ProductId, s => s.MapFrom(s => s.Product.ProductId))
                 //.ForMember(d => d.ProductName, s => s.MapFrom(s => s.Product.ProductName))
                 //.ForMember(d => d.Price, s => s.MapFrom(s => s.Product.Price))

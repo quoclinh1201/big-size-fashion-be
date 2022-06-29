@@ -27,5 +27,8 @@ namespace BigSizeFashion.Business.IServices
         Task<decimal?> GetProductPromotionPrice(int id);
         Task<Result<GetQuantityOfProductResponse>> GetQuantityOfProduct(GetQuantityOfProductParameter param);
         Task<Result<GetQuantityOfProductResponse>> GetQuantityOfProductInStore(string v, GetQuantityOfProductInStoreParameter param);
+        Task<Result<IEnumerable<ColourResponse>>> GetAllColourOfProduct(int id);
+        Task<Result<IEnumerable<SizeResponse>>> GetAllSizeOfProduct(int productId, int colourId);
+        Task<Result<IEnumerable<GetListProductResponse>>> GetTopTenBestSeller();
     }
 }
