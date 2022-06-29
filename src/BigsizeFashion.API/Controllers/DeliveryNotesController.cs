@@ -84,11 +84,67 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Create request import product
+        /// </summary>
+        /// <remarks>
+        /// - FromStoreId là id của store giao hàng
+        /// </remarks>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
         //[Authorize]
-        //[HttpPost]
-        //public async Task<IActionResult> CreateRequestImportProduct([FromHeader] string authorization, [FromBody] ImportProductRequest request)
-        //{
+        [HttpPost]
+        public async Task<IActionResult> CreateRequestImportProduct([FromHeader] string authorization, [FromBody] ImportProductRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.CreateRequestImportProduct(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
-        //}
+        /// <summary>
+        /// Approve Request Import Product
+        /// </summary>
+        /// <remarks>
+        /// - id là id của delivery note
+        /// </remarks>
+        /// <param name="authorization"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("approve/{id}")]
+        public async Task<IActionResult> ApproveRequestImportProduct([FromHeader] string authorization, int id)
+        {
+            var result = await _service.ApproveRequestImportProduct(authorization.Substring(7), id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Reject Request Import Product
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("reject/{id}")]
+        public async Task<IActionResult> RejectRequestImportProduct(int id)
+        {
+            var result = await _service.RejectRequestImportProduct( id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

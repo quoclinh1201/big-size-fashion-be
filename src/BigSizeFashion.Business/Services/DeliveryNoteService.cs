@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
@@ -24,6 +25,8 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<Store> _storeRepository;
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<ProductImage> _productImageRepository;
+        private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
+        private readonly IProductService _productService;
         private readonly IMapper _mapper;
 
         public DeliveryNoteService(IGenericRepository<DeliveryNote> genericRepository,
@@ -32,6 +35,8 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<Store> storeRepository,
             IGenericRepository<ProductDetail> productDetailRepository,
             IGenericRepository<ProductImage> productImageRepository,
+            IGenericRepository<StoreWarehouse> storeWarehouseRepository,
+            IProductService productService,
             IMapper mapper)
         {
             _genericRepository = genericRepository;
@@ -40,7 +45,105 @@ namespace BigSizeFashion.Business.Services
             _storeRepository = storeRepository;
             _productDetailRepository = productDetailRepository;
             _productImageRepository = productImageRepository;
+            _productService = productService;
+            _storeWarehouseRepository = storeWarehouseRepository;
             _mapper = mapper;
+        }
+
+        public async Task<Result<bool>> ApproveRequestImportProduct(string token, int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.FindAsync(s => s.Uid == uid && s.Status == true);
+                var pn = await _genericRepository.FindAsync(p => p.DeliveryNoteId == id);
+                pn.ApprovalDate = DateTime.UtcNow.AddHours(7);
+                pn.Status = 2;
+                await _genericRepository.UpdateAsync(pn);
+
+                var pnd = await _noteDetailRepository.FindByAsync(p => p.DeliveryNoteId == id);
+
+                foreach (var item in pnd)
+                {
+                    var from = await _storeWarehouseRepository.FindAsync(s => s.StoreId == pn.FromStore && s.ProductDetailId == item.ProductDetailId);
+                    from.Quantity -= item.Quantity;
+                    await _storeWarehouseRepository.UpdateAsync(from);
+
+                    var to = await _storeWarehouseRepository.FindAsync(s => s.StoreId == pn.ToStore && s.ProductDetailId == item.ProductDetailId);
+                    to.Quantity += item.Quantity;
+                    await _storeWarehouseRepository.UpdateAsync(to);
+
+                    //if(from.Quantity < 0)
+                    //{
+                    //    from.Quantity += item.Quantity;
+                    //    await _storeWarehouseRepository.UpdateAsync(from);
+                    //    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.NotEnoughProduct);
+                    //    return result;
+                    //}
+
+
+                }
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> CreateRequestImportProduct(string token, ImportProductRequest request)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.FindAsync(s => s.Uid == uid && s.Status == true);
+                var import = new DeliveryNote();
+                import.StaffId = uid;
+                import.FromStore = request.FromStoreId;
+                import.ToStore = staff.StoreId;
+                import.DeliveryNoteName = request.DeliveryNoteName;
+                import.CreateDate = DateTime.UtcNow.AddHours(7);
+                import.Status = 1;
+                decimal totalPrice = 0;
+
+                foreach (var item in request.ListProducts)
+                {
+                    var price = await _productService.GetProductPrice(item.ProductId) * item.Quantity;
+                    totalPrice += price;
+                }
+                import.TotalPrice = totalPrice;
+                await _genericRepository.InsertAsync(import);
+                await _genericRepository.SaveAsync();
+
+                foreach (var item in request.ListProducts)
+                {
+                    var pd = await _productDetailRepository
+                        .GetAllByIQueryable()
+                        .Where(p => p.ProductId == item.ProductId && p.ColourId == item.ColourId && p.SizeId == item.SizeId)
+                        .Select(p => p.ProductDetailId)
+                        .FirstOrDefaultAsync();
+                    var pnd = new DeliveryNoteDetail
+                    {
+                        DeliveryNoteId = import.DeliveryNoteId,
+                        ProductDetailId = pd,
+                        Price = await _productService.GetProductPrice(item.ProductId) * item.Quantity,
+                        Quantity = item.Quantity
+                    };
+                    await _noteDetailRepository.InsertAsync(pnd);
+                    await _noteDetailRepository.SaveAsync();
+                }
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
         }
 
         public async Task<Result<DeliveryNoteDetailResponse>> GetDeliveryNoteDetail(int id)
@@ -123,6 +226,25 @@ namespace BigSizeFashion.Business.Services
             {
 
                 throw;
+            }
+        }
+
+        public async Task<Result<bool>> RejectRequestImportProduct(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var pn = await _genericRepository.FindAsync(p => p.DeliveryNoteId == id);
+                pn.Status = 0;
+                await _genericRepository.UpdateAsync(pn);
+
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
