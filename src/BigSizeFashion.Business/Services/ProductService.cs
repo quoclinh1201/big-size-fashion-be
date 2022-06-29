@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Dtos.ResponseObjects;
 using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
@@ -33,6 +34,8 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<Order> _orderRepository;
         private readonly IGenericRepository<OrderDetail> _orderDetailRepository;
+        private readonly ISizeService _sizeService;
+        private readonly IProductDetailService _productDetailService;
         private readonly IMapper _mapper;
 
         public ProductService(
@@ -48,6 +51,7 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<ProductDetail> productDetailRepository,
             IGenericRepository<Order> orderRepository,
             IGenericRepository<OrderDetail> orderDetailRepository,
+            ISizeService sizeService,
             IMapper mapper)
         {
             _productRepository = productRepository;
@@ -63,6 +67,7 @@ namespace BigSizeFashion.Business.Services
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
             _mapper = mapper;
+            _sizeService = sizeService;
         }
 
         public async Task<Result<CreateProductResponse>> CreateProduct(CreateProductRequest request)
@@ -884,5 +889,125 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<IEnumerable<QuantityFitProductByCategoryResponse>>> GetQuantityFitProductByCategory(string token)
+        {
+            var result = new Result<IEnumerable<QuantityFitProductByCategoryResponse>>();
+            try
+            {
+                var accountUId = DecodeToken.DecodeTokenToGetUid(token);
+                var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
+                var height = customer.Height;
+                var weight = customer.Weight;
+                string size;
+               
+
+                if (customer.Gender == true)
+                    {
+
+                        if (height < 176 || weight < 76)
+                        {
+                        size = "";
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            size = "XL";
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 96)
+                        {
+                           size = "XXL";
+                        }
+                        else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
+                        {
+                            size = "XXXL";
+                        }
+                        else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
+                        {
+                        size = "4XL";
+                        }
+                        else if (height >= 188 && weight >= 115 && height < 196 && weight < 121)
+                        {
+                        size = "5XL";
+                        }
+                        else
+                        {
+                        size = "6XL";
+                        }
+                    }
+                    else
+                    {
+                        if (height < 168 || weight < 66)
+                        {
+                        size = "";
+                        }
+                        else if (height >= 168 && weight >= 66 && height < 176 && weight < 76)
+                        {
+                        size = "XL";
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                        size = "XXL";
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
+                        {
+                        size = "XXXL";
+                        }
+                        else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
+                        {
+                        size = "4XL";
+                        }
+                        else if (height >= 182 && weight >= 106 && height < 190 && weight < 111)
+                        {
+                        size = "5XL";
+                        }
+                        else
+                        {
+                        size = "6XL";
+                        }
+                    }
+                //getSizeId
+               var sizeId = (await _sizeService.GetAllSize(new SearchSizeParameter()
+                {
+                    Size = size,
+                    Status = true
+                })).Content.FirstOrDefault().SizeId;
+
+                var query =  _productRepository.GetAllByIQueryable()
+                                   .Include(p => p.Category)
+                                   .Where(p => p.Status == true)
+                                   .Include(p => p.ProductDetails)
+                                   .ThenInclude(p => p.Size)
+                                   .Include(p => p.ProductDetails)
+                                   .ThenInclude(p => p.Colour)
+                                   .AsQueryable();
+
+
+                FilterProductByColourAndSize(ref query, null, size);
+                var listProduct = await query.Where(p => p.Gender == customer.Gender).ToListAsync();
+                var groupforCategory = listProduct.GroupBy(p => p.CategoryId).Select(pd =>
+                    new QuantityFitProductByCategoryResponse()
+                    {
+                        CategoryId = pd.Key,
+                        QuantityFitProduct = pd.Count()
+                    }
+                    );
+              
+                
+
+                result = new Result<IEnumerable<QuantityFitProductByCategoryResponse>>();
+                result.Content = groupforCategory;
+                return result;
+                //getProductDetailId
+
+
+
+            }
+            catch(Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
     }
 }

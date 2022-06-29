@@ -1,4 +1,5 @@
 ﻿using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Dtos.ResponseObjects;
 using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
@@ -30,5 +31,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<ColourResponse>>> GetAllColourOfProduct(int id);
         Task<Result<IEnumerable<SizeResponse>>> GetAllSizeOfProduct(int productId, int colourId);
         Task<Result<IEnumerable<GetListProductResponse>>> GetTopTenBestSeller();
+        Task<Result<IEnumerable<QuantityFitProductByCategoryResponse>>> GetQuantityFitProductByCategory(string v);
+
     }
 }

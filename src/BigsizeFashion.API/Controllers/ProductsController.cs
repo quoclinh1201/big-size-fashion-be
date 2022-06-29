@@ -269,5 +269,16 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        [HttpGet("get-quantity-fit-product-by-category")]
+        public async Task<IActionResult> GetQuantityFitProductByCategory([FromHeader] string authorization)
+        {
+            var result = await _service.GetQuantityFitProductByCategory(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
