@@ -101,7 +101,7 @@ namespace BigSizeFashion.Business.Services
                 {
                     var acc = await _accountRepository.GetAllByIQueryable()
                         .Include(a => a.staff)
-                        .Where(a => a.RoleId == 1 && a.staff.StoreId == list[i].StoreId && a.Status == true && a.staff.Status == true)
+                        .Where(a => a.RoleId == 2 && a.staff.StoreId == list[i].StoreId && a.Status == true && a.staff.Status == true)
                         .Select(a => a.staff.Fullname)
                         .FirstOrDefaultAsync();
                     list[i].ManagerName = acc;
