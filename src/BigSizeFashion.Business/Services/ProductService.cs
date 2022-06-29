@@ -804,6 +804,7 @@ namespace BigSizeFashion.Business.Services
                 if(month == 1)
                 {
                     month = 12;
+                    year -= 1;
                 }
                 else
                 {
