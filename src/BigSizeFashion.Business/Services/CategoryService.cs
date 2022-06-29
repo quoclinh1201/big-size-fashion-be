@@ -34,6 +34,7 @@ namespace BigSizeFashion.Business.Services
                 var categories = await _genericRepository.GetAllAsync();
                 var query = categories.AsQueryable();
                 FilterCategoryByName(ref query, param.Category);
+                FilterCategoryByStatus(ref query, param.Status);
                 result.Content = _mapper.Map<List<CategoryResponse>>(query.ToList());
                 return result;
             }
@@ -42,6 +43,16 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
+        }
+
+        private static void FilterCategoryByStatus(ref IQueryable<Category> query, bool? status)
+        {
+            if (!query.Any() || status == null)
+            {
+                return;
+            }
+
+            query = query.Where(q => q.Status == status);
         }
 
         private static void FilterCategoryByName(ref IQueryable<Category> query, string name)
