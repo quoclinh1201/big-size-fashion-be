@@ -29,10 +29,13 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<Product> _productRepository;
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<ProductImage> _productImageRepository;
+    
         private readonly IProductService _productService;
         private readonly ICartService _cartService;
         private readonly IStoreService _storeService;
         private readonly IAddressService _addressService;
+        private readonly IOrderDetailService _orderDetailService;
+
 
 
         private readonly IMapper _mapper;
@@ -49,6 +52,7 @@ namespace BigSizeFashion.Business.Services
             ICartService cartService,
             IStoreService storeService,
             IAddressService addressService,
+            IOrderDetailService orderDetailService,
             IMapper mapper)
         {
             _orderRepository = orderRepository;
@@ -63,6 +67,7 @@ namespace BigSizeFashion.Business.Services
             _cartService = cartService;
             _storeService = storeService;
             _addressService = addressService;
+            _orderDetailService = orderDetailService;
             _mapper = mapper;
         }
 
@@ -488,37 +493,56 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<List<OrderResponse>>> AddOrder(string authorization, OrderRequest request)
+        public async Task<bool> AddOrder(string authorization, OrderRequest request)
         {
             var uid = DecodeToken.DecodeTokenToGetUid(authorization);
             var listCart = await _cartService.getListCart(authorization);
-            var listOrderResponse = new List<OrderResponse>();
+            var listOrderDetailRequest = new List<OrderDetailRequest>();
             var addressResponse = await _addressService.GetAddressById(authorization, request.DeliveryAddress);
             var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress);
+            var orderResponse = new OrderResponse()
+            {
+                CreateDate = DateTime.UtcNow.AddHours(7),
+                CustomerId = uid,
+                DeliveryAddress = 1,
+                PaymentMethod = request.PaymentMethod,
+                Status = (byte)OrderStatusEnum.Pending,
+                StoreId = storeId,
+                OrderType = request.OrderType,
+                TotalPrice = request.TotalPrice,
+                TotalPriceAfterDiscount = request.PromotionPrice,
+            };
+            //saveOrder
+            var order = _mapper.Map<Order>(orderResponse);
+             await _orderRepository.InsertAsync(order);
+             await _orderRepository.SaveAsync();
+
             foreach (var cart in listCart.Content)
             {
-                var orderResponse = new OrderResponse()
+
+                //listOrderResponse.Add(orderResponse);
+                var orderdetailRequest = new OrderDetailRequest()
                 {
-                    CreateDate = DateTime.UtcNow.AddHours(7),
-                    CustomerId = uid,
-                    DeliveryAddress = 1,
-                    PaymentMethod = request.PaymentMethod,
-                    Status = (byte)OrderStatusEnum.Pending,
-                    StoreId = storeId,
-                    OrderType = request.OrderType,
-                    TotalPrice = request.TotalPrice,
-                    TotalPriceAfterDiscount = request.PromotionPrice,
+                    OrderId = order.OrderId,
+                    DiscountPricePerOne = cart.ProductPromotion,
+                    DiscountPrice = cart.ProductPromotion * cart.Quantity,
+                    Price = cart.ProductPrice * cart.Quantity,
+                    Quantity = cart.Quantity,
+                    PricePerOne = cart.ProductPrice,
+                    ProductDetailId = cart.ProductDetailId
                 };
-                listOrderResponse.Add(orderResponse);
+                listOrderDetailRequest.Add(orderdetailRequest);
+                await _orderDetailService.createOrderDetail(listOrderDetailRequest);
+
             }
             //deleteCart
             await _cartService.AddToListCart(new List<AddToCartRequest>(), authorization);
             ///
 
-            var result = new Result<List<OrderResponse>>();
-            result.Content = new List<OrderResponse>();
-            result.Content = listOrderResponse;
-            return result;
+            //var result = new Result<List<OrderResponse>>();
+            //result.Content = new List<OrderResponse>();
+            //result.Content = listOrderResponse;
+            return true;
         }
     }
 }

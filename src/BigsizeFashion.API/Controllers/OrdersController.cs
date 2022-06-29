@@ -291,8 +291,8 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        [HttpPost("add-list-order")]
-        public async Task<IActionResult> CreateListOrder([FromBody] OrderRequest request, [FromHeader] string authorization)
+        [HttpPost("add-order")]
+        public async Task<IActionResult> CreateOrder([FromBody] OrderRequest request, [FromHeader] string authorization)
         {
             if (!ModelState.IsValid)
             {
@@ -301,10 +301,7 @@ namespace BigsizeFashion.API.Controllers
 
             var result = await _service.AddOrder(authorization.Substring(7), request);
 
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
+           
             return CreatedAtAction(nameof(CancelOrder), result);
 
         }
