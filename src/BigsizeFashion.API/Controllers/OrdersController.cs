@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace BigsizeFashion.API.Controllers
 {
-    [Route("api/v1/orders-s")]
+    [Route("api/v1/orders")]
     [ApiController]
     public class OrdersController : ControllerBase
     {

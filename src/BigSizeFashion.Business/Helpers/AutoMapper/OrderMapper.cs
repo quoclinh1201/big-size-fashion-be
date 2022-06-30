@@ -20,6 +20,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.CustomerName, s => s.MapFrom(s => s.Customer.Fullname))
                 .ForMember(d => d.StaffName, s => s.MapFrom(s => s.Staff.Fullname))
                 .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))
+                .ForMember(d => d.DeliveryAddress, s => s.MapFrom(s => new DeliveryAddressResponse()))
                 //.ForMember(d => d.TotalPrice, s => s.MapFrom(s => FormatMoney.FormatPrice(s.TotalPrice)))
                 //.ForMember(d => d.TotalPriceAfterDiscount, s => s.MapFrom(s => FormatMoney.FormatPrice(s.TotalPriceAfterDiscount)))
                 .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateDate)))
