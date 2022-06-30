@@ -530,6 +530,7 @@ namespace BigSizeFashion.Business.Services
             var listCart = await _cartService.getListCart(authorization);
             var listOrderDetailRequest = new List<OrderDetailRequest>();
             var addressResponse = await _addressService.GetAddressById(authorization, request.DeliveryAddress);
+            var test = addressResponse.Content.ReceiveAddress;
             var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress);
             var orderResponse = new OrderResponse()
             {
@@ -563,9 +564,17 @@ namespace BigSizeFashion.Business.Services
                     ProductDetailId = cart.ProductDetailId
                 };
                 listOrderDetailRequest.Add(orderdetailRequest);
-                await _orderDetailService.createOrderDetail(listOrderDetailRequest);
 
             }
+            try
+            {
+                await _orderDetailService.createOrderDetail(listOrderDetailRequest);
+            }
+            catch(Exception ex)
+            {
+                Console.Write(ex.Message);
+            }
+            
             //deleteCart
             await _cartService.AddToListCart(new List<AddToCartRequest>(), authorization);
             ///

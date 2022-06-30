@@ -303,7 +303,7 @@ namespace BigsizeFashion.API.Controllers
             var result = await _service.AddOrder(authorization.Substring(7), request);
 
            
-            return CreatedAtAction(nameof(CancelOrder), result);
+            return Ok(result);
 
         }
     }

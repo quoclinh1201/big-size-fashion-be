@@ -218,6 +218,7 @@ namespace BigSizeFashion.Business.Services
 
                 var result = await GoogleMaps.DistanceMatrix.QueryAsync(request);
                 var index = 0;
+                var test = result.RawJson;
 
                 foreach (var item in listAddress)
                 {
