@@ -25,17 +25,20 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<Store> _genericRepository;
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
         private readonly IMapper _mapper;
 
         public StoreService(
             IGenericRepository<Store> genericRepository,
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
             IGenericRepository<ProductDetail> productDetailRepository,
+            IGenericRepository<Account> accountRepository,
             IMapper mapper)
         {
             _genericRepository = genericRepository;
             _storeWarehouseRepository = storeWarehouseRepository;
             _productDetailRepository = productDetailRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
         }
 
@@ -93,7 +96,17 @@ namespace BigSizeFashion.Business.Services
                 var query = stores.AsQueryable();
                 FilterStoreByAddress(ref query, param.StoreAddress);
                 FilterStoreByStatus(ref query, param.Status);
-                result.Content = _mapper.Map<List<StoreResponse>>(query.ToList());
+                var list = _mapper.Map<List<StoreResponse>>(query.ToList());
+                for (int i = 0; i < list.Count; i++)
+                {
+                    var acc = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.RoleId == 2 && a.staff.StoreId == list[i].StoreId && a.Status == true && a.staff.Status == true)
+                        .Select(a => a.staff.Fullname)
+                        .FirstOrDefaultAsync();
+                    list[i].ManagerName = acc;
+                }
+                result.Content = list;
                 return result;
             }
             catch (Exception ex)

@@ -25,5 +25,6 @@ namespace BigSizeFashion.Business.Helpers.Constants
         public const string NotExistedOrder = "Đơn hàng không tồn tại.";
         public const string CannotCancelOrder = "Không thể hủy đơn hàng đã xác nhận.";
         public const string NotExistedProduct = "Sản phẩm không tồn tại.";
+        public const string NotEnoughProduct = "Số lượng hàng hóa trong kho không đáp ứng đủ cho đơn hàng.";
     }
 }
