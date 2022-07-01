@@ -149,7 +149,15 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var feedback = await _genericRepository.FindAsync(f => f.FeedbackId == id);
-                feedback.Status = false;
+
+                if(feedback.Status)
+                {
+                    feedback.Status = false;
+                }
+                else
+                {
+                    feedback.Status = true;
+                }
 
                 await _genericRepository.UpdateAsync(feedback);
                 result.Content = true;

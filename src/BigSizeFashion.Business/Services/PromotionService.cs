@@ -196,7 +196,15 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
 
-                promotion.Status = false;
+                if(promotion.Status)
+                {
+                    promotion.Status = false;
+                }
+                else
+                {
+                    promotion.Status = true;
+                }
+                    
                 await _genericRepository.UpdateAsync(promotion);
                 result.Content = true;
                 return result;

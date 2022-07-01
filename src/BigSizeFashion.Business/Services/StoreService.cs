@@ -190,7 +190,15 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
 
-                store.Status = false;
+                if(store.Status)
+                {
+                    store.Status = false;
+                }
+                else
+                {
+                    store.Status = true;
+                }
+                
                 await _genericRepository.UpdateAsync(store);
                 result.Content = true;
                 return result;

@@ -280,5 +280,21 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get product detail by ID - Hiếu
+        /// </summary>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("detail/{productId}/{productDetailId}")]
+        public async Task<IActionResult> GetProductByDetailID(int productId, int productDetailId)
+        {
+            var result = await _service.GetProductByDetailID(productId, productDetailId);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

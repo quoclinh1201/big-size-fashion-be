@@ -10,7 +10,7 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
     public class GetDetailProductResponse
     {
         public int ProductId { get; set; }
-        public int ProductDetailId { get; set; }
+        //public int ProductDetailId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
         public decimal? PromotionPrice { get; set; }

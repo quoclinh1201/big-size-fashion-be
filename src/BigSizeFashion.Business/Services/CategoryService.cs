@@ -130,7 +130,15 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
 
-                category.Status = false;
+                if(category.Status)
+                {
+                    category.Status = false;
+                }
+                else
+                {
+                    category.Status = true;
+                }
+                
                 await _genericRepository.UpdateAsync(category);
                 result.Content = true;
                 return result;

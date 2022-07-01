@@ -527,8 +527,15 @@ namespace BigSizeFashion.Business.Services
                     result.Content = false;
                     return result;
                 }
-
-                roduct.Status = false;
+                if (roduct.Status)
+                {
+                    roduct.Status = false;
+                }
+                else
+                {
+                    roduct.Status = true;
+                }
+                
                 await _productRepository.UpdateAsync(roduct);
                 result.Content = true;
                 return result;
@@ -1010,5 +1017,82 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
+        public async Task<Result<GetDetailProductResponse>> GetProductByDetailID(int productId, int productDetailId)
+        {
+            var result = new Result<GetDetailProductResponse>();
+            try
+            {
+                var product = await _productRepository.GetAllByIQueryable()
+                                    .Include(p => p.Category)
+                                    .Where(p => p.ProductId == productId)
+                                    .Include(p => p.ProductDetails)
+                                    .ThenInclude(p => p.Size)
+                                    .Include(p => p.ProductDetails)
+                                    .ThenInclude(p => p.Colour)
+                                    .FirstOrDefaultAsync();
+
+                if (product != null)
+                {
+                    var model = _mapper.Map<GetDetailProductResponse>(product);
+
+                    var productDetail = await _productDetailRepository.GetAllByIQueryable()
+                                        .Include(p => p.Size)
+                                        .Include(p => p.Colour)
+                                        .Where(p => p.ProductDetailId == productDetailId).FirstOrDefaultAsync();
+
+                    var list = new List<ProductDetailResponse>();
+                    var x = new ProductDetailResponse
+                    {
+                        ProductDetailId = productDetail.ProductDetailId,
+                        ProductId = productDetail.ProductId,
+                        Size = _mapper.Map<SizeResponse>(productDetail.Size),
+                        Colour = _mapper.Map<ColourResponse>(productDetail.Colour)
+                    };
+                    list.Add(x);
+                    model.ProductDetailList = list;
+
+                    var images = await _imageRepository.FindByAsync(i => i.ProductId == model.ProductId);
+
+                    if (images.Count > 0)
+                    {
+                        model.Images = _mapper.Map<List<ProductImageResponse>>(images);
+                    }
+                    else
+                    {
+                        var image = new ProductImageResponse
+                        {
+                            ProductId = model.ProductId,
+                            ImageUrl = CommonConstants.NoImageUrl,
+                            IsMainImage = true
+                        };
+                        model.Images.Add(image);
+                    }
+
+                    var now = DateTime.UtcNow.AddHours(7);
+                    var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                    .Include(p => p.Promotion)
+                                    .Where(p => p.Promotion.ApplyDate <= now
+                                                && p.Promotion.ExpiredDate >= now
+                                                && p.Promotion.Status == true
+                                                && p.ProductId == model.ProductId)
+                                    .FirstOrDefaultAsync();
+                    if (pd != null)
+                    {
+                        var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
+                        model.PromotionValue = pd.Promotion.PromotionValue + "%";
+                    }
+                    result.Content = model;
+                    return result;
+                }
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Sản phẩm không tồn tại");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }

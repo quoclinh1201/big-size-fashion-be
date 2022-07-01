@@ -57,7 +57,14 @@ namespace BigSizeFashion.Business.Services
                     return result;
                 }
 
-                size.Status = false;
+                if(size.Status)
+                {
+                    size.Status = false;
+                }
+                else{
+                    size.Status = true;
+                }
+                
                 await _genericRepository.UpdateAsync(size);
                 result.Content = true;
                 return result;
