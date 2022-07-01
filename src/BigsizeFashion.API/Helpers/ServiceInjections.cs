@@ -1,6 +1,8 @@
 ﻿using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
+using BigSizeFashion.Business.IServices.VNPay;
 using BigSizeFashion.Business.Services;
+using BigSizeFashion.Business.Services.VNPay;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
 using BigSizeFashion.Data.Repositories;
@@ -67,6 +69,7 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IStoreWarehouseService, StoreWarehouseService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();
             services.AddScoped<IDeliveryNoteService, DeliveryNoteService>();
+            services.AddScoped<IVNPayService, VNPayService>();
 
             return services;
         }

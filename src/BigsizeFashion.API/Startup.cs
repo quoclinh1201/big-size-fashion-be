@@ -21,6 +21,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace BigsizeFashion.API
 {
@@ -137,6 +138,12 @@ namespace BigsizeFashion.API
                     c.SwaggerEndpoint($"{swaggerJsonBasePath}/swagger/v1/swagger.json", "BigsizeFashion.API v1");
                 });
             }
+
+            //app.UseForwardedHeaders(new ForwardedHeadersOptions
+            //{
+            //    ForwardedHeaders = ForwardedHeaders.XForwardedFor |
+            //    ForwardedHeaders.XForwardedProto
+            //});
 
             app.UseHttpsRedirection();
 
