@@ -110,5 +110,17 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        [Authorize]
+        [HttpGet("nearest/{address}")]
+        public async Task<IActionResult> GetNearestStore(string address)
+        {
+            var result = await _service.GetNearestStore(address);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

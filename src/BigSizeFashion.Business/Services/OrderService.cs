@@ -531,7 +531,7 @@ namespace BigSizeFashion.Business.Services
             var listOrderDetailRequest = new List<OrderDetailRequest>();
             var addressResponse = await _addressService.GetAddressById(authorization, request.DeliveryAddress);
             var test = addressResponse.Content.ReceiveAddress;
-            var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress);
+            //var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress); //chỉnh lại
             var orderResponse = new OrderResponse()
             {
                 CreateDate = DateTime.UtcNow.AddHours(7),
@@ -539,7 +539,7 @@ namespace BigSizeFashion.Business.Services
                 DeliveryAddress = request.DeliveryAddress,
                 PaymentMethod = request.PaymentMethod,
                 Status = (byte)OrderStatusEnum.Pending,
-                StoreId = storeId,
+                //StoreId = storeId, //chỉnh lại
                 OrderType = request.OrderType,
                 TotalPrice = request.TotalPrice,
                 TotalPriceAfterDiscount = request.PromotionPrice,

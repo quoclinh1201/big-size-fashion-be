@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Common;
+﻿using BigSizeFashion.Business.Dtos.Responses;
+using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -17,7 +18,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<StoreResponse>> CreateStore(CreateStoreRequest request);
         Task<Result<StoreResponse>> UpdateStore(int id, CreateStoreRequest request);
         Task<Result<bool>> DeleteStore(int id);
-        public Task<int> GetNearestStore(string receiveAddress);
+        Task<Result<NearestStoreResponse>> GetNearestStore(string receiveAddress);
 
         
     }

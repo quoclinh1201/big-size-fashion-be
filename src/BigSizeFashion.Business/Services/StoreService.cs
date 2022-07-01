@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.Parameters;
@@ -210,8 +211,9 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<int> GetNearestStore(string receiveAddress)
+        public async Task<Result<NearestStoreResponse>> GetNearestStore(string receiveAddress)
         {
+            var result = new Result<NearestStoreResponse>();
             try
             {
                 var storeAddressList = await _genericRepository.GetAllByIQueryable()
@@ -237,17 +239,33 @@ namespace BigSizeFashion.Business.Services
                     Destinations = list
                 };
 
-                var result = await GoogleMaps.DistanceMatrix.QueryAsync(request);
+                var response = await GoogleMaps.DistanceMatrix.QueryAsync(request);
                 var index = 0;
-                var test = result.RawJson;
+                var test = response.RawJson;
 
                 foreach (var item in listAddress)
                 {
-                    listAddress[item.Key] = result.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
+                    listAddress[item.Key] = response.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
                     index++;
                 }
                 var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-                return storeId;
+                decimal shippingFee = 0;
+
+                if(listAddress[storeId] <= 3000)
+                {
+                    shippingFee = 15000;
+                }
+                else
+                {
+                    shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 5000;
+                }
+
+                var nearest = new NearestStoreResponse();
+                nearest.StoreId = storeId;
+                nearest.ShippingFee = shippingFee;
+
+                result.Content = nearest;
+                return result;
             }
             catch (Exception)
             {
