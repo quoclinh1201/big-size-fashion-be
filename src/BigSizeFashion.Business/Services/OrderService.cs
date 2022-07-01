@@ -536,7 +536,7 @@ namespace BigSizeFashion.Business.Services
             {
                 CreateDate = DateTime.UtcNow.AddHours(7),
                 CustomerId = uid,
-                DeliveryAddress = 1,
+                DeliveryAddress = request.DeliveryAddress,
                 PaymentMethod = request.PaymentMethod,
                 Status = (byte)OrderStatusEnum.Pending,
                 StoreId = storeId,
