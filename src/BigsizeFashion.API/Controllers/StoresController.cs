@@ -111,6 +111,16 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// GetNearestStore and calculate shipping fee
+        /// </summary>
+        /// <remarks>
+        /// - dưới 3km => phi ship 15000
+        /// - trên 3km => tăng 5000 cho mỗi km
+        /// - AE có ý kiến nào hay thì sửa lại
+        /// </remarks>
+        /// <param name="address"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpGet("nearest/{address}")]
         public async Task<IActionResult> GetNearestStore(string address)

@@ -21,7 +21,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Get payment url (for customer)
+        /// Get payment url for customer (lỗi)
         /// </summary>
         /// <remarks>
         /// - id là id của order cần thanh toán
@@ -41,7 +41,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// asdasdas
+        /// asdasdas (lỗi)
         /// </summary>
         /// <param name="param"></param>
         /// <returns></returns>
