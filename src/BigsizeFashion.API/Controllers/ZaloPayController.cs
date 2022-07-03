@@ -23,6 +23,7 @@ namespace BigsizeFashion.API.Controllers
         /// Create order from zalo pay
         /// </summary>
         /// <remarks>
+        /// - truyền order id vào
         /// - Dùng Order url để redirect sang app Zalo pay để thanh toán
         /// - Vào https://docs.zalopay.vn/v2/start/#A-I để tải app sandbox để test
         /// </remarks>

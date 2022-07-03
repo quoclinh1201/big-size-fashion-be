@@ -27,5 +27,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> RejectOrder(int id);
         Task<bool> AddOrder(string authorization, OrderRequest request);
         Task<Result<bool>> CancelOrder(string v, int id);
+        Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string v, GetRevenueParameter param);
+        Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param);
     }
 }

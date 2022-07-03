@@ -306,5 +306,42 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
 
         }
+
+        /// <summary>
+        /// Get revenue of own store (for manager)
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("revenue")]
+        public async Task<IActionResult> GetRevenueOfOwnStore([FromHeader] string authorization, [FromQuery] GetRevenueParameter param)
+        {
+            var result = await _service.GetRevenueOfOwnStore(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get revenue by store Id (for owner)
+        /// </summary>
+        /// <remarks>
+        /// - Id = 0 => lấy doanh thu của cả chuỗi
+        /// </remarks>
+        /// <param name="id"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("revenue/{id}")]
+        public async Task<IActionResult> GetRevenueByStoreId(int id, [FromQuery] GetRevenueParameter param)
+        {
+            var result = await _service.GetRevenueByStoreId(id, param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
