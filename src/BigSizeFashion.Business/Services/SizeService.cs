@@ -127,7 +127,7 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<SizeResponse>();
             try
             {
-                var size = await _genericRepository.FindAsync(s => s.SizeId == id && s.Status == true);
+                var size = await _genericRepository.FindAsync(s => s.SizeId == id);
                 result.Content = _mapper.Map<SizeResponse>(size);
                 return result;
             }

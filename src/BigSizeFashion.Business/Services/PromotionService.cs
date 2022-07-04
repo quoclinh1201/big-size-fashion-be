@@ -30,6 +30,15 @@ namespace BigSizeFashion.Business.Services
         {
             try
             {
+                var now = DateTime.Now;
+                var expiredPromotion = await _genericRepository.FindByAsync(p => p.ExpiredDate < now && p.Status == true);
+
+                for (int i = 0; i < expiredPromotion.Count; i++)
+                {
+                    expiredPromotion.ElementAt(i).Status = false;
+                    await _genericRepository.UpdateAsync(expiredPromotion.ElementAt(i));
+                }
+
                 var promotions = await _genericRepository.GetAllAsync();
                 var query = promotions.AsQueryable();
                 FilterPromotionByName(ref query, param.PromotionName);
@@ -93,7 +102,7 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<PromotionResponse>();
             try
             {
-                var promotion = await _genericRepository.FindAsync(s => s.PromotionId == id && s.Status == true);
+                var promotion = await _genericRepository.FindAsync(s => s.PromotionId == id);
                 result.Content = _mapper.Map<PromotionResponse>(promotion);
                 return result;
             }

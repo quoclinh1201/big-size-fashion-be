@@ -70,7 +70,7 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<CategoryResponse>();
             try
             {
-                var category = await _genericRepository.FindAsync(s => s.CategoryId == id && s.Status == true);
+                var category = await _genericRepository.FindAsync(s => s.CategoryId == id);
                 result.Content = _mapper.Map<CategoryResponse>(category);
                 return result;
             }

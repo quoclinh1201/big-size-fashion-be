@@ -10,7 +10,7 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
     {
         public int PromotionId { get; set; }
         public string PromotionName { get; set; }
-        public string PromotionValue { get; set; }
+        public byte PromotionValue { get; set; }
         public string ApplyDate { get; set; }
         public string ExpiredDate { get; set; }
         public bool Status { get; set; }

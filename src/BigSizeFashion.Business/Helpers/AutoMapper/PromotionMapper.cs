@@ -16,7 +16,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
         public PromotionMapper()
         {
             CreateMap<Promotion, PromotionResponse>()
-                .ForMember(d => d.PromotionValue, s => s.MapFrom(s => s.PromotionValue + "%"))
+                .ForMember(d => d.PromotionValue, s => s.MapFrom(s => s.PromotionValue))
                 .ForMember(d => d.ApplyDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.ApplyDate)))
                 .ForMember(d => d.ExpiredDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.ExpiredDate)));
 

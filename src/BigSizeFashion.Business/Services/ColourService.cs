@@ -77,7 +77,7 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<ColourResponse>();
             try
             {
-                var colour = await _genericRepository.FindAsync(s => s.ColourId == id && s.Status == true);
+                var colour = await _genericRepository.FindAsync(s => s.ColourId == id);
                 result.Content = _mapper.Map<ColourResponse>(colour);
                 return result;
             }
