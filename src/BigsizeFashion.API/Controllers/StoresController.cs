@@ -25,6 +25,11 @@ namespace BigsizeFashion.API.Controllers
         /// <summary>
         /// Get all store
         /// </summary>
+        /// <remarks>
+        /// - IsMainWarehouse = null => get all type
+        /// - IsMainWarehouse = true => get only warehouse
+        /// - IsMainWarehouse = fasle => get only store
+        /// </remarks>
         /// <returns></returns>
         //[Authorize]
         [HttpGet]

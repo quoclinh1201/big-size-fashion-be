@@ -95,6 +95,7 @@ namespace BigSizeFashion.Business.Services
             {
                 var stores = await _genericRepository.GetAllAsync();
                 var query = stores.AsQueryable();
+                FilterStoreByIsMainWarehouse(ref query, param.IsMainWarehouse);
                 FilterStoreByAddress(ref query, param.StoreAddress);
                 FilterStoreByStatus(ref query, param.Status);
                 var list = _mapper.Map<List<StoreResponse>>(query.ToList());
@@ -114,6 +115,23 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        private void FilterStoreByIsMainWarehouse(ref IQueryable<Store> query, bool? isMainWarehouse)
+        {
+            if (!query.Any() || isMainWarehouse is null)
+            {
+                return;
+            }
+
+            if (isMainWarehouse is true)
+            {
+                query = query.Where(x => x.IsMainWarehouse == true);
+            }
+            else
+            {
+                query = query.Where(x => x.IsMainWarehouse == false);
             }
         }
 
