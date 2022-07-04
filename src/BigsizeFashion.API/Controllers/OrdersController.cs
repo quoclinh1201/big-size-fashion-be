@@ -293,7 +293,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Sửa lại api này đi Long
+        /// Sửa lại api này đi Long(ok)
         /// </summary>
         /// <remarks>
         /// - Phí ship thì lưu vô Shipping Fee

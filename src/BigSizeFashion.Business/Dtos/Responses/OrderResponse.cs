@@ -24,5 +24,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public DateTime? ReceivedDate { get; set; }
         public DateTime? RejectedDate { get; set; }
         public byte Status { get; set; }
+        public decimal? ShippingFee { get; set; }
     }
 }
