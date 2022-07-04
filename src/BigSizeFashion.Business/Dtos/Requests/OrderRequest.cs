@@ -13,6 +13,8 @@ namespace BigSizeFashion.Business.Dtos.Requests
         public decimal PromotionPrice { get; set; }
         public bool OrderType { get; set; }
         public string PaymentMethod { get; set; }
-
+        public decimal? ShippingFee { get; set; }
+        public int MyProperty { get; set; }
+        public int StoreId { get; set; }
     }
 }

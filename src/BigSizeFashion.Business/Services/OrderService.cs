@@ -122,7 +122,6 @@ namespace BigSizeFashion.Business.Services
                     CreateDate = DateTime.UtcNow.AddHours(7),
                     TotalPrice = totalPrice,
                     TotalPriceAfterDiscount = totalDiscount,
-                    ShippingFee = 0,
                     OrderType = false,
                     PaymentMethod = request.PaymentMethod,
                     ApprovalDate = DateTime.UtcNow.AddHours(7),
@@ -532,7 +531,7 @@ namespace BigSizeFashion.Business.Services
             var listOrderDetailRequest = new List<OrderDetailRequest>();
             var addressResponse = await _addressService.GetAddressById(authorization, request.DeliveryAddress);
             var test = addressResponse.Content.ReceiveAddress;
-            //var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress); //chỉnh lại
+            //var storeId = await _storeService.GetNearestStore(addressResponse.Content.ReceiveAddress);
             var orderResponse = new OrderResponse()
             {
                 CreateDate = DateTime.UtcNow.AddHours(7),
@@ -540,7 +539,7 @@ namespace BigSizeFashion.Business.Services
                 DeliveryAddress = request.DeliveryAddress,
                 PaymentMethod = request.PaymentMethod,
                 Status = (byte)OrderStatusEnum.Pending,
-                //StoreId = storeId, //chỉnh lại
+              //  StoreId = storeId,
                 OrderType = request.OrderType,
                 TotalPrice = request.TotalPrice,
                 TotalPriceAfterDiscount = request.PromotionPrice,
@@ -586,95 +585,14 @@ namespace BigSizeFashion.Business.Services
             return true;
         }
 
-        public async Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string token, GetRevenueParameter param)
+        public Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string v, GetRevenueParameter param)
         {
-            var result = new Result<IEnumerable<GetRevenueResponse>>();
-            var listDate = new List<GetRevenueResponse>();
-            try
-            {
-                var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var staff = await _staffRepository.FindAsync(s => s.Uid == uid);
-
-                for (int i = 1; i <= DateTime.DaysInMonth(param.Year, param.Month); i++)
-                {
-                    var d = new GetRevenueResponse { Date = i, Value = 0 };
-                    listDate.Add(d);
-                }
-
-                for (int i = 1; i <= listDate.Count; i++)
-                {
-                    var orders = await _orderRepository
-                        .FindByAsync(o => o.StoreId == staff.StoreId
-                        && o.CreateDate.Day == listDate[i - 1].Date
-                        && o.CreateDate.Month == param.Month
-                        && o.CreateDate.Year == param.Year
-                        && o.Status != 0
-                        && o.Status != 1
-                        && o.Status != 6);
-                    var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
-                    listDate[i - 1].Value = revenue;
-                }
-                result.Content = listDate;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-                return result;
-            }
+            throw new NotImplementedException();
         }
 
-        public async Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param)
+        public Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param)
         {
-            var result = new Result<IEnumerable<GetRevenueResponse>>();
-            var listDate = new List<GetRevenueResponse>();
-            try
-            {
-                for (int i = 1; i <= DateTime.DaysInMonth(param.Year, param.Month); i++)
-                {
-                    var d = new GetRevenueResponse { Date = i, Value = 0 };
-                    listDate.Add(d);
-                }
-
-                if(id == 0)
-                {
-                    for (int i = 1; i <= listDate.Count; i++)
-                    {
-                        var orders = await _orderRepository
-                            .FindByAsync(o => o.CreateDate.Day == listDate[i - 1].Date
-                            && o.CreateDate.Month == param.Month
-                            && o.CreateDate.Year == param.Year
-                            && o.Status != 0
-                            && o.Status != 1
-                            && o.Status != 6);
-                        var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
-                        listDate[i - 1].Value = revenue;
-                    }
-                }
-                else
-                {
-                    for (int i = 1; i <= listDate.Count; i++)
-                    {
-                        var orders = await _orderRepository
-                            .FindByAsync(o => o.StoreId == id
-                            && o.CreateDate.Day == listDate[i - 1].Date
-                            && o.CreateDate.Month == param.Month
-                            && o.CreateDate.Year == param.Year
-                            && o.Status != 0
-                            && o.Status != 1
-                            && o.Status != 6);
-                        var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
-                        listDate[i - 1].Value = revenue;
-                    }
-                }
-                result.Content = listDate;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-                return result;
-            }
+            throw new NotImplementedException();
         }
     }
 }
