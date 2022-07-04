@@ -122,6 +122,7 @@ namespace BigSizeFashion.Business.Services
                     CreateDate = DateTime.UtcNow.AddHours(7),
                     TotalPrice = totalPrice,
                     TotalPriceAfterDiscount = totalDiscount,
+                    ShippingFee = 0,
                     OrderType = false,
                     PaymentMethod = request.PaymentMethod,
                     ApprovalDate = DateTime.UtcNow.AddHours(7),

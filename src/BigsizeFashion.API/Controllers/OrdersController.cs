@@ -292,6 +292,16 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Sửa lại api này đi Long
+        /// </summary>
+        /// <remarks>
+        /// - Phí ship thì lưu vô Shipping Fee
+        /// - Sửa mấy chỗ khác trong service này nữa
+        /// </remarks>
+        /// <param name="request"></param>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
         [HttpPost("add-order")]
         public async Task<IActionResult> CreateOrder([FromBody] OrderRequest request, [FromHeader] string authorization)
         {

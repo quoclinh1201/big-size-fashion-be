@@ -11,5 +11,7 @@ namespace BigSizeFashion.Business.IServices.ZaloPay
     public interface IZaloPayService
     {
         Task<Result<CreateZaloPayOrderResponse>> CreateOrder(int id);
+
+        Task<Result<string>> CreateOrderString(int id);
     }
 }

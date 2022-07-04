@@ -11,6 +11,10 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
     {
         [Required]
         [MaxLength(200)]
+        public string StoreName { get; set; }
+
+        [Required]
+        [MaxLength(200)]
         public string StoreAddress { get; set; }
 
         [Required]
@@ -18,5 +22,8 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
         [MaxLength(10)]
         [MinLength(10)]
         public string StorePhone { get; set; }
+
+        [Required]
+        public bool IsMainWarehouse { get; set; }
     }
 }

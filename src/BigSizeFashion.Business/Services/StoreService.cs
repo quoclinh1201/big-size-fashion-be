@@ -157,7 +157,7 @@ namespace BigSizeFashion.Business.Services
                 return;
             }
 
-            query = query.Where(q => q.StoreAddress.ToLower().Contains(storeAddress.ToLower()));
+            query = query.Where(q => (q.StoreAddress.ToLower() + " " + q.StoreName.ToLower()).Contains(storeAddress.ToLower()));
         }
 
         public async Task<Result<StoreResponse>> UpdateStore(int id, CreateStoreRequest request)
@@ -217,7 +217,7 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var storeAddressList = await _genericRepository.GetAllByIQueryable()
-                        .Where(s => s.Status == true)
+                        .Where(s => s.Status == true && s.IsMainWarehouse == false)
                         .ToListAsync();
 
                 var list = new List<LocationEx>();
@@ -267,10 +267,10 @@ namespace BigSizeFashion.Business.Services
                 result.Content = nearest;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
     }

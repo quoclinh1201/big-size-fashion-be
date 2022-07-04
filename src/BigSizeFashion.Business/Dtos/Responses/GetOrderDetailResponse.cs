@@ -20,6 +20,7 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public List<OrderDetailItem> ProductList { get; set; } = new List<OrderDetailItem>();
         public decimal TotalPrice { get; set; }
         public decimal? TotalPriceAfterDiscount { get; set; }
+        public decimal? ShippingFee { get; set; }
         public string PaymentMethod { get; set; }
         public string OrderType { get; set; }
         public string ApprovalDate { get; set; }

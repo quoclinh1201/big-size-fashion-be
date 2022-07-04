@@ -39,5 +39,17 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+
+        //[HttpGet("test/{id}")]
+        //public async Task<IActionResult> CreateOrderString(int id)
+        //{
+        //    var result = await _service.CreateOrderString(id);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
     }
 }
