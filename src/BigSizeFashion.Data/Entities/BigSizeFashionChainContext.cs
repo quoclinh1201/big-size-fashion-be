@@ -416,6 +416,10 @@ namespace BigSizeFashion.Data.Entities
                     .HasColumnType("datetime")
                     .HasColumnName("rejected_date");
 
+                entity.Property(e => e.ShippingFee)
+                    .HasColumnType("money")
+                    .HasColumnName("shipping_fee");
+
                 entity.Property(e => e.StaffId).HasColumnName("staff_id");
 
                 entity.Property(e => e.Status).HasColumnName("status");
@@ -666,12 +670,19 @@ namespace BigSizeFashion.Data.Entities
 
                 entity.Property(e => e.StoreId).HasColumnName("store_id");
 
+                entity.Property(e => e.IsMainWarehouse).HasColumnName("is_main_warehouse");
+
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.StoreAddress)
                     .IsRequired()
                     .HasMaxLength(200)
                     .HasColumnName("store_address");
+
+                entity.Property(e => e.StoreName)
+                    .IsRequired()
+                    .HasMaxLength(200)
+                    .HasColumnName("store_name");
 
                 entity.Property(e => e.StorePhone)
                     .IsRequired()
