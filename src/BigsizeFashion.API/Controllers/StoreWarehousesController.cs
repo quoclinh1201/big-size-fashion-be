@@ -81,7 +81,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpPut]
+        [HttpPut("quantity-adjustment")]
         public async Task<IActionResult> QuantityAdjustment([FromHeader] string authorization, [FromBody] List<QuantityAdjustmentRequest> request)
         {
             var result = await _service.QuantityAdjustment(authorization.Substring(7), request);
