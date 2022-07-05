@@ -18,5 +18,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> CreateRequestImportProduct(string v, ImportProductRequest request);
         Task<Result<bool>> ApproveRequestImportProduct(string v, int id);
         Task<Result<bool>> RejectRequestImportProduct(int id);
+        Task<PagedResult<ListImportProductResponse>> GetListExportProductForMainWarehouse(string v, ImportProductParameter param);
     }
 }

@@ -208,6 +208,36 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
+        public async Task<PagedResult<ListImportProductResponse>> GetListExportProductForMainWarehouse(string token, ImportProductParameter param)
+        {
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var fromStores = await _storeRepository.FindByAsync(f => f.IsMainWarehouse == true);
+                var list = new List<DeliveryNote>();
+
+                foreach (var item in fromStores)
+                {
+                    var dn = await _genericRepository.FindByAsync(d => d.FromStore == item.StoreId);
+                    foreach (var i in dn)
+                    {
+                        list.Add(i);
+                    }
+                }
+                
+                var query = list.AsQueryable();
+                FilterByName(ref query, param.DeliveryNoteName);
+                query.OrderByDescending(q => q.CreateDate);
+                var result = _mapper.Map<List<ListImportProductResponse>>(query.ToList());
+                return PagedResult<ListImportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<PagedResult<ListImportProductResponse>> GetListRequestImportProduct(string token, ImportProductParameter param)
         {
             try

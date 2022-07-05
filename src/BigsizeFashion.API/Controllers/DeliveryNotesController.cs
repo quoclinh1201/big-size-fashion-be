@@ -146,5 +146,23 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get list export product for main warehouse (In admin page)
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("export-list-for-main-warehouse")]
+        public async Task<IActionResult> GetListExportProductForMainWarehouse([FromHeader] string authorization, [FromQuery] ImportProductParameter param)
+        {
+            var result = await _service.GetListExportProductForMainWarehouse(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
