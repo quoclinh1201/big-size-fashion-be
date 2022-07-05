@@ -46,5 +46,50 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Kiểm kê kho
+        /// </summary>
+        /// <remarks>
+        /// - Chọn từ ngày ... đến ngày ...
+        /// - Chọn product, chọn size, colour, nhập số lượng thực tế có trong cửa hàng
+        /// - Kq: số lượng đầu kỳ, số lượng cuối kỳ trên hệ thống, chênh lệch
+        /// </remarks>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CheckWarehouse([FromHeader] string authorization, [FromBody] CheckWarehouseRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.CheckWarehouse(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Điều chỉnh số lượng trong kho sau khi kiểm kê
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut]
+        public async Task<IActionResult> QuantityAdjustment([FromHeader] string authorization, [FromBody] List<QuantityAdjustmentRequest> request)
+        {
+            var result = await _service.QuantityAdjustment(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

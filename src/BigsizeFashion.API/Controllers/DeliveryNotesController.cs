@@ -33,7 +33,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet("import-list")]
-        public async Task<IActionResult> GetListRequestImportProduct([FromHeader] string authorization, [FromBody] ImportProductParameter param)
+        public async Task<IActionResult> GetListRequestImportProduct([FromHeader] string authorization, [FromQuery] ImportProductParameter param)
         {
             var result = await _service.GetListRequestImportProduct(authorization.Substring(7), param);
             if (!result.IsSuccess)
@@ -54,7 +54,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet("export-list")]
-        public async Task<IActionResult> GetListExportProduct([FromHeader] string authorization, [FromBody] ImportProductParameter param)
+        public async Task<IActionResult> GetListExportProduct([FromHeader] string authorization, [FromQuery] ImportProductParameter param)
         {
             var result = await _service.GetListExportProduct(authorization.Substring(7), param);
             if (!result.IsSuccess)
