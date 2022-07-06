@@ -355,25 +355,53 @@ namespace BigSizeFashion.Business.Services
                     .Where(a => a.Uid.Equals(uid)).Include(a => a.Role)
                     .FirstOrDefaultAsync();
 
-                account.Status = false;
+                if (account.Status == true)
+                {
+                    account.Status = false;
+                }
+                else
+                {
+                    account.Status = true;
+                }
                 await _accountRepository.SaveAsync();
 
                 if (account.Role.RoleName.Equals(AccountRoleEnum.Customer.ToString()))
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
-                    customer.Status = false;
+                    if (customer.Status == true)
+                    {
+                        customer.Status = false;
+                    }
+                    else
+                    {
+                        customer.Status = true;
+                    }
                     await _customerRepository.SaveAsync();
                 }
                 else if (account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
                 {
                     var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
-                    staff.Status = false;
+                    if (staff.Status == true)
+                    {
+                        staff.Status = false;
+                    }
+                    else
+                    {
+                        staff.Status = true;
+                    }
                     await _staffRepository.SaveAsync();
                 }
                 else if (account.Role.RoleName.Equals(AccountRoleEnum.Admin.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))
                 {
                     var admin = await _userRepository.FindAsync(c => c.Uid.Equals(uid));
-                    admin.Status = false;
+                    if (admin.Status == true)
+                    {
+                        admin.Status = false;
+                    }
+                    else
+                    {
+                        admin.Status = true;
+                    }
                     await _userRepository.SaveAsync();
                 }
                 //else if (account.Role.RoleName.Equals(AccountRoleEnum.Owner.ToString()))

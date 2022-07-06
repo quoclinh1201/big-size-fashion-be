@@ -219,7 +219,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Use for ban customer or disable staff account
+        /// adtive and disable account 
         /// </summary>
         /// <param name="uid"></param>
         /// <returns></returns>
@@ -239,26 +239,26 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        /// <summary>
+        /*// <summary>
         /// Use for unban customer or active staff account
         /// </summary>
         /// <param name="uid"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPut("active-account/uid")]
-        public async Task<IActionResult> ActiveAccount(int uid)
-        {
-            if (uid < 1)
-            {
-                return BadRequest();
-            }
-            var result = await _service.ActiveAccount(uid);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        /// <returns></returns>*/
+        //[Authorize]
+        //[HttpPut("active-account/uid")]
+        //public async Task<IActionResult> ActiveAccount(int uid)
+        //{
+        //    if (uid < 1)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.ActiveAccount(uid);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Change password
