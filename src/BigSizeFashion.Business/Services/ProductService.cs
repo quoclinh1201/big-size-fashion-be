@@ -547,7 +547,7 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<GetListProductResponse>> GetListProductFitWithCustomer(string token, QueryStringParameters param)
+        public async Task<PagedResult<GetListProductResponse>> GetListProductFitWithCustomer(string token, GetListProductFitWithCustomerParameters param)
         {
             try
             {
@@ -555,7 +555,7 @@ namespace BigSizeFashion.Business.Services
                 var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
                 var height = customer.Height;
                 var weight = customer.Weight;
-                var s = new SearchProductsParameter { PageNumber = param.PageNumber, PageSize = param.PageSize };
+                var s = new SearchProductsParameter { Category = param.CategoryName , PageNumber = param.PageNumber, PageSize = param.PageSize, Status = true };
 
                 if (height == null || weight == null)
                 {
@@ -1049,6 +1049,167 @@ namespace BigSizeFashion.Business.Services
                         Colour = _mapper.Map<ColourResponse>(productDetail.Colour)
                     };
                     list.Add(x);
+                    model.ProductDetailList = list;
+
+                    var images = await _imageRepository.FindByAsync(i => i.ProductId == model.ProductId);
+
+                    if (images.Count > 0)
+                    {
+                        model.Images = _mapper.Map<List<ProductImageResponse>>(images);
+                    }
+                    else
+                    {
+                        var image = new ProductImageResponse
+                        {
+                            ProductId = model.ProductId,
+                            ImageUrl = CommonConstants.NoImageUrl,
+                            IsMainImage = true
+                        };
+                        model.Images.Add(image);
+                    }
+
+                    var now = DateTime.UtcNow.AddHours(7);
+                    var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                    .Include(p => p.Promotion)
+                                    .Where(p => p.Promotion.ApplyDate <= now
+                                                && p.Promotion.ExpiredDate >= now
+                                                && p.Promotion.Status == true
+                                                && p.ProductId == model.ProductId)
+                                    .FirstOrDefaultAsync();
+                    if (pd != null)
+                    {
+                        var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
+                        model.PromotionValue = pd.Promotion.PromotionValue + "%";
+                    }
+                    result.Content = model;
+                    return result;
+                }
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Sản phẩm không tồn tại");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<GetDetailProductResponse>> GetDetailFitProductWithCustomer(string token, int id)
+        {
+            var result = new Result<GetDetailProductResponse>();
+            try
+            {
+                var accountUId = DecodeToken.DecodeTokenToGetUid(token);
+                var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
+                var height = customer.Height;
+                var weight = customer.Weight;
+                var size = string.Empty;
+
+
+                if (height == null || weight == null)
+                {
+                    return await GetProductByID(id);
+                }
+
+                if (customer.Gender != null)
+                {
+                    if (customer.Gender == true)
+                    {
+                        if (height < 176 || weight < 76)
+                        {
+                            return await GetProductByID(id);
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            size = "XL";
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 96)
+                        {
+                            size = "XXL";
+                        }
+                        else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
+                        {
+                            size = "XXXL";
+                        }
+                        else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
+                        {
+                            size = "4XL";
+                        }
+                        else if (height >= 188 && weight >= 115 && height < 196 && weight < 121)
+                        {
+                            size = "5XL";
+                        }
+                        else
+                        {
+                            size = "6XL";
+                        }
+                    }
+                    else
+                    {
+                        if (height < 168 || weight < 66)
+                        {
+                            return await GetProductByID(id);
+                        }
+                        else if (height >= 168 && weight >= 66 && height < 176 && weight < 76)
+                        {
+                            size = "XL";
+                        }
+                        else if (height >= 176 && weight >= 76 && height < 182 && weight < 86)
+                        {
+                            size = "XXL";
+                        }
+                        else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
+                        {
+                            size = "XXXL";
+                        }
+                        else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
+                        {
+                            size = "4XL";
+                        }
+                        else if (height >= 182 && weight >= 106 && height < 190 && weight < 111)
+                        {
+                            size = "5XL";
+                        }
+                        else
+                        {
+                            size = "6XL";
+                        }
+                    }
+                }
+                else
+                {
+                    return await GetProductByID(id);
+                }
+
+                var product = await _productRepository.GetAllByIQueryable()
+                                    .Include(p => p.Category)
+                                    .Where(p => p.ProductId == id && p.Status == true)
+                                    .FirstOrDefaultAsync();
+
+                if (product != null)
+                {
+                    var model = _mapper.Map<GetDetailProductResponse>(product);
+
+                    var productDetails = await _productDetailRepository.GetAllByIQueryable()
+                                        .Include(p => p.Size)
+                                        .Include(p => p.Colour)
+                                        .Where(p => p.ProductId == id && p.Size.SizeName == size).ToListAsync();
+
+                    var list = new List<ProductDetailResponse>();
+
+                    foreach (var item in productDetails)
+                    {
+                        var x = new ProductDetailResponse
+                        {
+                            ProductDetailId = item.ProductDetailId,
+                            ProductId = item.ProductId,
+                            Size = _mapper.Map<SizeResponse>(item.Size),
+                            Colour = _mapper.Map<ColourResponse>(item.Colour)
+                        };
+                        list.Add(x);
+                    }
+
                     model.ProductDetailList = list;
 
                     var images = await _imageRepository.FindByAsync(i => i.ProductId == model.ProductId);

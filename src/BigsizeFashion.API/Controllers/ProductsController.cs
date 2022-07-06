@@ -172,19 +172,30 @@ namespace BigsizeFashion.API.Controllers
 
 
         /// <summary>
-        /// Get list product fit with customer
+        /// Get list product fit with customer by category
         /// </summary>
-        /// <remarks>
-        /// Sau khi đăng nhập thành công thì gọi api này để lấy danh sách product phù hợp, còn muốn search thì gọi api khác
-        /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
         [HttpGet("fit-with-customer")]
-        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
+        public async Task<IActionResult> GetListProductFitWithCustomer([FromHeader] string authorization, [FromQuery] GetListProductFitWithCustomerParameters param)
         {
             var result = await _service.GetListProductFitWithCustomer(authorization.Substring(7), param);
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// View detail fit product for customer
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpGet("detail-fit-product/{id}")]
+        public async Task<IActionResult> GetDetailFitProductWithCustomer([FromHeader] string authorization, int id)
+        {
+            var result = await _service.GetDetailFitProductWithCustomer(authorization.Substring(7), id);
             return Ok(result);
         }
 
