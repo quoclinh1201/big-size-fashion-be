@@ -137,6 +137,7 @@ namespace BigSizeFashion.Business.Services
                 {
                     var query = products.AsQueryable();
                     FilterProductByName(ref query, param.ProductName);
+                    FilterProductByGender(ref query, param.Gender);
                     FilterProductByCategory(ref query, param.Category);
                     FilterProductByColourAndSize(ref query, param.Colour, param.Size);
                     OrderByPrice(ref query, param.OrderByPrice);
@@ -181,7 +182,23 @@ namespace BigSizeFashion.Business.Services
                 throw;
             }
         }
-        
+
+        private void FilterProductByGender(ref IQueryable<Product> query, string gender)
+        {
+            if (!query.Any() || String.IsNullOrEmpty(gender) || String.IsNullOrWhiteSpace(gender))
+            {
+                return;
+            }
+            if(gender.Equals("Male"))
+            {
+                query = query.Where(q => q.Gender == true);
+            }
+            else
+            {
+                query = query.Where(q => q.Gender == false);
+            }
+        }
+
         private static void FilterProductByName(ref IQueryable<Product> query, string name)
         {
             if (!query.Any() || String.IsNullOrEmpty(name) || String.IsNullOrWhiteSpace(name))
