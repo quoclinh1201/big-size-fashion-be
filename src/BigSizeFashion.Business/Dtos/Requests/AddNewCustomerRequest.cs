@@ -19,7 +19,6 @@ namespace BigSizeFashion.Business.Dtos.Requests
         [MaxLength(50)]
         public string Fullname { get; set; }
 
-        [Required(AllowEmptyStrings = false)]
         [MaxLength(50)]
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }

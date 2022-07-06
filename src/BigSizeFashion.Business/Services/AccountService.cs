@@ -18,6 +18,7 @@ using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.Enums;
 using BigSizeFashion.Business.Helpers.Constants;
+using BigSizeFashion.Business.Dtos.Requests;
 
 namespace BigSizeFashion.Business.Services
 {
@@ -138,12 +139,21 @@ namespace BigSizeFashion.Business.Services
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(account.Uid));
                     var token = GenerateJSONWebToken(customer.Uid.ToString(), customer.Fullname, account.Role.RoleName);
-                    result.Content = new CustomerLoginResponse { Token = token, IsNewCustomer = false };
-                    return result;
+
+                    if(customer.Weight > 0 && customer.Weight != null && customer.Height > 0 && customer.Height != null)
+                    {
+                        result.Content = new CustomerLoginResponse { Token = token, IsNewCustomer = false, IsHasWeightHeight = true };
+                        return result;
+                    }
+                    else
+                    {
+                        result.Content = new CustomerLoginResponse { Token = token, IsNewCustomer = false, IsHasWeightHeight = false };
+                        return result;
+                    }
                 }
                 else
                 {
-                    result.Content = new CustomerLoginResponse { IsNewCustomer = true };
+                    result.Content = new CustomerLoginResponse { IsNewCustomer = true, IsHasWeightHeight = false };
                     return result;
                 }
             }
@@ -309,14 +319,17 @@ namespace BigSizeFashion.Business.Services
                 {
                     var customer = await _customerRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(customer);
+                    response.Username = account.Username;
                     response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
                 }
                 else if (account.Role.RoleName.Equals(AccountRoleEnum.Manager.ToString()) || account.Role.RoleName.Equals(AccountRoleEnum.Staff.ToString()))
                 {
-                    var staff = await _staffRepository.FindAsync(c => c.Uid.Equals(uid));
+                    var staff = await _staffRepository.GetAllByIQueryable().Where(c => c.Uid.Equals(uid)).Include(s => s.Store).FirstOrDefaultAsync();
                     var response = _mapper.Map<GetDetailUserByUidResponse>(staff);
+                    response.Username = account.Username;
+                    response.StoreName = staff.Store.StoreName;
                     response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
@@ -325,6 +338,7 @@ namespace BigSizeFashion.Business.Services
                 {
                     var user = await _userRepository.FindAsync(c => c.Uid.Equals(uid));
                     var response = _mapper.Map<GetDetailUserByUidResponse>(user);
+                    response.Username = account.Username;
                     response.Role = account.Role.RoleName;
                     result.Content = response;
                     return result;
@@ -581,6 +595,24 @@ namespace BigSizeFashion.Business.Services
                 response.RoleAccount = request.RoleAccount;
                 response.Fullname = fullname;
                 result.Content = response;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> ResetPassword(int uid, ResetPasswordRequest request)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var account = await _accountRepository.FindAsync(a => a.Uid == uid);
+                account.Password = request.NewPassword;
+                await _accountRepository.UpdateAsync(account);
+                result.Content = true;
                 return result;
             }
             catch (Exception ex)

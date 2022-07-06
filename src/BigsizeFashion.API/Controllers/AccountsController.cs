@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Parameters;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -284,6 +285,28 @@ namespace BigsizeFashion.API.Controllers
                 {
                     return BadRequest(result);
                 }
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Reset password
+        /// </summary>
+        /// <param name="uid"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("reset-password/{uid}")]
+        public async Task<IActionResult> ResetPassword(int uid, [FromBody] ResetPasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.ResetPassword(uid, request);
+            if (!result.IsSuccess)
+            {
+                    return BadRequest(result);
             }
             return Ok(result);
         }

@@ -295,26 +295,64 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> ApproveOrder(int id)
+        public async Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOrder(int id)
         {
-            var result = new Result<bool>();
+            var result = new Result<IEnumerable<NotEnoughProductResponse>>();
             try
             {
+                var list = new List<NotEnoughProductResponse>();
                 var order = await _orderRepository.FindAsync(o => o.OrderId == id);
                 order.ApprovalDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Approved;
                 await _orderRepository.UpdateAsync(order);
 
                 var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
+
                 foreach (var item in ods)
                 {
-                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
-                    storeWarehouse.Quantity -= item.Quantity;
-                    await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                    var storeWarehouse = await _storeWarehouseRepository.GetAllByIQueryable()
+                        .Where(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Colour)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Product)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Size)
+                        .FirstOrDefaultAsync();
+                    if (storeWarehouse.Quantity < item.Quantity)
+                    {
+                        var cc = new NotEnoughProductResponse
+                        {
+                            ColourId = storeWarehouse.ProductDetail.ColourId,
+                            ColourName = storeWarehouse.ProductDetail.Colour.ColourName,
+                            ProductId = storeWarehouse.ProductDetail.ProductId,
+                            ProductName = storeWarehouse.ProductDetail.Product.ProductName,
+                            SizeId = storeWarehouse.ProductDetail.SizeId,
+                            SizeName = storeWarehouse.ProductDetail.Size.SizeName,
+                            QuantityInStore = storeWarehouse.Quantity,
+                            RequiredQuantity = item.Quantity
+                        };
+                        list.Add(cc);
+                    }
                 }
 
-                result.Content = true;
-                return result;
+                if(list.Count == 0)
+                {
+                    foreach (var item in ods)
+                    {
+                        var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                        storeWarehouse.Quantity -= item.Quantity;
+                        await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                    }
+
+                    result.Content = null;
+                    return result;
+                }
+                else
+                {
+                    result.Content = list;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -718,11 +756,12 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> ApproveOfflineOrder(int id)
+        public async Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOfflineOrder(int id)
         {
-            var result = new Result<bool>();
+            var result = new Result<IEnumerable<NotEnoughProductResponse>>();
             try
             {
+                var list = new List<NotEnoughProductResponse>();
                 var order = await _orderRepository.FindAsync(o => o.OrderId == id);
                 order.ApprovalDate = DateTime.UtcNow.AddHours(7);
                 order.PackagedDate = DateTime.UtcNow.AddHours(7);
@@ -734,13 +773,49 @@ namespace BigSizeFashion.Business.Services
                 var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
                 foreach (var item in ods)
                 {
-                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
-                    storeWarehouse.Quantity -= item.Quantity;
-                    await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                    var storeWarehouse = await _storeWarehouseRepository.GetAllByIQueryable()
+                        .Where(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Colour)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Product)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Size)
+                        .FirstOrDefaultAsync();
+                    if (storeWarehouse.Quantity < item.Quantity)
+                    {
+                        var cc = new NotEnoughProductResponse
+                        {
+                            ColourId = storeWarehouse.ProductDetail.ColourId,
+                            ColourName = storeWarehouse.ProductDetail.Colour.ColourName,
+                            ProductId = storeWarehouse.ProductDetail.ProductId,
+                            ProductName = storeWarehouse.ProductDetail.Product.ProductName,
+                            SizeId = storeWarehouse.ProductDetail.SizeId,
+                            SizeName = storeWarehouse.ProductDetail.Size.SizeName,
+                            QuantityInStore = storeWarehouse.Quantity,
+                            RequiredQuantity = item.Quantity
+                        };
+                        list.Add(cc);
+                    }
                 }
 
-                result.Content = true;
-                return result;
+                if (list.Count == 0)
+                {
+                    foreach (var item in ods)
+                    {
+                        var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                        storeWarehouse.Quantity -= item.Quantity;
+                        await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                    }
+
+                    result.Content = null;
+                    return result;
+                }
+                else
+                {
+                    result.Content = list;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -771,6 +846,39 @@ namespace BigSizeFashion.Business.Services
                                                && o.Status != 6);
                     var value = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
                     list.Add(new StaffPerformanceResponse { Date = ConvertDateTime.ConvertDateToString(item), Value = value });
+                }
+                result.Content = list;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<StaffPerformanceOrderResponse>>> GetStaffPerformanceOrder(string token)
+        {
+            var result = new Result<IEnumerable<StaffPerformanceOrderResponse>>();
+            var list = new List<StaffPerformanceOrderResponse>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                DateTime[] last7Days = Enumerable.Range(0, 7)
+                                        .Select(i => DateTime.Now.AddDays(-i))
+                                        .ToArray();
+                foreach (var item in last7Days)
+                {
+                    var orders = await _orderRepository
+                                .FindByAsync(o => o.StaffId == uid
+                                               && o.CreateDate.Day == item.Day
+                                               && o.CreateDate.Month == item.Month
+                                               && o.CreateDate.Year == item.Year
+                                               && o.Status != 0
+                                               && o.Status != 1
+                                               && o.Status != 6);
+                    var value = orders.Select(o => o.OrderId).Count();
+                    list.Add(new StaffPerformanceOrderResponse { Date = ConvertDateTime.ConvertDateToString(item), QuantityOfOrders = value });
                 }
                 result.Content = list;
                 return result;

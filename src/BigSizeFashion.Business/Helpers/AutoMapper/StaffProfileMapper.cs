@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -20,6 +21,9 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
 
             CreateMap<UpdateStaffProfileRequest, staff>()
                 .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertStringToDate(s.Birthday)));
+
+            CreateMap<staff, StaffOfStoreResponse>()
+               .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)));
         }
     }
 }

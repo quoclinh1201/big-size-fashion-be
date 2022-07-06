@@ -9,7 +9,7 @@ namespace BigSizeFashion.Business.Helpers.Parameters
     public class SearchPromotionParameter : QueryStringParameters
     {
         public string PromotionName { get; set; }
-        public bool? OrderByApplyDate { get; set; }
+        public bool? OrderByExpiredDate { get; set; }
         public bool? Status { get; set; }
     }
 }

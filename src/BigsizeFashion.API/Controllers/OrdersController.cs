@@ -124,6 +124,10 @@ namespace BigsizeFashion.API.Controllers
         /// <summary>
         /// Manager approve order (cho đơn hàng online)
         /// </summary>
+        /// <remarks>
+        /// - content = null => approve thành công
+        /// - content != null => list các sản phẩm không đáp ứng đủ số lượng
+        /// </remarks>
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
@@ -141,6 +145,10 @@ namespace BigsizeFashion.API.Controllers
         /// <summary>
         /// Manager approve order (cho đơn hàng offline)
         /// </summary>
+        /// <remarks>
+        /// - content = null => approve thành công
+        /// - content != null => list các sản phẩm không đáp ứng đủ số lượng
+        /// </remarks>
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
@@ -390,7 +398,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Get nearest 7 days performance of staff
+        /// Get nearest 7 days performance of staff (revenue)
         /// </summary>
         /// <param name="authorization"></param>
         /// <returns></returns>
@@ -398,6 +406,22 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> GetStaffPerformance([FromHeader] string authorization)
         {
             var result = await _service.GetStaffPerformance(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get nearest 7 days performance of staff (order)
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
+        [HttpGet("staff-performance-order")]
+        public async Task<IActionResult> GetStaffPerformanceOrder([FromHeader] string authorization)
+        {
+            var result = await _service.GetStaffPerformanceOrder(authorization.Substring(7));
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

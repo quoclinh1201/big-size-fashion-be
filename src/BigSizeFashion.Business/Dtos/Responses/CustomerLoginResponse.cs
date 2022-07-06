@@ -10,5 +10,6 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
     {
         public string Token { get; set; }
         public bool IsNewCustomer { get; set; }
+        public bool IsHasWeightHeight { get; set; }
     }
 }

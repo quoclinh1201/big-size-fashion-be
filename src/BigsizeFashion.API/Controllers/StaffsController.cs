@@ -81,5 +81,22 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Manager get all staff of store (only status = true)
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("all-staff-of-store")]
+        public async Task<IActionResult> GetAllStaffOfStore([FromHeader] string authorization)
+        {
+            var result = await _service.GetAllStaffOfStore(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                 return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
 using BigSizeFashion.Business.Helpers.RequestObjects;
@@ -29,6 +30,24 @@ namespace BigSizeFashion.Business.Services
             _staffRepository = staffRepository;
             _accountRepository = accountRepository;
             _mapper = mapper;
+        }
+
+        public async Task<Result<IEnumerable<StaffOfStoreResponse>>> GetAllStaffOfStore(string token)
+        {
+            var result = new Result<IEnumerable<StaffOfStoreResponse>>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository.GetAllByIQueryable().Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
+                var staffs = await _staffRepository.FindByAsync(s => s.StoreId == storeId && s.Status == true);
+                result.Content = _mapper.Map<List<StaffOfStoreResponse>>(staffs);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
         }
 
         public async Task<Result<StaffProfileResponse>> GetOwnProfile(string token)

@@ -876,7 +876,7 @@ namespace BigSizeFashion.Business.Services
 
                 for (int i = 0; i < cc.Count(); i++)
                 {
-                    var product = await _productRepository.FindAsync(p => p.ProductId == cc.ElementAt(i).Key);
+                    var product = await _productRepository.FindAsync(p => p.ProductId == cc.ElementAt(i).Key && p.Status == true);
                     var pp = _mapper.Map<GetListProductResponse>(product);
                     var image = await _imageRepository.FindAsync(x => x.ProductId == pp.ProductId && x.IsMainImage == true);
                     if (image != null)

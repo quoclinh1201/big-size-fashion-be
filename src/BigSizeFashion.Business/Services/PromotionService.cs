@@ -43,7 +43,7 @@ namespace BigSizeFashion.Business.Services
                 var query = promotions.AsQueryable();
                 FilterPromotionByName(ref query, param.PromotionName);
                 FilterPromotionByStatus(ref query, param.Status);
-                OrderByCreatedDate(ref query, param.OrderByApplyDate);
+                OrderByCreatedDate(ref query, param.OrderByExpiredDate);
                 var response = _mapper.Map<List<PromotionResponse>>(query.ToList());
                 return PagedResult<PromotionResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
             }
@@ -72,11 +72,11 @@ namespace BigSizeFashion.Business.Services
 
             if (orderByApplydDate is true)
             {
-                query = query.OrderByDescending(x => x.ApplyDate);
+                query = query.OrderByDescending(x => x.ExpiredDate);
             }
             else
             {
-                query = query.OrderBy(x => x.ApplyDate);
+                query = query.OrderBy(x => x.ExpiredDate);
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Common;
+﻿using BigSizeFashion.Business.Dtos.Responses;
+using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using System;
@@ -13,5 +14,6 @@ namespace BigSizeFashion.Business.IServices
     {
         Task<Result<StaffProfileResponse>> GetOwnProfile(string token);
         Task<Result<StaffProfileResponse>> UpdateProfile(string token, UpdateStaffProfileRequest request);
+        Task<Result<IEnumerable<StaffOfStoreResponse>>> GetAllStaffOfStore(string v);
     }
 }

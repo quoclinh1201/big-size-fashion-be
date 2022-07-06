@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Common;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -23,5 +24,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> ChangePassword(string token, ChangePasswordRequest request);
         Task<Result<LoginResponse>> Login(UsernamePasswordLoginRequest request);
         Task<Result<AccountResponse>> CreateAccount(CreateAccountRequest request);
+        Task<Result<bool>> ResetPassword(int uid, ResetPasswordRequest request);
     }
 }
