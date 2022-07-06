@@ -109,9 +109,9 @@ namespace BigSizeFashion.Business.Services
                         totalDiscount += p * item.Quantity;
                     }
 
-                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == staff.StoreId && s.ProductDetailId == item.ProductDetailId);
-                    storeWarehouse.Quantity -= item.Quantity;
-                    await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                    //var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == staff.StoreId && s.ProductDetailId == item.ProductDetailId);
+                    //storeWarehouse.Quantity -= item.Quantity;
+                    //await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
                 }
 
                 var order = new Order
@@ -124,11 +124,11 @@ namespace BigSizeFashion.Business.Services
                     TotalPriceAfterDiscount = totalDiscount,
                     OrderType = false,
                     PaymentMethod = request.PaymentMethod,
-                    ApprovalDate = DateTime.UtcNow.AddHours(7),
-                    PackagedDate = DateTime.UtcNow.AddHours(7),
-                    DeliveryDate = DateTime.UtcNow.AddHours(7),
-                    ReceivedDate = DateTime.UtcNow.AddHours(7),
-                    Status = (byte)OrderStatusEnum.Received
+                    //ApprovalDate = DateTime.UtcNow.AddHours(7),
+                    //PackagedDate = DateTime.UtcNow.AddHours(7),
+                    //DeliveryDate = DateTime.UtcNow.AddHours(7),
+                    //ReceivedDate = DateTime.UtcNow.AddHours(7),
+                    Status = (byte)OrderStatusEnum.Pending
                 };
                 await _orderRepository.InsertAsync(order);
                 await _orderRepository.SaveAsync();
@@ -305,6 +305,15 @@ namespace BigSizeFashion.Business.Services
                 order.ApprovalDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Approved;
                 await _orderRepository.UpdateAsync(order);
+
+                var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
+                foreach (var item in ods)
+                {
+                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                    storeWarehouse.Quantity -= item.Quantity;
+                    await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                }
+
                 result.Content = true;
                 return result;
             }
@@ -377,27 +386,59 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string token, FilterOrderParameter param)
+        //public async Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string token, FilterOrderParameter param)
+        //{
+        //    try
+        //    {
+        //        var uid = DecodeToken.DecodeTokenToGetUid(token);
+        //        var orders = await _orderRepository.GetAllByIQueryable().Where(o => o.StaffId == uid).Include(o => o.Customer).ToListAsync();
+        //        var query = orders.AsQueryable();
+        //        FilterOrderByType(ref query, param.OrderType);
+        //        FilterOrderStatus(ref query, param.OrderStatus.ToString());
+        //        OrderByCreateDate(ref query, param.OrderByCreateDate);
+        //        var response = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
+        //        for (int i = 0; i < response.Count; i++)
+        //        {
+        //            var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == response[i].OrderId).Select(o => o.Quantity).Sum();
+        //            response[i].TotalQuantity = totalQuantity;
+        //        }
+        //        return PagedResult<ListOrderForStaffResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+        //    }
+        //    catch (Exception)
+        //    {
+        //        throw;
+        //    }
+        //}
+
+        public async Task<Result<IEnumerable<ListOrderForStaffResponse>>> GetListOrderOfStoreForStaff(string token, FilterOrderForStaffParameter param)
         {
+            var result = new Result<IEnumerable<ListOrderForStaffResponse>>();
             try
             {
+                var date = ConvertDateTime.ConvertStringToDate(param.CreateDate);
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.GetAllByIQueryable().Where(o => o.StaffId == uid).Include(o => o.Customer).ToListAsync();
-                var query = orders.AsQueryable();
-                FilterOrderByType(ref query, param.OrderType);
-                FilterOrderStatus(ref query, param.OrderStatus.ToString());
-                OrderByCreateDate(ref query, param.OrderByCreateDate);
-                var response = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
+                var orders = await _orderRepository
+                    .GetAllByIQueryable()
+                    .Where(o => o.StaffId == uid
+                            && o.CreateDate.Day == date.Value.Day
+                            && o.CreateDate.Month == date.Value.Month
+                            && o.CreateDate.Year == date.Value.Year)
+                    .Include(o => o.Customer)
+                    .OrderByDescending(o => o.CreateDate)
+                    .ToListAsync();
+                var response = _mapper.Map<List<ListOrderForStaffResponse>>(orders);
                 for (int i = 0; i < response.Count; i++)
                 {
                     var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == response[i].OrderId).Select(o => o.Quantity).Sum();
                     response[i].TotalQuantity = totalQuantity;
                 }
-                return PagedResult<ListOrderForStaffResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+                result.Content = response;
+                return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
             }
         }
 
@@ -669,6 +710,37 @@ namespace BigSizeFashion.Business.Services
                     }
                 }
                 result.Content = listDate;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> ApproveOfflineOrder(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.ApprovalDate = DateTime.UtcNow.AddHours(7);
+                order.PackagedDate = DateTime.UtcNow.AddHours(7);
+                order.DeliveryDate = DateTime.UtcNow.AddHours(7);
+                order.ReceivedDate = DateTime.UtcNow.AddHours(7);
+                order.Status = (byte)OrderStatusEnum.Received;
+                await _orderRepository.UpdateAsync(order);
+
+                var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
+                foreach (var item in ods)
+                {
+                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                    storeWarehouse.Quantity -= item.Quantity;
+                    await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                }
+
+                result.Content = true;
                 return result;
             }
             catch (Exception ex)

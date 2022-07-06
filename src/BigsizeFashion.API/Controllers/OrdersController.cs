@@ -122,15 +122,32 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
-        /// Manager approve order
+        /// Manager approve order (cho đơn hàng online)
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpPut("approve/{id}")]
+        [HttpPut("online-approve/{id}")]
         public async Task<IActionResult> ApproveOrder(int id)
         {
             var result = await _service.ApproveOrder(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Manager approve order (cho đơn hàng offline)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        //[Authorize]
+        [HttpPut("offline-approve/{id}")]
+        public async Task<IActionResult> ApproveOfflineOrder(int id)
+        {
+            var result = await _service.ApproveOfflineOrder(id);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
@@ -177,7 +194,7 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Get list order of staff
         /// </summary>
         /// <remarks>
@@ -190,10 +207,28 @@ namespace BigsizeFashion.API.Controllers
         /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="param"></param>
+        /// <returns></returns>*/
+        //[Authorize]
+        //[HttpGet("for-staff")]
+        //public async Task<IActionResult> GetListOrderOfStoreForStaff([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
+        //{
+        //    var result = await _service.GetListOrderOfStoreForStaff(authorization.Substring(7), param);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
+
+        /// <summary>
+        /// Get List Order of Store For Staff
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]
         [HttpGet("for-staff")]
-        public async Task<IActionResult> GetListOrderOfStoreForStaff([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
+        public async Task<IActionResult> GetListOrderOfStoreForStaff([FromHeader] string authorization, [FromQuery] FilterOrderForStaffParameter param)
         {
             var result = await _service.GetListOrderOfStoreForStaff(authorization.Substring(7), param);
             if (!result.IsSuccess)

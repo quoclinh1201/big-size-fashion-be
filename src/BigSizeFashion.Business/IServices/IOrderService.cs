@@ -20,7 +20,8 @@ namespace BigSizeFashion.Business.IServices
         Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForManager(string v, FilterOrderParameter param);
         Task<Result<bool>> AssignOrder(AssignOrderRequest request);
         Task<PagedResult<ListOrderForStaffResponse>> GetListAssignedOrder(string v, QueryStringParameters param);
-        Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string v, FilterOrderParameter param);
+        //Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string v, FilterOrderParameter param);
+        Task<Result<IEnumerable<ListOrderForStaffResponse>>> GetListOrderOfStoreForStaff(string v, FilterOrderForStaffParameter param);
         Task<Result<bool>> PackagedOrder(int id);
         Task<Result<bool>> DeliveryOrder(int id);
         Task<Result<bool>> ReceivedOrder(int id);
@@ -29,5 +30,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> CancelOrder(string v, int id);
         Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string v, GetRevenueParameter param);
         Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param);
+        Task<Result<bool>> ApproveOfflineOrder(int id);
     }
 }
