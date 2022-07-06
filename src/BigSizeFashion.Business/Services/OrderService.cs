@@ -14,7 +14,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Services
@@ -741,6 +740,39 @@ namespace BigSizeFashion.Business.Services
                 }
 
                 result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<StaffPerformanceResponse>>> GetStaffPerformance(string token)
+        {
+            var result = new Result<IEnumerable<StaffPerformanceResponse>>();
+            var list = new List<StaffPerformanceResponse>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                DateTime[] last7Days = Enumerable.Range(0, 7)
+                                        .Select(i => DateTime.Now.AddDays(-i))
+                                        .ToArray();
+                foreach (var item in last7Days)
+                {
+                    var orders = await _orderRepository
+                                .FindByAsync(o => o.StaffId == uid
+                                               && o.CreateDate.Day == item.Day
+                                               && o.CreateDate.Month == item.Month
+                                               && o.CreateDate.Year == item.Year
+                                               && o.Status != 0
+                                               && o.Status != 1
+                                               && o.Status != 6);
+                    var value = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
+                    list.Add(new StaffPerformanceResponse { Date = ConvertDateTime.ConvertDateToString(item), Value = value });
+                }
+                result.Content = list;
                 return result;
             }
             catch (Exception ex)

@@ -31,5 +31,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string v, GetRevenueParameter param);
         Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param);
         Task<Result<bool>> ApproveOfflineOrder(int id);
+        Task<Result<IEnumerable<StaffPerformanceResponse>>> GetStaffPerformance(string v);
     }
 }

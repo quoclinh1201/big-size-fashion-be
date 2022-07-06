@@ -388,5 +388,21 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get nearest 7 days performance of staff
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
+        [HttpGet("staff-performance")]
+        public async Task<IActionResult> GetStaffPerformance([FromHeader] string authorization)
+        {
+            var result = await _service.GetStaffPerformance(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
