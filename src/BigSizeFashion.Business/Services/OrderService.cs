@@ -371,7 +371,8 @@ namespace BigSizeFashion.Business.Services
                 var query = orders.AsQueryable();
                 FilterOrderByType(ref query, param.OrderType);
                 FilterOrderStatus(ref query, param.OrderStatus.ToString());
-                OrderByCreateDate(ref query, param.OrderByCreateDate);
+                OrderByStatus(ref query);
+                //OrderByCreateDate(ref query, param.OrderByCreateDate);
                 var list = query.ToList();
                 var response = _mapper.Map<List<ListOrderResponse>>(list);
                 return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
@@ -381,6 +382,16 @@ namespace BigSizeFashion.Business.Services
 
                 throw;
             }
+        }
+
+        private void OrderByStatus(ref IQueryable<Order> query)
+        {
+            if (!query.Any())
+            {
+                return;
+            }
+
+            query = query.OrderBy(q => q.CreateDate).OrderByDescending(q => q.Status == 1);
         }
 
         public async Task<Result<bool>> AssignOrder(AssignOrderRequest request)

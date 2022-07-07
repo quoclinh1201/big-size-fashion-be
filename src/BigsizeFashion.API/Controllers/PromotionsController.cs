@@ -27,8 +27,8 @@ namespace BigsizeFashion.API.Controllers
         /// </summary>
         /// <remarks>
         /// - Không nhập OrderByApplyDate hoặc OrderByApplyDate = null => Không sếp theo thứ tự
-        /// - OrderByApplyDate = true => giảm dần
-        /// - OrderByApplyDate = false => tăng dần
+        /// - OrderByExpiredDate = true => giảm dần
+        /// - OrderByExpiredDate = false => tăng dần
         /// -------------------------
         /// - Status = null => get all
         /// </remarks>

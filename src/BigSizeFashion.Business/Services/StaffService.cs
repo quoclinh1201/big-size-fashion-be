@@ -39,7 +39,7 @@ namespace BigSizeFashion.Business.Services
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
                 var storeId = await _staffRepository.GetAllByIQueryable().Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
-                var staffs = await _staffRepository.FindByAsync(s => s.StoreId == storeId && s.Status == true);
+                var staffs = await _staffRepository.GetAllByIQueryable().Include(s => s.UidNavigation).Where(s => s.StoreId == storeId && s.Status == true && s.UidNavigation.RoleId == 3).ToListAsync();
                 result.Content = _mapper.Map<List<StaffOfStoreResponse>>(staffs);
                 return result;
             }

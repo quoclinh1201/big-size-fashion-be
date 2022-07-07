@@ -33,6 +33,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
 
             CreateMap<Order, ListOrderResponse>()
+                .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.CreateDate)))
                 .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))
                 .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
 
