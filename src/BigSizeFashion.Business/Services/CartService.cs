@@ -43,6 +43,22 @@ namespace BigSizeFashion.Business.Services
         {
             var uid = DecodeToken.DecodeTokenToGetUid(token);
             var result = new Result<AddToCartResponse>();
+            var quantity = await checkExistCart(uid, request.ProductDetailId);
+            if(quantity != 0)
+            {
+                quantity= quantity + request.Quantity;
+                //find that instance
+                var cart = await _genericRepository.FindAsync(c => c.CustomerId == uid & c.ProductDetailId == request.ProductDetailId);
+                cart.Quantity = quantity;
+                    await _genericRepository.UpdateAsync(cart);
+                result.Content = new AddToCartResponse
+                {
+                    CustomerId = uid,
+                    ProductDetailId = request.ProductDetailId,
+                    Quantity = quantity++
+                };
+                return result;
+            }
             try
             {
                 var customerOrder = _mapper.Map<CustomerCart>(request);
@@ -71,7 +87,9 @@ namespace BigSizeFashion.Business.Services
         {
             var uid = DecodeToken.DecodeTokenToGetUid(token);
             var result = new Result<List<AddToCartResponse>>();
+
             result.Content = new List<AddToCartResponse>();
+            
             try
             {
                 await deleteCart(uid);
@@ -102,6 +120,17 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
+        }
+
+        private async Task<int> checkExistCart(int uid, int productDetailId)
+        {
+           var cart = (await _genericRepository.FindByAsync(c => c.CustomerId == uid && c.ProductDetailId == productDetailId)).FirstOrDefault();
+            if(cart != null)
+            {
+                return cart.Quantity;
+            }
+            return 0;
+
         }
 
         public async Task deleteCart(int uid)
