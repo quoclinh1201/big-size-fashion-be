@@ -613,8 +613,9 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<bool> AddOrder(string authorization, OrderRequest request)
+        public async Task<Result<OrderResponse>> AddOrder(string authorization, OrderRequest request)
         {
+            var result = new Result<OrderResponse>();
             var uid = DecodeToken.DecodeTokenToGetUid(authorization);
             var listCart = await _cartService.getListCart(authorization);
             var listOrderDetailRequest = new List<OrderDetailRequest>();
@@ -673,7 +674,9 @@ namespace BigSizeFashion.Business.Services
             //var result = new Result<List<OrderResponse>>();
             //result.Content = new List<OrderResponse>();
             //result.Content = listOrderResponse;
-            return true;
+
+            result.Content = _mapper.Map<OrderResponse>(order);
+            return result;
         }
 
         public async Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string token, GetRevenueParameter param)
