@@ -417,7 +417,8 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid && o.Status == (byte)OrderStatusEnum.Approved);
+                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid && (o.Status == (byte)OrderStatusEnum.Approved
+                                                                                            || o.Status == (byte)OrderStatusEnum.Packaged));
                 var query = orders.AsQueryable();
                 OrderByCreateDate(ref query, false);
                 var list = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
@@ -594,6 +595,18 @@ namespace BigSizeFashion.Business.Services
                     }
                     else
                     {
+                        if (order.Status != (byte)OrderStatusEnum.Pending
+                            && order.Status != (byte)OrderStatusEnum.Reject
+                            && order.Status != (byte)OrderStatusEnum.Cancel)
+                        {
+                            var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
+                            foreach (var item in ods)
+                            {
+                                var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                                storeWarehouse.Quantity += item.Quantity;
+                                await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                            }
+                        }
                         order.Status = (byte)OrderStatusEnum.Cancel;
                         await _orderRepository.UpdateAsync(order);
                         result.Content = true;

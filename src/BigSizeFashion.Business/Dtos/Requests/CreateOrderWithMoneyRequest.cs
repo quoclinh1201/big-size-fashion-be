@@ -8,6 +8,6 @@ namespace BigSizeFashion.Business.Dtos.Requests
 {
     public class CreateOrderWithMoneyRequest
     {
-        public decimal TotalPrice { get; set; }
+        public string TotalPrice { get; set; }
     }
 }

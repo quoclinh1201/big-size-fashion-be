@@ -144,7 +144,7 @@ namespace BigSizeFashion.Business.Services.ZaloPay
                 param.Add("app_user", "user123");
                 param.Add("app_time", Utils.GetTimeStamp().ToString());
                 //param.Add("amount", request.TotalPrice.ToString().Substring(0, request.TotalPrice.ToString().Length - 5));
-                param.Add("amount", request.TotalPrice.ToString());
+                param.Add("amount", request.TotalPrice);
                 param.Add("app_trans_id", DateTime.Now.ToString("yyMMdd") + "_" + app_trans_id); // mã giao dich có định dạng yyMMdd_xxxx
                 param.Add("embed_data", JsonConvert.SerializeObject(embed_data));
                 param.Add("item", JsonConvert.SerializeObject(items));
