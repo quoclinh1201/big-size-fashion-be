@@ -5,6 +5,7 @@ using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,6 +34,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOfflineOrder(int id);
         Task<Result<IEnumerable<StaffPerformanceResponse>>> GetStaffPerformance(string v);
         Task<Result<IEnumerable<StaffPerformanceOrderResponse>>> GetStaffPerformanceOrder(string v);
-        Task<Result<bool>> ExportBill(int id);
+        Task<Result<Stream>> ExportBill(int id);
     }
 }

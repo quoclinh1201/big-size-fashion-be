@@ -1290,11 +1290,13 @@ namespace BigSizeFashion.Business.Services
                 {
                     list.Add(new GetAllProductToImportResponse
                     {
-                        Product = item.Product.ProductName + "-" + item.Colour.ColourName + "-" + item.Size.SizeName,
+                        ProductName = item.Product.ProductName,
+                        SizeName = item.Size.SizeName,
+                        ColourName = item.Colour.ColourName,
                         ProductId = item.ProductId,
                         ColourId = item.ColourId,
                         SizeId = item.SizeId
-                    });
+                    }) ;
                 }
                 result.Content = list;
                 return result;

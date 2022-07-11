@@ -8,7 +8,7 @@ namespace BigSizeFashion.Business.Helpers.Parameters
 {
     public class QueryStringParameters
     {
-        const int maxPageSize = 100;
+        const int maxPageSize = 1000;
 
         public int PageNumber { get; set; } = 1;
 

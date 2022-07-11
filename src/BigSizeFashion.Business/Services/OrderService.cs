@@ -930,15 +930,12 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> ExportBill(int id)
+        public async Task<Result<Stream>> ExportBill(int id)
         {
-            var result = new Result<bool>();
+            var result = new Result<Stream>();
             try
             {
-
-
-
-
+                result.Content = await CreateExcelFile(id);
                 return result;
             }
             catch (Exception ex)
@@ -959,6 +956,7 @@ namespace BigSizeFashion.Business.Services
                                 .Include(o => o.Staff)
                                 .FirstOrDefaultAsync();
 
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
                 using (var excelPackage = new ExcelPackage(stream ?? new MemoryStream()))
                 {
                     // Tạo author cho file Excel
@@ -970,7 +968,7 @@ namespace BigSizeFashion.Business.Services
                     // Add Sheet vào file Excel
                     excelPackage.Workbook.Worksheets.Add("Hóa đơn #" + order.OrderId);
                     // Lấy Sheet bạn vừa mới tạo ra để thao tác 
-                    var workSheet = excelPackage.Workbook.Worksheets[1];
+                    var workSheet = excelPackage.Workbook.Worksheets.First();
                     // Đổ data vào Excel file
                     //workSheet.Cells[1, 1].LoadFromCollection(list, true, TableStyles.Dark9);
                     await BindingFormatForExcel(workSheet, order);
@@ -989,15 +987,144 @@ namespace BigSizeFashion.Business.Services
         {
             try
             {
+                var orderDetail = await _orderDetailRepository
+                                    .GetAllByIQueryable()
+                                    .Where(o => o.OrderId == order.OrderId)
+                                    .Include(o => o.ProductDetail)
+                                    .ThenInclude(o => o.Product)
+                                    .Include(o => o.ProductDetail)
+                                    .ThenInclude(o => o.Size)
+                                    .Include(o => o.ProductDetail)
+                                    .ThenInclude(o => o.Colour)
+                                    .ToListAsync();
+
                 worksheet.DefaultColWidth = 10;
                 worksheet.Cells.Style.WrapText = true;
 
                 worksheet.Cells["A1:F1"].Value = "BIG-SIZE FASHION";
                 worksheet.Cells["A1:F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
                 worksheet.Cells["A1:F1"].Style.Font.Bold = true;
+                worksheet.Cells["A1:F1"].Merge = true;
 
+                worksheet.Cells["A3:F3"].Value = order.Store.StoreAddress;
+                worksheet.Cells["A3:F3"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A3:F3"].Merge = true;
+                worksheet.Row(3).Height = 30.75;
 
+                worksheet.Cells["A4:F4"].Value = "                                                                                                                                                            					";
+                worksheet.Cells["A4:F4"].Merge = true;
+                worksheet.Cells["A4:F4"].Style.Font.Strike = true;
 
+                worksheet.Cells["A5:F5"].Value = "PHIẾU THANH TOÁN";
+                worksheet.Cells["A5:F5"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A5:F5"].Style.Font.Bold = true;
+                worksheet.Cells["A5:F5"].Merge = true;
+
+                worksheet.Cells["A6:B6"].Value = "Mã đơn hàng:";
+                worksheet.Cells["A6:B6"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["A6:B6"].Merge = true;
+                worksheet.Cells["C6:D6"].Value = "#" + order.OrderId;
+                worksheet.Cells["C6:D6"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["C6:D6"].Merge = true;
+                worksheet.Cells["A7:B7"].Value = "Ngày tạo:";
+                worksheet.Cells["A7:B7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["A7:B7"].Merge = true;
+                worksheet.Cells["C7:E7"].Value = ConvertDateTime.ConvertDateTimeToString(order.CreateDate);
+                worksheet.Cells["C7:E7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["C7:E7"].Merge = true;
+                worksheet.Cells["A8:B8"].Value = "Nhân viên:";
+                worksheet.Cells["A8:B8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["A8:B8"].Merge = true;
+                worksheet.Cells["C8:E8"].Value = order.Staff.Fullname;
+                worksheet.Cells["C8:E8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["C8:E8"].Merge = true;
+
+                worksheet.Cells["A9:F9"].Value = "                                                                                                                                                            					";
+                worksheet.Cells["A9:F9"].Merge = true;
+                worksheet.Cells["A9:F9"].Style.Font.Strike = true;
+
+                worksheet.Cells["A10:B10"].Value = "SL";
+                worksheet.Cells["A10:B10"].Style.Font.Bold = true;
+                worksheet.Cells["A10:B10"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A10:B10"].Merge = true;
+
+                worksheet.Cells["C10:D10"].Value = "Giá bán";
+                worksheet.Cells["C10:D10"].Style.Font.Bold = true;
+                worksheet.Cells["C10:D10"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["C10:D10"].Merge = true;
+
+                worksheet.Cells["E10:F10"].Value = "T.Tiền";
+                worksheet.Cells["E10:F10"].Style.Font.Bold = true;
+                worksheet.Cells["E10:F10"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["E10:F10"].Merge = true;
+
+                var index = 11;
+                foreach (var item in orderDetail)
+                {
+                    var name = item.ProductDetail.Product.ProductName + "-Màu " + item.ProductDetail.Colour.ColourName + "-Size " + item.ProductDetail.Size.SizeName;
+                    worksheet.Cells["A" + index + ":F" + index].Value = name;
+                    worksheet.Cells["A" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    worksheet.Cells["A" + index + ":F" + index].Merge = true;
+                    if(name.Length > 62)
+                    {
+                        worksheet.Row(index).Height = 30.75;
+                    }
+                    index += 1;
+
+                    worksheet.Cells["A" + index + ":B" + index].Value = item.Quantity;
+                    worksheet.Cells["A" + index + ":B" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["A" + index + ":B" + index].Merge = true;
+
+                    worksheet.Cells["C" + index + ":D" + index].Value = FormatMoney.FormatPrice(item.PricePerOne);
+                    worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                    worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(item.Price);
+                    worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["E" + index + ":F" + index].Merge = true;
+                    index += 1;
+
+                    if (item.DiscountPrice != null && item.DiscountPricePerOne != null)
+                    {
+                        worksheet.Cells["C" + (index - 1) + ":D" + (index -1)].Style.Font.Strike = true;
+                        worksheet.Cells["E" + (index - 1) + ":F" + (index -1)].Style.Font.Strike = true;
+
+                        worksheet.Cells["C" + index + ":D" + index].Value = FormatMoney.FormatPrice(item.DiscountPricePerOne);
+                        worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                        worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(item.DiscountPrice);
+                        worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        worksheet.Cells["E" + index + ":F" + index].Merge = true;
+                    }
+                    index += 1;
+                }
+
+                worksheet.Cells["A" + index + ":F" + index].Value = "                                                                                                                                                            					";
+                worksheet.Cells["A" + index + ":F" + index].Merge = true;
+                worksheet.Cells["A" + index + ":F" + index].Style.Font.Strike = true;
+                index += 1;
+
+                worksheet.Cells["C" + index + ":D" + index].Value = "Tổng tiền:";
+                worksheet.Cells["C" + index + ":D" + index].Style.Font.Bold = true;
+                worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(order.TotalPriceAfterDiscount);
+                worksheet.Cells["E" + index + ":F" + index].Style.Font.Bold = true;
+                worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["E" + index + ":F" + index].Merge = true;
+                index += 2;
+
+                worksheet.Cells["C" + index + ":D" + index].Value = "Thanh toán:";
+                worksheet.Cells["C" + index + ":D" + index].Style.Font.Bold = true;
+                worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(order.TotalPriceAfterDiscount);
+                worksheet.Cells["E" + index + ":F" + index].Style.Font.Bold = true;
+                worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["E" + index + ":F" + index].Merge = true;
             }
             catch (Exception)
             {
