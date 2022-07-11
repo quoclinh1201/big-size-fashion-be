@@ -11,8 +11,11 @@ using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -412,13 +415,20 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListOrderForStaffResponse>> GetListAssignedOrder(string token, QueryStringParameters param)
+        public async Task<Result<IEnumerable<ListOrderForStaffResponse>>> GetListAssignedOrder(string token, FilterOrderForStaffParameter param)
         {
+            var result = new Result<IEnumerable<ListOrderForStaffResponse>>();
             try
             {
+                var date = ConvertDateTime.ConvertStringToDate(param.CreateDate);
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid && (o.Status == (byte)OrderStatusEnum.Approved
-                                                                                            || o.Status == (byte)OrderStatusEnum.Packaged));
+                var orders = await _orderRepository.FindByAsync(
+                    o => o.StaffId == uid
+                    && o.CreateDate.Day == date.Value.Day
+                    && o.CreateDate.Month == date.Value.Month
+                    && o.CreateDate.Year == date.Value.Year
+                    && (o.Status == (byte)OrderStatusEnum.Approved
+                        || o.Status == (byte)OrderStatusEnum.Packaged));
                 var query = orders.AsQueryable();
                 OrderByCreateDate(ref query, false);
                 var list = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
@@ -427,7 +437,8 @@ namespace BigSizeFashion.Business.Services
                     var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == list[i].OrderId).Select(o => o.Quantity).Sum();
                     list[i].TotalQuantity = totalQuantity;
                 }
-                return PagedResult<ListOrderForStaffResponse>.ToPagedList(list, param.PageNumber, param.PageSize);
+                result.Content = list;
+                return result;
             }
             catch (Exception)
             {
@@ -466,9 +477,11 @@ namespace BigSizeFashion.Business.Services
             {
                 var date = ConvertDateTime.ConvertStringToDate(param.CreateDate);
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.FindAsync(s => s.Uid == uid);
                 var orders = await _orderRepository
                     .GetAllByIQueryable()
                     .Where(o => o.StaffId == uid
+                            && o.StoreId == staff.StoreId
                             && o.CreateDate.Day == date.Value.Day
                             && o.CreateDate.Month == date.Value.Month
                             && o.CreateDate.Year == date.Value.Year)
@@ -711,9 +724,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var orders = await _orderRepository
                         .FindByAsync(o => o.StoreId == staff.StoreId
-                        && o.CreateDate.Day == listDate[i - 1].Date
-                        && o.CreateDate.Month == param.Month
-                        && o.CreateDate.Year == param.Year
+                        && o.ApprovalDate.Value.Day == listDate[i - 1].Date
+                        && o.ApprovalDate.Value.Month == param.Month
+                        && o.ApprovalDate.Value.Year == param.Year
                         && o.Status != 0
                         && o.Status != 1
                         && o.Status != 6);
@@ -747,9 +760,9 @@ namespace BigSizeFashion.Business.Services
                     for (int i = 1; i <= listDate.Count; i++)
                     {
                         var orders = await _orderRepository
-                            .FindByAsync(o => o.CreateDate.Day == listDate[i - 1].Date
-                            && o.CreateDate.Month == param.Month
-                            && o.CreateDate.Year == param.Year
+                            .FindByAsync(o => o.ApprovalDate.Value.Day == listDate[i - 1].Date
+                            && o.ApprovalDate.Value.Month == param.Month
+                            && o.ApprovalDate.Value.Year == param.Year
                             && o.Status != 0
                             && o.Status != 1
                             && o.Status != 6);
@@ -865,9 +878,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var orders = await _orderRepository
                                 .FindByAsync(o => o.StaffId == uid
-                                               && o.CreateDate.Day == item.Day
-                                               && o.CreateDate.Month == item.Month
-                                               && o.CreateDate.Year == item.Year
+                                               && o.ApprovalDate.Value.Day == item.Day
+                                               && o.ApprovalDate.Value.Month == item.Month
+                                               && o.ApprovalDate.Value.Year == item.Year
                                                && o.Status != 0
                                                && o.Status != 1
                                                && o.Status != 6);
@@ -898,9 +911,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var orders = await _orderRepository
                                 .FindByAsync(o => o.StaffId == uid
-                                               && o.CreateDate.Day == item.Day
-                                               && o.CreateDate.Month == item.Month
-                                               && o.CreateDate.Year == item.Year
+                                               && o.ApprovalDate.Value.Day == item.Day
+                                               && o.ApprovalDate.Value.Month == item.Month
+                                               && o.ApprovalDate.Value.Year == item.Year
                                                && o.Status != 0
                                                && o.Status != 1
                                                && o.Status != 6);
@@ -914,6 +927,82 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        public async Task<Result<bool>> ExportBill(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+
+
+
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        private async Task<Stream> CreateExcelFile(int id, Stream stream = null)
+        {
+            try
+            {
+                var order = await _orderRepository
+                                .GetAllByIQueryable()
+                                .Where(o => o.OrderId == id)
+                                .Include(o => o.Store)
+                                .Include(o => o.Staff)
+                                .FirstOrDefaultAsync();
+
+                using (var excelPackage = new ExcelPackage(stream ?? new MemoryStream()))
+                {
+                    // Tạo author cho file Excel
+                    //excelPackage.Workbook.Properties.Author = "Hanker";
+                    // Tạo title cho file Excel
+                    //excelPackage.Workbook.Properties.Title = "EPP test background";
+                    // thêm tí comments vào làm màu 
+                    //excelPackage.Workbook.Properties.Comments = "This is my fucking generated Comments";
+                    // Add Sheet vào file Excel
+                    excelPackage.Workbook.Worksheets.Add("Hóa đơn #" + order.OrderId);
+                    // Lấy Sheet bạn vừa mới tạo ra để thao tác 
+                    var workSheet = excelPackage.Workbook.Worksheets[1];
+                    // Đổ data vào Excel file
+                    //workSheet.Cells[1, 1].LoadFromCollection(list, true, TableStyles.Dark9);
+                    await BindingFormatForExcel(workSheet, order);
+                    excelPackage.Save();
+                    return excelPackage.Stream;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private async Task BindingFormatForExcel(ExcelWorksheet worksheet, Order order)
+        {
+            try
+            {
+                worksheet.DefaultColWidth = 10;
+                worksheet.Cells.Style.WrapText = true;
+
+                worksheet.Cells["A1:F1"].Value = "BIG-SIZE FASHION";
+                worksheet.Cells["A1:F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A1:F1"].Style.Font.Bold = true;
+
+
+
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

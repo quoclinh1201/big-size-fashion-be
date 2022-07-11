@@ -90,16 +90,7 @@ namespace BigsizeFashion.API.Controllers
         }
 
 
-        /// <summary>
-        /// Get list product of store
-        /// </summary>
-        /// <remarks>
-        /// - Get list product with quantity for staff and manager
-        /// - Status must be true
-        /// </remarks>
-        /// <param name="authorization"></param>
-        /// <param name="param"></param>
-        /// <returns></returns>
+
         //[Authorize]
         //[HttpGet("store")]
         //public async Task<IActionResult> GetListProductOfStore([FromHeader] string authorization, [FromQuery] SearchProductsParameter param)
@@ -112,13 +103,7 @@ namespace BigsizeFashion.API.Controllers
         //    return Ok(result);
         //}
 
-        /// <summary>
-        /// Get product by ID (Get detail)
-        /// </summary>
-        /// <remarks>
-        /// - Get with quantity for manager and staff
-        /// </remarks>
-        /// <returns></returns>
+
         //[Authorize]
         //[HttpGet("store/{id}")]
         //public async Task<IActionResult> GetProductOfStoreByID([FromHeader] string authorization, int id)
@@ -199,11 +184,6 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// Get quantity of product
-        /// </summary>
-        /// <param name="param"></param>
-        /// <returns></returns>
         //[Authorize]
         //[HttpGet("quantity")]
         //public async Task<IActionResult> GetQuantityOfProduct([FromQuery] GetQuantityOfProductParameter param)
@@ -301,6 +281,21 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> GetProductByDetailID(int productId, int productDetailId)
         {
             var result = await _service.GetProductByDetailID(productId, productDetailId);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get all product to import
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("all-product-to-import")]
+        public async Task<IActionResult> GetAllProductToImport()
+        {
+            var result = await _service.GetAllProductToImport();
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

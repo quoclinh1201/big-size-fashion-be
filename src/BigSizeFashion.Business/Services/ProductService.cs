@@ -1272,5 +1272,38 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<IEnumerable<GetAllProductToImportResponse>>> GetAllProductToImport()
+        {
+            var result = new Result<IEnumerable<GetAllProductToImportResponse>>();
+            var list = new List<GetAllProductToImportResponse>();
+            try
+            {
+                var products = await _productDetailRepository
+                    .GetAllByIQueryable()
+                    .Include(p => p.Size)
+                    .Include(p => p.Colour)
+                    .Include(p => p.Product)
+                    .ToListAsync();
+
+                foreach (var item in products)
+                {
+                    list.Add(new GetAllProductToImportResponse
+                    {
+                        Product = item.Product.ProductName + "-" + item.Colour.ColourName + "-" + item.Size.SizeName,
+                        ProductId = item.ProductId,
+                        ColourId = item.ColourId,
+                        SizeId = item.SizeId
+                    });
+                }
+                result.Content = list;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
