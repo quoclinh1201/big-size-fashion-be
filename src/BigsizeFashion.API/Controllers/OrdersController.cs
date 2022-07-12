@@ -453,5 +453,22 @@ namespace BigsizeFashion.API.Controllers
             var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
             return File(fileBytes, mimeType, "bill_of_order_#"+ id); ;
         }
+
+        /// <summary>
+        /// Manager get all staff's performance of store
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet("performance-of-all-staff")]
+        public async Task<IActionResult> GetPerformanceOfAllStaff([FromHeader] string authorization, [FromQuery] GetRevenueParameter param)
+        {
+            var result = await _service.GetPerformanceOfAllStaff(authorization.Substring(7), param);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

@@ -35,5 +35,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<StaffPerformanceResponse>>> GetStaffPerformance(string v);
         Task<Result<IEnumerable<StaffPerformanceOrderResponse>>> GetStaffPerformanceOrder(string v);
         Task<Result<Stream>> ExportBill(int id);
+        Task<Result<IEnumerable<StaffPerformanceOfStoreResponse>>> GetPerformanceOfAllStaff(string v, GetRevenueParameter param);
     }
 }

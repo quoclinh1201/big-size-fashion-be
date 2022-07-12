@@ -1132,5 +1132,54 @@ namespace BigSizeFashion.Business.Services
                 throw;
             }
         }
+
+        public async Task<Result<IEnumerable<StaffPerformanceOfStoreResponse>>> GetPerformanceOfAllStaff(string token, GetRevenueParameter param)
+        {
+            var result = new Result<IEnumerable<StaffPerformanceOfStoreResponse>>();
+            var list = new List<StaffPerformanceOfStoreResponse>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository.GetAllByIQueryable()
+                                    .Where(s => s.Uid == uid)
+                                    .Select(s => s.StoreId)
+                                    .FirstOrDefaultAsync();
+
+                var staffs = await _staffRepository.GetAllByIQueryable()
+                                    .Include(s => s.UidNavigation)
+                                    .Where(s => s.StoreId == storeId && s.UidNavigation.RoleId == 3 && s.Status == true)
+                                    .ToListAsync();
+
+                foreach (var staff in staffs)
+                {
+                    var orders = await _orderRepository
+                                .FindByAsync(o => o.StaffId == staff.Uid
+                                               && o.StoreId == storeId
+                                               && o.ApprovalDate.Value.Month == param.Month
+                                               && o.ApprovalDate.Value.Year == param.Year
+                                               && o.Status != 0
+                                               && o.Status != 1
+                                               && o.Status != 6);
+                    var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
+                    var quantity = orders.Select(o => o.OrderId).Count();
+
+                    list.Add(new StaffPerformanceOfStoreResponse
+                    {
+                        Uid = staff.Uid,
+                        Fullname = staff.Fullname,
+                        Revenue = revenue,
+                        QuantityOfOrders = quantity
+                    });
+                }
+
+                result.Content = list;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
