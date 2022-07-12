@@ -5,6 +5,7 @@ using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Parameters;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOrder(int id);
         Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForManager(string v, FilterOrderParameter param);
         Task<Result<bool>> AssignOrder(AssignOrderRequest request);
-        Task<PagedResult<ListOrderForStaffResponse>> GetListAssignedOrder(string v, QueryStringParameters param);
+        Task<Result<IEnumerable<ListOrderForStaffResponse>>> GetListAssignedOrder(string v, FilterOrderForStaffParameter param);
         //Task<PagedResult<ListOrderForStaffResponse>> GetListOrderOfStoreForStaff(string v, FilterOrderParameter param);
         Task<Result<IEnumerable<ListOrderForStaffResponse>>> GetListOrderOfStoreForStaff(string v, FilterOrderForStaffParameter param);
         Task<Result<bool>> PackagedOrder(int id);
@@ -33,5 +34,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOfflineOrder(int id);
         Task<Result<IEnumerable<StaffPerformanceResponse>>> GetStaffPerformance(string v);
         Task<Result<IEnumerable<StaffPerformanceOrderResponse>>> GetStaffPerformanceOrder(string v);
+        Task<Result<Stream>> ExportBill(int id);
     }
 }

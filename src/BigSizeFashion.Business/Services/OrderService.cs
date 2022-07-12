@@ -11,8 +11,11 @@ using BigSizeFashion.Business.IServices;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -412,12 +415,20 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListOrderForStaffResponse>> GetListAssignedOrder(string token, QueryStringParameters param)
+        public async Task<Result<IEnumerable<ListOrderForStaffResponse>>> GetListAssignedOrder(string token, FilterOrderForStaffParameter param)
         {
+            var result = new Result<IEnumerable<ListOrderForStaffResponse>>();
             try
             {
+                var date = ConvertDateTime.ConvertStringToDate(param.CreateDate);
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.FindByAsync(o => o.StaffId == uid && o.Status == (byte)OrderStatusEnum.Approved);
+                var orders = await _orderRepository.FindByAsync(
+                    o => o.StaffId == uid
+                    && o.CreateDate.Day == date.Value.Day
+                    && o.CreateDate.Month == date.Value.Month
+                    && o.CreateDate.Year == date.Value.Year
+                    && (o.Status == (byte)OrderStatusEnum.Approved
+                        || o.Status == (byte)OrderStatusEnum.Packaged));
                 var query = orders.AsQueryable();
                 OrderByCreateDate(ref query, false);
                 var list = _mapper.Map<List<ListOrderForStaffResponse>>(query.ToList());
@@ -426,7 +437,8 @@ namespace BigSizeFashion.Business.Services
                     var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == list[i].OrderId).Select(o => o.Quantity).Sum();
                     list[i].TotalQuantity = totalQuantity;
                 }
-                return PagedResult<ListOrderForStaffResponse>.ToPagedList(list, param.PageNumber, param.PageSize);
+                result.Content = list;
+                return result;
             }
             catch (Exception)
             {
@@ -465,9 +477,11 @@ namespace BigSizeFashion.Business.Services
             {
                 var date = ConvertDateTime.ConvertStringToDate(param.CreateDate);
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.FindAsync(s => s.Uid == uid);
                 var orders = await _orderRepository
                     .GetAllByIQueryable()
                     .Where(o => o.StaffId == uid
+                            && o.StoreId == staff.StoreId
                             && o.CreateDate.Day == date.Value.Day
                             && o.CreateDate.Month == date.Value.Month
                             && o.CreateDate.Year == date.Value.Year)
@@ -594,6 +608,18 @@ namespace BigSizeFashion.Business.Services
                     }
                     else
                     {
+                        if (order.Status != (byte)OrderStatusEnum.Pending
+                            && order.Status != (byte)OrderStatusEnum.Reject
+                            && order.Status != (byte)OrderStatusEnum.Cancel)
+                        {
+                            var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
+                            foreach (var item in ods)
+                            {
+                                var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                                storeWarehouse.Quantity += item.Quantity;
+                                await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                            }
+                        }
                         order.Status = (byte)OrderStatusEnum.Cancel;
                         await _orderRepository.UpdateAsync(order);
                         result.Content = true;
@@ -698,9 +724,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var orders = await _orderRepository
                         .FindByAsync(o => o.StoreId == staff.StoreId
-                        && o.CreateDate.Day == listDate[i - 1].Date
-                        && o.CreateDate.Month == param.Month
-                        && o.CreateDate.Year == param.Year
+                        && o.ApprovalDate.Value.Day == listDate[i - 1].Date
+                        && o.ApprovalDate.Value.Month == param.Month
+                        && o.ApprovalDate.Value.Year == param.Year
                         && o.Status != 0
                         && o.Status != 1
                         && o.Status != 6);
@@ -734,9 +760,9 @@ namespace BigSizeFashion.Business.Services
                     for (int i = 1; i <= listDate.Count; i++)
                     {
                         var orders = await _orderRepository
-                            .FindByAsync(o => o.CreateDate.Day == listDate[i - 1].Date
-                            && o.CreateDate.Month == param.Month
-                            && o.CreateDate.Year == param.Year
+                            .FindByAsync(o => o.ApprovalDate.Value.Day == listDate[i - 1].Date
+                            && o.ApprovalDate.Value.Month == param.Month
+                            && o.ApprovalDate.Value.Year == param.Year
                             && o.Status != 0
                             && o.Status != 1
                             && o.Status != 6);
@@ -852,9 +878,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var orders = await _orderRepository
                                 .FindByAsync(o => o.StaffId == uid
-                                               && o.CreateDate.Day == item.Day
-                                               && o.CreateDate.Month == item.Month
-                                               && o.CreateDate.Year == item.Year
+                                               && o.ApprovalDate.Value.Day == item.Day
+                                               && o.ApprovalDate.Value.Month == item.Month
+                                               && o.ApprovalDate.Value.Year == item.Year
                                                && o.Status != 0
                                                && o.Status != 1
                                                && o.Status != 6);
@@ -885,9 +911,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var orders = await _orderRepository
                                 .FindByAsync(o => o.StaffId == uid
-                                               && o.CreateDate.Day == item.Day
-                                               && o.CreateDate.Month == item.Month
-                                               && o.CreateDate.Year == item.Year
+                                               && o.ApprovalDate.Value.Day == item.Day
+                                               && o.ApprovalDate.Value.Month == item.Month
+                                               && o.ApprovalDate.Value.Year == item.Year
                                                && o.Status != 0
                                                && o.Status != 1
                                                && o.Status != 6);
@@ -901,6 +927,209 @@ namespace BigSizeFashion.Business.Services
             {
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
+            }
+        }
+
+        public async Task<Result<Stream>> ExportBill(int id)
+        {
+            var result = new Result<Stream>();
+            try
+            {
+                result.Content = await CreateExcelFile(id);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        private async Task<Stream> CreateExcelFile(int id, Stream stream = null)
+        {
+            try
+            {
+                var order = await _orderRepository
+                                .GetAllByIQueryable()
+                                .Where(o => o.OrderId == id)
+                                .Include(o => o.Store)
+                                .Include(o => o.Staff)
+                                .FirstOrDefaultAsync();
+
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using (var excelPackage = new ExcelPackage(stream ?? new MemoryStream()))
+                {
+                    // Tạo author cho file Excel
+                    //excelPackage.Workbook.Properties.Author = "Hanker";
+                    // Tạo title cho file Excel
+                    //excelPackage.Workbook.Properties.Title = "EPP test background";
+                    // thêm tí comments vào làm màu 
+                    //excelPackage.Workbook.Properties.Comments = "This is my fucking generated Comments";
+                    // Add Sheet vào file Excel
+                    excelPackage.Workbook.Worksheets.Add("Hóa đơn #" + order.OrderId);
+                    // Lấy Sheet bạn vừa mới tạo ra để thao tác 
+                    var workSheet = excelPackage.Workbook.Worksheets.First();
+                    // Đổ data vào Excel file
+                    //workSheet.Cells[1, 1].LoadFromCollection(list, true, TableStyles.Dark9);
+                    await BindingFormatForExcel(workSheet, order);
+                    excelPackage.Save();
+                    return excelPackage.Stream;
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private async Task BindingFormatForExcel(ExcelWorksheet worksheet, Order order)
+        {
+            try
+            {
+                var orderDetail = await _orderDetailRepository
+                                    .GetAllByIQueryable()
+                                    .Where(o => o.OrderId == order.OrderId)
+                                    .Include(o => o.ProductDetail)
+                                    .ThenInclude(o => o.Product)
+                                    .Include(o => o.ProductDetail)
+                                    .ThenInclude(o => o.Size)
+                                    .Include(o => o.ProductDetail)
+                                    .ThenInclude(o => o.Colour)
+                                    .ToListAsync();
+
+                worksheet.DefaultColWidth = 10;
+                worksheet.Cells.Style.WrapText = true;
+
+                worksheet.Cells["A1:F1"].Value = "BIG-SIZE FASHION";
+                worksheet.Cells["A1:F1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A1:F1"].Style.Font.Bold = true;
+                worksheet.Cells["A1:F1"].Merge = true;
+
+                worksheet.Cells["A3:F3"].Value = order.Store.StoreAddress;
+                worksheet.Cells["A3:F3"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A3:F3"].Merge = true;
+                worksheet.Row(3).Height = 30.75;
+
+                worksheet.Cells["A4:F4"].Value = "                                                                                                                                                            					";
+                worksheet.Cells["A4:F4"].Merge = true;
+                worksheet.Cells["A4:F4"].Style.Font.Strike = true;
+
+                worksheet.Cells["A5:F5"].Value = "PHIẾU THANH TOÁN";
+                worksheet.Cells["A5:F5"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A5:F5"].Style.Font.Bold = true;
+                worksheet.Cells["A5:F5"].Merge = true;
+
+                worksheet.Cells["A6:B6"].Value = "Mã đơn hàng:";
+                worksheet.Cells["A6:B6"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["A6:B6"].Merge = true;
+                worksheet.Cells["C6:D6"].Value = "#" + order.OrderId;
+                worksheet.Cells["C6:D6"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["C6:D6"].Merge = true;
+                worksheet.Cells["A7:B7"].Value = "Ngày tạo:";
+                worksheet.Cells["A7:B7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["A7:B7"].Merge = true;
+                worksheet.Cells["C7:E7"].Value = ConvertDateTime.ConvertDateTimeToString(order.CreateDate);
+                worksheet.Cells["C7:E7"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["C7:E7"].Merge = true;
+                worksheet.Cells["A8:B8"].Value = "Nhân viên:";
+                worksheet.Cells["A8:B8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["A8:B8"].Merge = true;
+                worksheet.Cells["C8:E8"].Value = order.Staff.Fullname;
+                worksheet.Cells["C8:E8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                worksheet.Cells["C8:E8"].Merge = true;
+
+                worksheet.Cells["A9:F9"].Value = "                                                                                                                                                            					";
+                worksheet.Cells["A9:F9"].Merge = true;
+                worksheet.Cells["A9:F9"].Style.Font.Strike = true;
+
+                worksheet.Cells["A10:B10"].Value = "SL";
+                worksheet.Cells["A10:B10"].Style.Font.Bold = true;
+                worksheet.Cells["A10:B10"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A10:B10"].Merge = true;
+
+                worksheet.Cells["C10:D10"].Value = "Giá bán";
+                worksheet.Cells["C10:D10"].Style.Font.Bold = true;
+                worksheet.Cells["C10:D10"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["C10:D10"].Merge = true;
+
+                worksheet.Cells["E10:F10"].Value = "T.Tiền";
+                worksheet.Cells["E10:F10"].Style.Font.Bold = true;
+                worksheet.Cells["E10:F10"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["E10:F10"].Merge = true;
+
+                var index = 11;
+                foreach (var item in orderDetail)
+                {
+                    var name = item.ProductDetail.Product.ProductName + "-Màu " + item.ProductDetail.Colour.ColourName + "-Size " + item.ProductDetail.Size.SizeName;
+                    worksheet.Cells["A" + index + ":F" + index].Value = name;
+                    worksheet.Cells["A" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    worksheet.Cells["A" + index + ":F" + index].Merge = true;
+                    if(name.Length > 62)
+                    {
+                        worksheet.Row(index).Height = 30.75;
+                    }
+                    index += 1;
+
+                    worksheet.Cells["A" + index + ":B" + index].Value = item.Quantity;
+                    worksheet.Cells["A" + index + ":B" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["A" + index + ":B" + index].Merge = true;
+
+                    worksheet.Cells["C" + index + ":D" + index].Value = FormatMoney.FormatPrice(item.PricePerOne);
+                    worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                    worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(item.Price);
+                    worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["E" + index + ":F" + index].Merge = true;
+                    index += 1;
+
+                    if (item.DiscountPrice != null && item.DiscountPricePerOne != null)
+                    {
+                        worksheet.Cells["C" + (index - 1) + ":D" + (index -1)].Style.Font.Strike = true;
+                        worksheet.Cells["E" + (index - 1) + ":F" + (index -1)].Style.Font.Strike = true;
+
+                        worksheet.Cells["C" + index + ":D" + index].Value = FormatMoney.FormatPrice(item.DiscountPricePerOne);
+                        worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                        worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(item.DiscountPrice);
+                        worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                        worksheet.Cells["E" + index + ":F" + index].Merge = true;
+                    }
+                    index += 1;
+                }
+
+                worksheet.Cells["A" + index + ":F" + index].Value = "                                                                                                                                                            					";
+                worksheet.Cells["A" + index + ":F" + index].Merge = true;
+                worksheet.Cells["A" + index + ":F" + index].Style.Font.Strike = true;
+                index += 1;
+
+                worksheet.Cells["C" + index + ":D" + index].Value = "Tổng tiền:";
+                worksheet.Cells["C" + index + ":D" + index].Style.Font.Bold = true;
+                worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(order.TotalPriceAfterDiscount);
+                worksheet.Cells["E" + index + ":F" + index].Style.Font.Bold = true;
+                worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["E" + index + ":F" + index].Merge = true;
+                index += 2;
+
+                worksheet.Cells["C" + index + ":D" + index].Value = "Thanh toán:";
+                worksheet.Cells["C" + index + ":D" + index].Style.Font.Bold = true;
+                worksheet.Cells["C" + index + ":D" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["C" + index + ":D" + index].Merge = true;
+
+                worksheet.Cells["E" + index + ":F" + index].Value = FormatMoney.FormatPrice(order.TotalPriceAfterDiscount);
+                worksheet.Cells["E" + index + ":F" + index].Style.Font.Bold = true;
+                worksheet.Cells["E" + index + ":F" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["E" + index + ":F" + index].Merge = true;
+            }
+            catch (Exception)
+            {
+
+                throw;
             }
         }
     }

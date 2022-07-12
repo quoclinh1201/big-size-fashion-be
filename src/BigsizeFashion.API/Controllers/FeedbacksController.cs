@@ -47,7 +47,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetListFeedbackOfProduct(int id, FeeadbackParameter param)
+        public async Task<IActionResult> GetListFeedbackOfProduct(int id, [FromQuery] FeeadbackParameter param)
         {
             var result = await _service.GetListFeedbackOfProduct(id, param);
             return Ok(result);
@@ -61,7 +61,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpPost]
-        public async Task<IActionResult> CreateFeedback([FromHeader] string authorization, FeedbackRequest request)
+        public async Task<IActionResult> CreateFeedback([FromHeader] string authorization, [FromBody] FeedbackRequest request)
         {
             if (!ModelState.IsValid)
             {
@@ -83,7 +83,7 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFeedback([FromHeader] string authorization, FeedbackRequest request, int id)
+        public async Task<IActionResult> UpdateFeedback([FromHeader] string authorization, [FromBody] FeedbackRequest request, int id)
         {
             if (!ModelState.IsValid)
             {

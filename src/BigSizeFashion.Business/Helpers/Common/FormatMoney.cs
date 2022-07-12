@@ -14,7 +14,7 @@ namespace BigSizeFashion.Business.Helpers.Common
                 return null;
 
             if (price == 0)
-                return "0 VNĐ";
+                return "0";
 
             var priceString = price.ToString().Substring(0, price.ToString().Length - 5);
             var newPrice = "";
@@ -25,11 +25,11 @@ namespace BigSizeFashion.Business.Helpers.Common
                 count++;
                 if(count == 3 && i != 0)
                 {
-                    newPrice = "." + newPrice;
+                    newPrice = "," + newPrice;
                     count = 0;
                 }
             }
-            return newPrice + " VNĐ";
+            return newPrice + "";
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Dtos.Responses;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using System;
 using System.Collections.Generic;
@@ -13,5 +14,6 @@ namespace BigSizeFashion.Business.IServices.ZaloPay
         Task<Result<CreateZaloPayOrderResponse>> CreateOrder(int id);
 
         Task<Result<string>> CreateOrderString(int id);
+        Task<Result<CreateZaloPayOrderResponse>> CreateOrderWithMoney(CreateOrderWithMoneyRequest request);
     }
 }

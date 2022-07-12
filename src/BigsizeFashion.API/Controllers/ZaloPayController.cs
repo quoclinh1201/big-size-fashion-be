@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.IServices.ZaloPay;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.IServices.ZaloPay;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -40,6 +41,21 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Create order from zalo pay with money
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("money")]
+        public async Task<IActionResult> CreateOrderWithMoney([FromBody] CreateOrderWithMoneyRequest request)
+        {
+            var result = await _service.CreateOrderWithMoney(request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
 
         //[HttpGet("test/{id}")]
         //public async Task<IActionResult> CreateOrderString(int id)

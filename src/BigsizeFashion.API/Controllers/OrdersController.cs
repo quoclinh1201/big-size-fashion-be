@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -192,7 +193,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet("assigned-order")]
-        public async Task<IActionResult> GetListAssignedOrder([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
+        public async Task<IActionResult> GetListAssignedOrder([FromHeader] string authorization, [FromQuery] FilterOrderForStaffParameter param)
         {
             var result = await _service.GetListAssignedOrder(authorization.Substring(7), param);
             if (!result.IsSuccess)
@@ -427,6 +428,30 @@ namespace BigsizeFashion.API.Controllers
                 return BadRequest(result);
             }
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Export hóa đơn mua hàng khi mua offline
+        /// </summary>
+        /// <remarks>
+        /// - id: order id
+        /// </remarks>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("export-bill/{id}")]
+        public async Task<IActionResult> ExportBill(int id)
+        {
+            var result = await _service.ExportBill(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            var stream = result.Content;
+            var buffer = stream as MemoryStream;
+            byte[] fileBytes = buffer.ToArray();
+            var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            return File(fileBytes, mimeType, "bill_of_order_#"+ id); ;
         }
     }
 }
