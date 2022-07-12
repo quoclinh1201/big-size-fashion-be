@@ -10,6 +10,7 @@ namespace BigSizeFashion.Business.Dtos.Requests
     {
         public int DeliveryAddress { get; set; }
         public decimal TotalPrice { get; set; }
+        public decimal TotalAfterDiscount { get; set; }
         public decimal PromotionPrice { get; set; }
         public bool OrderType { get; set; }
         public string PaymentMethod { get; set; }

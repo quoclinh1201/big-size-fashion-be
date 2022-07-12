@@ -658,9 +658,9 @@ namespace BigSizeFashion.Business.Services
               //  StoreId = storeId,
                 OrderType = request.OrderType,
                 TotalPrice = request.TotalPrice,
-                TotalPriceAfterDiscount = request.PromotionPrice,
+                TotalPriceAfterDiscount = request.TotalAfterDiscount,
                 StoreId = request.StoreId,
-                ShippingFee = request.ShippingFee
+                ShippingFee = request.ShippingFee,
             };
             //saveOrder
             var order = _mapper.Map<Order>(orderResponse);
