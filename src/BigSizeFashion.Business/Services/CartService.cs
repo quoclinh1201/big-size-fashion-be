@@ -23,19 +23,22 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
         private readonly IMapper _mapper;
         private readonly IProductService _productService;
+        private readonly IGenericRepository<ProductDetail> _productDetailRespository;
 
         public CartService(
             IGenericRepository<CustomerCart> genericRepository,
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
             IMapper mapper,
-            IProductService productService
+            IProductService productService,
+            IGenericRepository<ProductDetail> productDetailRespository
             )
         {
             _genericRepository = genericRepository;
             _storeWarehouseRepository = storeWarehouseRepository;
             _mapper = mapper;
             _productService = productService;
-        }
+            _productDetailRespository = productDetailRespository;
+    }
 
         
 
@@ -152,13 +155,18 @@ namespace BigSizeFashion.Business.Services
                 .ThenInclude(pd => pd.Product).
                 ThenInclude(p => p.PromotionDetails).
                 ThenInclude(pp => pp.Promotion).ToListAsync();
+
                 
                 foreach (var cart in listCart)
                 {
                     var product = await _productService.
                     GetProductByID(cart.ProductDetail.Product.ProductId);
 
-                  
+                    var productDetailResposne = _productDetailRespository
+                        .GetAllByIQueryable()
+                        .Where(pd => pd.ProductDetailId == cart.ProductDetailId)
+                        .Include(pd => pd.Colour)
+                        .Include(pd => pd.Size).FirstOrDefault();
 
                     var cartResponse = new CartResponse()
                     {
@@ -167,7 +175,9 @@ namespace BigSizeFashion.Business.Services
                         ProductName = product.Content.ProductName,
                         ProductPrice = product.Content.Price,
                         ProductPromotion = product.Content.PromotionPrice,
-                        Quantity = cart.Quantity
+                        Quantity = cart.Quantity,
+                        Color = productDetailResposne.Colour.ColourName,
+                        Size = productDetailResposne.Size.SizeName
                     };
 
                     result.Content.Add(cartResponse);

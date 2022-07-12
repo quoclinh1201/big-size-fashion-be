@@ -10,6 +10,8 @@ namespace BigSizeFashion.Business.Dtos.Responses
     {
         public string ProductName { get; set; }
         public int ProductDetailId { get; set; }
+        public string Color { get; set; }
+        public string Size { get; set; }
         public decimal ProductPrice { get; set; }
         public decimal? ProductPromotion { get; set; }
         public string ProductImage { get; set; }
