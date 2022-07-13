@@ -120,9 +120,8 @@ namespace BigsizeFashion.API.Controllers
         /// GetNearestStore and calculate shipping fee
         /// </summary>
         /// <remarks>
-        /// - dưới 3km => phi ship 15000
-        /// - trên 3km => tăng 5000 cho mỗi km
-        /// - AE có ý kiến nào hay thì sửa lại
+        /// - dưới 10km => phi ship 3000 cho mỗi km
+        /// - trên 10km => 30000
         /// </remarks>
         /// <param name="address"></param>
         /// <returns></returns>

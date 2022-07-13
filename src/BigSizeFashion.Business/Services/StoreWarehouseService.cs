@@ -22,6 +22,8 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<Order> _orderRepository;
         private readonly IGenericRepository<OrderDetail> _orderDetailRepository;
+        private readonly IGenericRepository<DeliveryNote> _deliveryNoteRepository;
+        private readonly IGenericRepository<DeliveryNoteDetail> _deliveryNoteDetailRepository;
         private readonly IMapper _mapper;
 
         public StoreWarehouseService(IGenericRepository<StoreWarehouse> genericRepository,
@@ -29,6 +31,8 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<Order> orderRepository,
             IGenericRepository<OrderDetail> orderDetailRepository,
             IGenericRepository<staff> staffRepository,
+            IGenericRepository<DeliveryNote> deliveryNoteRepository,
+            IGenericRepository<DeliveryNoteDetail> deliveryNoteDetailRepository,
             IMapper mapper)
         {
             _genericRepository = genericRepository;
@@ -36,6 +40,8 @@ namespace BigSizeFashion.Business.Services
             _productDetailRepository = productDetailRepository;
             _orderDetailRepository = orderDetailRepository;
             _orderRepository = orderRepository;
+            _deliveryNoteRepository = deliveryNoteRepository;
+            _deliveryNoteDetailRepository = deliveryNoteDetailRepository;
             _mapper = mapper;
         }
 
@@ -56,15 +62,25 @@ namespace BigSizeFashion.Business.Services
 
                 var orders = await _orderRepository
                         .FindByAsync(o => o.StoreId == storeId
-                        && o.CreateDate.Day >= from.Value.Day
-                        && o.CreateDate.Month >= from.Value.Month
-                        && o.CreateDate.Year >= from.Value.Year
-                        && o.CreateDate.Day <= to.Value.Day
-                        && o.CreateDate.Month <= to.Value.Month
-                        && o.CreateDate.Year <= to.Value.Year
+                        && o.ApprovalDate.Value.Day >= from.Value.Day
+                        && o.ApprovalDate.Value.Month >= from.Value.Month
+                        && o.ApprovalDate.Value.Year >= from.Value.Year
+                        && o.ApprovalDate.Value.Day <= to.Value.Day
+                        && o.ApprovalDate.Value.Month <= to.Value.Month
+                        && o.ApprovalDate.Value.Year <= to.Value.Year
                         && o.Status != 0
                         && o.Status != 1
                         && o.Status != 6);
+
+                var deliverynotes = await _deliveryNoteRepository
+                        .FindByAsync(o => (o.ToStore == storeId || o.FromStore == storeId)
+                        && o.ApprovalDate.Value.Day >= from.Value.Day
+                        && o.ApprovalDate.Value.Month >= from.Value.Month
+                        && o.ApprovalDate.Value.Year >= from.Value.Year
+                        && o.ApprovalDate.Value.Day <= to.Value.Day
+                        && o.ApprovalDate.Value.Month <= to.Value.Month
+                        && o.ApprovalDate.Value.Year <= to.Value.Year
+                        && o.Status == 2);
 
                 foreach (var item in request.ListProducts)
                 {
@@ -99,6 +115,22 @@ namespace BigSizeFashion.Business.Services
                     foreach (var odt in odts)
                     {
                         map[odt.ProductDetailId] += odt.Quantity;
+                    }
+                }
+
+                foreach (var deliverynote in deliverynotes)
+                {
+                    var dnds = await _deliveryNoteDetailRepository.FindByAsync(d => d.DeliveryNoteId == deliverynote.DeliveryNoteId);
+                    foreach (var dnd in dnds)
+                    {
+                        if(deliverynote.FromStore == storeId)
+                        {
+                            map[dnd.ProductDetailId] += dnd.Quantity;
+                        }
+                        else if(deliverynote.ToStore == storeId)
+                        {
+                            map[dnd.ProductDetailId] -= dnd.Quantity;
+                        }
                     }
                 }
 

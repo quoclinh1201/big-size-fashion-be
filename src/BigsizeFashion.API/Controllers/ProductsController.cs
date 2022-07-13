@@ -197,8 +197,9 @@ namespace BigsizeFashion.API.Controllers
         //}
 
         /// <summary>
-        /// Staff and manager get quantity of product in store
+        /// Staff and manager get quantity of product in store, admin get quantity of product in main warehouse
         /// </summary>
+        /// <param name="authorization"></param>
         /// <param name="param"></param>
         /// <returns></returns>
         //[Authorize]

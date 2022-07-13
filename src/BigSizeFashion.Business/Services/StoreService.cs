@@ -79,7 +79,7 @@ namespace BigSizeFashion.Business.Services
                     var newItem = new AddNewProductIntoStoreRequest {
                         StoreId = id,
                         ProductDetailId = productId,
-                        Quantity = 0
+                        Quantity = 1000
                     };
                     var storeWarehouse = _mapper.Map<StoreWarehouse>(newItem);
                     await _storeWarehouseRepository.InsertAsync(storeWarehouse);
@@ -269,13 +269,13 @@ namespace BigSizeFashion.Business.Services
                 var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
                 decimal shippingFee = 0;
 
-                if(listAddress[storeId] <= 3000)
+                if(listAddress[storeId] < 10000)
                 {
-                    shippingFee = 15000;
+                    shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 3000;
                 }
                 else
                 {
-                    shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 5000;
+                    shippingFee = 30000;
                 }
 
                 var nearest = new NearestStoreResponse();

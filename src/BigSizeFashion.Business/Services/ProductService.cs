@@ -34,8 +34,9 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<Order> _orderRepository;
         private readonly IGenericRepository<OrderDetail> _orderDetailRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
         private readonly ISizeService _sizeService;
-        private readonly IProductDetailService _productDetailService;
+        //private readonly IProductDetailService _productDetailService;
         private readonly IMapper _mapper;
 
         public ProductService(
@@ -51,6 +52,7 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<ProductDetail> productDetailRepository,
             IGenericRepository<Order> orderRepository,
             IGenericRepository<OrderDetail> orderDetailRepository,
+            IGenericRepository<Account> accountRepository,
             ISizeService sizeService,
             IMapper mapper)
         {
@@ -66,6 +68,7 @@ namespace BigSizeFashion.Business.Services
             _productDetailRepository = productDetailRepository;
             _orderRepository = orderRepository;
             _orderDetailRepository = orderDetailRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
             _sizeService = sizeService;
         }
@@ -349,6 +352,7 @@ namespace BigSizeFashion.Business.Services
                     if (pd != null)
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.PromotionId = pd.Promotion.PromotionId;
                         model.ProductName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
@@ -747,21 +751,41 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var storeId = await _staffRepository.GetAllByIQueryable()
-                     .Where(s => s.Uid == uid)
-                     .Select(s => s.StoreId)
-                     .FirstOrDefaultAsync();
-                var productDetailId = await _productDetailRepository
+                var account = await _accountRepository.FindAsync(a => a.Uid == uid);
+                var storeId = 0;
+
+                if (account.RoleId == 1)
+                {
+                    //case chỉ 1 kho tổng
+                    storeId = await _storeRepository.GetAllByIQueryable()
+                                    .Where(s => s.IsMainWarehouse == true && s.Status == true)
+                                    .Select(s => s.StoreId)
+                                    .FirstOrDefaultAsync();
+                }
+                else
+                {
+                    storeId = await _staffRepository.GetAllByIQueryable()
+                                 .Where(s => s.Uid == uid)
+                                 .Select(s => s.StoreId)
+                                 .FirstOrDefaultAsync();
+                }
+
+                if(storeId != 0)
+                {
+                    var productDetailId = await _productDetailRepository
                     .GetAllByIQueryable()
                     .Where(p => p.ProductId == param.ProductId && p.ColourId == param.ColourId && p.SizeId == param.SizeId)
                     .Select(p => p.ProductDetailId).FirstOrDefaultAsync();
 
-                var quantity = await _storeWarehouseRepository.GetAllByIQueryable()
-                                .Where(s => s.StoreId == storeId && s.ProductDetailId == productDetailId)
-                                .Select(s => s.Quantity)
-                                .FirstOrDefaultAsync();
+                    var quantity = await _storeWarehouseRepository.GetAllByIQueryable()
+                                    .Where(s => s.StoreId == storeId && s.ProductDetailId == productDetailId)
+                                    .Select(s => s.Quantity)
+                                    .FirstOrDefaultAsync();
 
-                result.Content = new GetQuantityOfProductResponse { ProductDetailId = productDetailId, StoreId = storeId, Quantity = quantity };
+                    result.Content = new GetQuantityOfProductResponse { ProductDetailId = productDetailId, StoreId = storeId, Quantity = quantity };
+                    return result;
+                }
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Cửa hàng không hợp lệ.");
                 return result;
             }
             catch (Exception ex)
@@ -1097,6 +1121,7 @@ namespace BigSizeFashion.Business.Services
                     if (pd != null)
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.PromotionId = pd.Promotion.PromotionId;
                         model.ProductName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
@@ -1259,6 +1284,7 @@ namespace BigSizeFashion.Business.Services
                     if (pd != null)
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.PromotionId = pd.Promotion.PromotionId;
                         model.ProductName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
@@ -1287,6 +1313,7 @@ namespace BigSizeFashion.Business.Services
                     .Include(p => p.Size)
                     .Include(p => p.Colour)
                     .Include(p => p.Product)
+                    .Where(p => p.Product.Status == true)
                     .ToListAsync();
 
                 foreach (var item in products)

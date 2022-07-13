@@ -26,6 +26,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
 
             CreateMap<Product, GetDetailProductResponse>()
                 .ForMember(d => d.Category, s => s.MapFrom(s => s.Category.CategoryName))
+                .ForMember(d => d.CategoryId, s => s.MapFrom(s => s.Category.CategoryId))
                 .ForMember(d => d.Gender, s => s.MapFrom(s => s.Gender == true ? "Nam" : "Nữ"));
 
             CreateMap<Product, GetListProductResponse>();

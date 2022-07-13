@@ -87,7 +87,7 @@ namespace BigSizeFashion.Business.Services
             {
                 foreach (var id in allStoreId)
                 {
-                    var storeWarehoust = new StoreWarehouse { ProductDetailId = productDetailId, StoreId = id, Quantity = 0 };
+                    var storeWarehoust = new StoreWarehouse { ProductDetailId = productDetailId, StoreId = id, Quantity = 1000 };
                     await _storeWarehouseRepository.InsertAsync(storeWarehoust);
                 }
                 await _storeWarehouseRepository.SaveAsync();

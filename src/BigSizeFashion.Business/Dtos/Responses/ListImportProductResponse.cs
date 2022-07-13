@@ -9,7 +9,7 @@ namespace BigSizeFashion.Business.Dtos.Responses
     public class ListImportProductResponse
     {
         public int DeliveryNoteId { get; set; }
-        public int DeliveryNoteName { get; set; }
+        public string DeliveryNoteName { get; set; }
         public decimal TotalPrice { get; set; }
         public string CreateDate { get; set; }
         public string Status { get; set; }
