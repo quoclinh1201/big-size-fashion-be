@@ -8,15 +8,19 @@ using BigSizeFashion.Business.Helpers.Enums;
 using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
 using BigSizeFashion.Business.IServices;
+using BigSizeFashion.Business.Services.ZaloPay;
 using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Services
@@ -532,6 +536,19 @@ namespace BigSizeFashion.Business.Services
                 order.DeliveryDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Delivery;
                 await _orderRepository.UpdateAsync(order);
+
+                //Call api cho bên thứ 3 để đăng ký giao hàng
+                using (HttpClient hc = new HttpClient())
+                {
+                    var request = new DeliveryRequest
+                    {
+                        order_id = order.OrderId.ToString()
+                    };
+                    string json = JsonConvert.SerializeObject(request);
+                    var response = await hc.PostAsync(ThirdPartyDeliverySimulationConstants.UrlServer, new StringContent(json, Encoding.UTF8, "application/json"));
+                    //var responseString = await response.Content.ReadAsStringAsync();
+                    //var sadsd = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseString);
+                }
                 result.Content = true;
                 return result;
             }
@@ -1173,6 +1190,25 @@ namespace BigSizeFashion.Business.Services
                 }
 
                 result.Content = list;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> UpdateReceivedOrder(TrackingOrderRequest request)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == request.OrderId);
+                order.ReceivedDate = request.ReceivedDate;
+                order.Status = (byte)OrderStatusEnum.Received;
+                await _orderRepository.UpdateAsync(order);
+                result.Content = true;
                 return result;
             }
             catch (Exception ex)

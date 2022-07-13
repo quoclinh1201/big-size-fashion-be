@@ -26,6 +26,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> PackagedOrder(int id);
         Task<Result<bool>> DeliveryOrder(int id);
         Task<Result<bool>> ReceivedOrder(int id);
+        Task<Result<bool>> UpdateReceivedOrder(TrackingOrderRequest request);
         Task<Result<bool>> RejectOrder(int id);
         Task<Result<OrderResponse>> AddOrder(string authorization, OrderRequest request);
         Task<Result<bool>> CancelOrder(string v, int id);

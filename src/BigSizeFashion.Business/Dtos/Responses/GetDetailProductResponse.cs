@@ -13,6 +13,7 @@ namespace BigSizeFashion.Business.Helpers.ResponseObjects
         //public int ProductDetailId { get; set; }
         public string ProductName { get; set; }
         public decimal Price { get; set; }
+        public string PromotionName { get; set; }
         public decimal? PromotionPrice { get; set; }
         public string PromotionValue { get; set; }
         public string Category { get; set; }

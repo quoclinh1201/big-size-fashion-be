@@ -349,6 +349,7 @@ namespace BigSizeFashion.Business.Services
                     if (pd != null)
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.ProductName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
                     }
@@ -1096,6 +1097,7 @@ namespace BigSizeFashion.Business.Services
                     if (pd != null)
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.ProductName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
                     }
@@ -1257,6 +1259,7 @@ namespace BigSizeFashion.Business.Services
                     if (pd != null)
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
+                        model.ProductName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
                     }

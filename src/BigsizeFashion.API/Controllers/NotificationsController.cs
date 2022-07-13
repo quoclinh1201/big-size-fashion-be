@@ -29,7 +29,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet]
-        public async Task<IActionResult> GetAllNotifications([FromHeader] string authorization, QueryStringParameters param)
+        public async Task<IActionResult> GetAllNotifications([FromHeader] string authorization, [FromQuery] QueryStringParameters param)
         {
             var result = await _service.GetAllNotifications(authorization.Substring(7), param);
             return Ok(result);

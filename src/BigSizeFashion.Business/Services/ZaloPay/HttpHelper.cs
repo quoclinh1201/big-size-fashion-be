@@ -34,6 +34,23 @@ namespace BigSizeFashion.Business.Services.ZaloPay
             return PostFormAsync<Dictionary<string, object>>(uri, data);
         }
 
+        public static async Task<T> GetAsync<T>(string uri)
+        {
+            var response = await httpClient.GetAsync(uri);
+            var responseString = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<T>(responseString);
+        }
+
+        public static Task<T> GetFormAsync<T>(string uri)
+        {
+            return GetAsync<T>(uri);
+        }
+
+        public static Task<Dictionary<string, object>> GetFormAsync(string uri)
+        {
+            return GetFormAsync<Dictionary<string, object>>(uri);
+        }
+
         public static async Task<T> GetJson<T>(string uri)
         {
             var response = await httpClient.GetAsync(uri);
