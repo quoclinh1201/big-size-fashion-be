@@ -38,7 +38,7 @@ namespace BigSizeFashion.Business.Services
                 };
                 var messaging = FirebaseMessaging.DefaultInstance;
 
-                var notify = new CreateNotificationRequest {AccountId = Convert.ToInt32(user), Title = title, Message = body };
+                var notify = new CreateNotificationRequest {Username = user, Title = title, Message = body };
                 await _service.CreateNotification(notify);
 
                 return await messaging.SendAsync(message);

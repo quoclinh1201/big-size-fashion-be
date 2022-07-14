@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Dtos.Responses
 {
-    public class ListImportProductResponse
+    public class ListExportProductResponse
     {
         public int DeliveryNoteId { get; set; }
         public string DeliveryNoteName { get; set; }

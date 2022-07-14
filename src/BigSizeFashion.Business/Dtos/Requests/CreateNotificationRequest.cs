@@ -8,7 +8,7 @@ namespace BigSizeFashion.Business.Dtos.Requests
 {
     public class CreateNotificationRequest
     {
-        public int AccountId { get; set; }
+        public string Username { get; set; }
         public string Title { get; set; }
         public string Message { get; set; }
         public string ReferenceUrl { get; set; }

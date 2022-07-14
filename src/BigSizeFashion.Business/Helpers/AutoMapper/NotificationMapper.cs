@@ -19,6 +19,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateDate)));
 
             CreateMap<CreateNotificationRequest, Notification>()
+                .ForMember(d => d.AccountId, s => s.MapFrom(s => 0))
                 .ForMember(d => d.CreateDate, s => s.MapFrom(s => DateTime.UtcNow.AddHours(7)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => true));
         }

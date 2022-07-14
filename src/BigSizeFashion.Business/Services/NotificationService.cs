@@ -18,11 +18,16 @@ namespace BigSizeFashion.Business.Services
     public class NotificationService : INotificationService
     {
         private readonly IGenericRepository<Notification> _genericRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
         private readonly IMapper _mapper;
 
-        public NotificationService(IGenericRepository<Notification> genericRepository, IMapper mapper)
+        public NotificationService(
+            IGenericRepository<Notification> genericRepository,
+            IGenericRepository<Account> accountRepository,
+            IMapper mapper)
         {
             _genericRepository = genericRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
         }
 
@@ -31,6 +36,8 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var notify = _mapper.Map<Notification>(request);
+                var acc = await _accountRepository.FindAsync(a => a.Username == request.Username);
+                notify.AccountId = acc.Uid;
                 await _genericRepository.InsertAsync(notify);
                 await _genericRepository.SaveAsync();
             }

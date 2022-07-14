@@ -26,6 +26,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<ProductImage> _productImageRepository;
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
+        private readonly IGenericRepository<Account> _accountRepository;
         private readonly IProductService _productService;
         private readonly IMapper _mapper;
 
@@ -36,6 +37,7 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<ProductDetail> productDetailRepository,
             IGenericRepository<ProductImage> productImageRepository,
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
+            IGenericRepository<Account> accountRepository,
             IProductService productService,
             IMapper mapper)
         {
@@ -47,6 +49,7 @@ namespace BigSizeFashion.Business.Services
             _productImageRepository = productImageRepository;
             _productService = productService;
             _storeWarehouseRepository = storeWarehouseRepository;
+            _accountRepository = accountRepository;
             _mapper = mapper;
         }
 
@@ -151,6 +154,8 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<DeliveryNoteDetailResponse>();
             try
             {
+                var m1 = "";
+                var m2 = "";
                 var dn = await _genericRepository.GetAllByIQueryable()
                     .Where(d => d.DeliveryNoteId == id)
                     .Include(d => d.Staff)
@@ -158,9 +163,46 @@ namespace BigSizeFashion.Business.Services
                     .FirstOrDefaultAsync();
                 var response = _mapper.Map<DeliveryNoteDetailResponse>(dn);
                 var fromStore = await _storeRepository.FindAsync(s => s.StoreId == dn.FromStore);
+
+                if(fromStore.IsMainWarehouse)
+                {
+                    m1 = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.User)
+                        .Where(a => a.RoleId == 1 && a.User.Status == true && a.Status == true)
+                        .Select(a => a.User.Fullname)
+                        .FirstOrDefaultAsync();
+                }
+                else
+                {
+                    m1 = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.RoleId == 2 && a.staff.StoreId == fromStore.StoreId && a.Status == true && a.staff.Status == true)
+                        .Select(a => a.staff.Fullname)
+                        .FirstOrDefaultAsync();
+                }
+                
                 var toStore = await _storeRepository.FindAsync(s => s.StoreId == dn.ToStore);
+                if(toStore.IsMainWarehouse)
+                {
+                    m2 = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.User)
+                        .Where(a => a.RoleId == 1 && a.User.Status == true && a.Status == true)
+                        .Select(a => a.User.Fullname)
+                        .FirstOrDefaultAsync();
+                }
+                else
+                {
+                    m2 = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.RoleId == 2 && a.staff.StoreId == toStore.StoreId && a.Status == true && a.staff.Status == true)
+                        .Select(a => a.staff.Fullname)
+                        .FirstOrDefaultAsync();
+                }
+                
                 response.FromStore = _mapper.Map<StoreResponse>(fromStore);
+                response.FromStore.ManagerName = m1;
                 response.ToStore = _mapper.Map<StoreResponse>(toStore);
+                response.ToStore.ManagerName = m2;
 
                 foreach (var item in dn.DeliveryNoteDetails)
                 {
@@ -187,19 +229,22 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListImportProductResponse>> GetListExportProduct(string token, ImportProductParameter param)
+        public async Task<PagedResult<ListExportProductResponse>> GetListExportProduct(string token, ImportProductParameter param)
         {
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
                 var fromStoreId = await _staffRepository.GetAllByIQueryable()
                     .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
-                var dn = await _genericRepository.FindByAsync(d => d.FromStore == fromStoreId);
+                var dn = await _genericRepository.GetAllByIQueryable()
+                        .Where(d => d.FromStore == fromStoreId)
+                        .Include(d => d.ToStoreNavigation)
+                        .ToListAsync();
                 var query = dn.AsQueryable();
                 FilterByName(ref query, param.DeliveryNoteName);
                 query.OrderByDescending(q => q.CreateDate);
-                var result = _mapper.Map<List<ListImportProductResponse>>(query.ToList());
-                return PagedResult<ListImportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
+                var result = _mapper.Map<List<ListExportProductResponse>>(query.ToList());
+                return PagedResult<ListExportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
             }
             catch (Exception)
             {
@@ -208,7 +253,7 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListImportProductResponse>> GetListExportProductForMainWarehouse(string token, ImportProductParameter param)
+        public async Task<PagedResult<ListExportProductResponse>> GetListExportProductForMainWarehouse(string token, ImportProductParameter param)
         {
             try
             {
@@ -218,7 +263,10 @@ namespace BigSizeFashion.Business.Services
 
                 foreach (var item in fromStores)
                 {
-                    var dn = await _genericRepository.FindByAsync(d => d.FromStore == item.StoreId);
+                    var dn = await _genericRepository.GetAllByIQueryable()
+                        .Where(d => d.FromStore == item.StoreId)
+                        .Include(d => d.ToStoreNavigation)
+                        .ToListAsync();
                     foreach (var i in dn)
                     {
                         list.Add(i);
@@ -228,8 +276,8 @@ namespace BigSizeFashion.Business.Services
                 var query = list.AsQueryable();
                 FilterByName(ref query, param.DeliveryNoteName);
                 query.OrderByDescending(q => q.CreateDate);
-                var result = _mapper.Map<List<ListImportProductResponse>>(query.ToList());
-                return PagedResult<ListImportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
+                var result = _mapper.Map<List<ListExportProductResponse>>(query.ToList());
+                return PagedResult<ListExportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
             }
             catch (Exception)
             {
@@ -245,7 +293,10 @@ namespace BigSizeFashion.Business.Services
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
                 var toStoreId = await _staffRepository.GetAllByIQueryable()
                     .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
-                var dn = await _genericRepository.FindByAsync(d => d.ToStore == toStoreId);
+                var dn = await _genericRepository.GetAllByIQueryable()
+                    .Include(s => s.FromStoreNavigation)
+                    .Where(d => d.ToStore == toStoreId)
+                    .ToListAsync();
                 var query = dn.AsQueryable();
                 FilterByName(ref query, param.DeliveryNoteName);
                 query.OrderByDescending(q => q.CreateDate);

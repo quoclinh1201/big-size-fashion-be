@@ -353,7 +353,7 @@ namespace BigSizeFashion.Business.Services
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
                         model.PromotionId = pd.Promotion.PromotionId;
-                        model.ProductName = pd.Promotion.PromotionName;
+                        model.PromotionName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
                     }
@@ -865,7 +865,11 @@ namespace BigSizeFashion.Business.Services
                 //    .ToListAsync();
 
                 var o = await _orderDetailRepository.GetAllByIQueryable().Include(o => o.Order)
-                    .Where(o => o.Order.CreateDate.Month == month && o.Order.CreateDate.Year == year && o.Order.Status == 5)
+                    .Where(o => o.Order.ApprovalDate.Value.Month == month 
+                            && o.Order.ApprovalDate.Value.Year == year
+                            && o.Order.Status != 0
+                            && o.Order.Status != 1
+                            && o.Order.Status != 6)
                     .ToListAsync();
 
                 var listproductdetail = new Dictionary<int, int>();
@@ -896,38 +900,43 @@ namespace BigSizeFashion.Business.Services
                         listproduct.Add(pd.ProductId, item.Value);
                     }
                 }
-                var cc = listproduct.OrderByDescending(s => s.Value);
+                //var cc = listproduct.OrderByDescending(s => s.Value);
+                var cc = listproduct.ToList();
+                cc.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
                 var list = new List<GetListProductResponse>();
 
                 for (int i = 0; i < cc.Count(); i++)
                 {
                     var product = await _productRepository.FindAsync(p => p.ProductId == cc.ElementAt(i).Key && p.Status == true);
-                    var pp = _mapper.Map<GetListProductResponse>(product);
-                    var image = await _imageRepository.FindAsync(x => x.ProductId == pp.ProductId && x.IsMainImage == true);
-                    if (image != null)
+                    if (product != null)
                     {
-                        pp.ImageUrl = image.ImageUrl;
-                    }
-                    else
-                    {
-                        pp.ImageUrl = CommonConstants.NoImageUrl;
-                    }
+                        var pp = _mapper.Map<GetListProductResponse>(product);
+                        var image = await _imageRepository.FindAsync(x => x.ProductId == pp.ProductId && x.IsMainImage == true);
+                        if (image != null)
+                        {
+                            pp.ImageUrl = image.ImageUrl;
+                        }
+                        else
+                        {
+                            pp.ImageUrl = CommonConstants.NoImageUrl;
+                        }
 
-                    var now = DateTime.UtcNow.AddHours(7);
-                    var pd = await _promotionDetailRepository.GetAllByIQueryable()
-                                    .Include(p => p.Promotion)
-                                    .Where(p => p.Promotion.ApplyDate <= now
-                                                && p.Promotion.ExpiredDate >= now
-                                                && p.Promotion.Status == true
-                                                && p.ProductId == pp.ProductId)
-                                    .FirstOrDefaultAsync();
-                    if (pd != null)
-                    {
-                        var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * pp.Price;
-                        pp.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
-                        pp.PromotionValue = pd.Promotion.PromotionValue + "%";
+                        var now = DateTime.UtcNow.AddHours(7);
+                        var pd = await _promotionDetailRepository.GetAllByIQueryable()
+                                        .Include(p => p.Promotion)
+                                        .Where(p => p.Promotion.ApplyDate <= now
+                                                    && p.Promotion.ExpiredDate >= now
+                                                    && p.Promotion.Status == true
+                                                    && p.ProductId == pp.ProductId)
+                                        .FirstOrDefaultAsync();
+                        if (pd != null)
+                        {
+                            var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * pp.Price;
+                            pp.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
+                            pp.PromotionValue = pd.Promotion.PromotionValue + "%";
+                        }
+                        list.Add(pp);
                     }
-                    list.Add(pp);
                 }
                 var response = list.Skip(0).Take(10);
                 result.Content = response;
@@ -1122,7 +1131,7 @@ namespace BigSizeFashion.Business.Services
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
                         model.PromotionId = pd.Promotion.PromotionId;
-                        model.ProductName = pd.Promotion.PromotionName;
+                        model.PromotionName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
                     }
@@ -1285,7 +1294,7 @@ namespace BigSizeFashion.Business.Services
                     {
                         var unroundPrice = ((decimal)(100 - pd.Promotion.PromotionValue) / 100) * model.Price;
                         model.PromotionId = pd.Promotion.PromotionId;
-                        model.ProductName = pd.Promotion.PromotionName;
+                        model.PromotionName = pd.Promotion.PromotionName;
                         model.PromotionPrice = Math.Round(unroundPrice / 1000, 0) * 1000;
                         model.PromotionValue = pd.Promotion.PromotionValue + "%";
                     }
