@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Dtos.RequestObjects;
+﻿using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Dtos.RequestObjects;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Http;
@@ -24,6 +25,10 @@ namespace BigsizeFashion.API.Controllers
         /// <summary>
         /// Add list product into promotion
         /// </summary>
+        /// <remarks>
+        /// - trả về 200 và content = [] là add thành công
+        /// - content != null => danh sách sản phẩm bị trùng ngày
+        /// </remarks>
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
@@ -52,6 +57,18 @@ namespace BigsizeFashion.API.Controllers
             {
                 return BadRequest(result);
             }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get all product in promotion
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public async Task<IActionResult> GetListProductInPromotion([FromQuery] GetListProductInPromotionParameter param)
+        {
+            var result = await _service.GetListProductInPromotion(param);
             return Ok(result);
         }
     }

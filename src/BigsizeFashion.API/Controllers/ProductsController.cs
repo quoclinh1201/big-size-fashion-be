@@ -303,5 +303,20 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Lấy danh sách sản phẩm để add vào promotion (response là id và product name)
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("all-product-to-add-into-promotion")]
+        public async Task<IActionResult> GetAllProductToAddIntoPromotion()
+        {
+            var result = await _service.GetAllProductToAddIntoPromotion();
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

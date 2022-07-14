@@ -1,4 +1,6 @@
-﻿using BigSizeFashion.Business.Dtos.RequestObjects;
+﻿using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Dtos.RequestObjects;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -12,8 +14,8 @@ namespace BigSizeFashion.Business.IServices
 {
     public interface IPromotionDetailService
     {
-        Task<Result<bool>> AddProductsIntoPromotion(AddProductsIntoPromotionRequest request);
+        Task<Result<IEnumerable<ErrorProductWhenAddToPromotionResponse>>> AddProductsIntoPromotion(AddProductsIntoPromotionRequest request);
         Task<Result<bool>> RemoveProductOutOfPromotion(RemoveProductOutOfPromotionnRequest request);
-        
+        Task<PagedResult<GetListProductResponse>> GetListProductInPromotion(GetListProductInPromotionParameter param);
     }
 }

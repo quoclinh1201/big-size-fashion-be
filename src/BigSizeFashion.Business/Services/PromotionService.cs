@@ -119,6 +119,7 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var promotion = _mapper.Map<Promotion>(request);
+                promotion.ExpiredDate = promotion.ExpiredDate.AddDays(1).AddMinutes(-1);
                 await _genericRepository.InsertAsync(promotion);
                 await _genericRepository.SaveAsync();
                 result.Content = _mapper.Map<PromotionResponse>(promotion);

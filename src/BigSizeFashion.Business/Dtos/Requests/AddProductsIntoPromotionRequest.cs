@@ -11,6 +11,7 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
     {
         [Required]
         public int PromotionId { get; set; }
+        [Required]
         public List<int> ListProductId { get; set; }
     }
 }
