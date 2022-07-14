@@ -109,29 +109,36 @@ namespace BigSizeFashion.Business.Services
                     response.ListProducts.Add(cc);
                 }
 
+                var m = map.Count();
+
                 foreach (var order in orders)
                 {
-                    var odts = await _orderDetailRepository.FindByAsync(o => o.OrderId == order.OrderId);
-                    foreach (var odt in odts)
+                    foreach (var item in map)
                     {
-                        map[odt.ProductDetailId] += odt.Quantity;
+                        var odt = await _orderDetailRepository.FindAsync(o => o.OrderId == order.OrderId && o.ProductDetailId == item.Key);
+                        if(odt != null)
+                            map[odt.ProductDetailId] += odt.Quantity;
+
                     }
                 }
 
                 foreach (var deliverynote in deliverynotes)
                 {
-                    var dnds = await _deliveryNoteDetailRepository.FindByAsync(d => d.DeliveryNoteId == deliverynote.DeliveryNoteId);
-                    foreach (var dnd in dnds)
+                    foreach (var item in map)
                     {
-                        if(deliverynote.FromStore == storeId)
+                        var dnd = await _deliveryNoteDetailRepository.FindAsync(d => d.DeliveryNoteId == deliverynote.DeliveryNoteId && d.ProductDetailId == item.Key); ;
+                        if(dnd != null)
                         {
-                            map[dnd.ProductDetailId] += dnd.Quantity;
+                            if (deliverynote.FromStore == storeId)
+                            {
+                                map[dnd.ProductDetailId] += dnd.Quantity;
+                            }
+                            else if (deliverynote.ToStore == storeId)
+                            {
+                                map[dnd.ProductDetailId] -= dnd.Quantity;
+                            }
                         }
-                        else if(deliverynote.ToStore == storeId)
-                        {
-                            map[dnd.ProductDetailId] -= dnd.Quantity;
-                        }
-                    }
+                    } 
                 }
 
                 foreach (var item in map)
