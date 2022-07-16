@@ -96,20 +96,21 @@ namespace BigSizeFashion.Business.Services
                                 && e.ProductDetail.ColourId == item.ColourId)
                         .FirstOrDefaultAsync();
 
-                    cc.productId = item.productId;
-                    cc.ProductName = eq.ProductDetail.Product.ProductName;
-                    cc.SizeId = item.SizeId;
-                    cc.SizeName = eq.ProductDetail.Size.SizeName;
-                    cc.ColourId = item.ColourId;
-                    cc.ColourName = eq.ProductDetail.Colour.ColourName;
-                    cc.RealQuantity = item.RealQuantity;
-                    cc.EndingQuantityInSystem = eq.Quantity;
+                    if(eq != null)
+                    {
+                        cc.productId = item.productId;
+                        cc.ProductName = eq.ProductDetail.Product.ProductName;
+                        cc.SizeId = item.SizeId;
+                        cc.SizeName = eq.ProductDetail.Size.SizeName;
+                        cc.ColourId = item.ColourId;
+                        cc.ColourName = eq.ProductDetail.Colour.ColourName;
+                        cc.RealQuantity = item.RealQuantity;
+                        cc.EndingQuantityInSystem = eq.Quantity;
 
-                    map.Add(eq.ProductDetailId, eq.Quantity);
-                    response.ListProducts.Add(cc);
+                        map.Add(eq.ProductDetailId, eq.Quantity);
+                        response.ListProducts.Add(cc);
+                    }
                 }
-
-                var m = map.Count();
 
                 foreach (var order in orders)
                 {

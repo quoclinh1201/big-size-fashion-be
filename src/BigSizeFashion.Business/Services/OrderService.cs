@@ -41,7 +41,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IStoreService _storeService;
         private readonly IAddressService _addressService;
         private readonly IOrderDetailService _orderDetailService;
-
+        private readonly IFirebaseNotificationService _firebaseNotificationService;
 
 
         private readonly IMapper _mapper;
@@ -59,6 +59,7 @@ namespace BigSizeFashion.Business.Services
             IStoreService storeService,
             IAddressService addressService,
             IOrderDetailService orderDetailService,
+            IFirebaseNotificationService firebaseNotificationService,
             IMapper mapper)
         {
             _orderRepository = orderRepository;
@@ -74,6 +75,7 @@ namespace BigSizeFashion.Business.Services
             _storeService = storeService;
             _addressService = addressService;
             _orderDetailService = orderDetailService;
+            _firebaseNotificationService = firebaseNotificationService;
             _mapper = mapper;
         }
 
@@ -159,6 +161,10 @@ namespace BigSizeFashion.Business.Services
                     await _orderDetailRepository.InsertAsync(od);
                 }
                 await _orderDetailRepository.SaveAsync();
+
+                var username = await GetManagerUserName(staff.StoreId);
+                await _firebaseNotificationService.SendNotification(username, "Đơn hàng offline #" + order.OrderId + " vừa được tạo", "Vui lòng xác thực đơn hàng.", "");
+
                 result.Content = new OrderIdResponse { OrderId = order.OrderId };
                 return result;
             }
@@ -167,6 +173,33 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
+        }
+
+        private async Task<string> GetManagerUserName(int storeId)
+        {
+            var username = await _staffRepository.GetAllByIQueryable()
+                .Where(s => s.StoreId == storeId && s.Status == true && s.UidNavigation.RoleId == 2 && s.UidNavigation.Status == true)
+                .Select(s => s.UidNavigation.Username)
+                .FirstOrDefaultAsync();
+            return username;
+        }
+
+        private async Task<string> GetStaffUserName(int uid)
+        {
+            var username = await _staffRepository.GetAllByIQueryable()
+                .Where(s => s.Uid == uid && s.Status == true && s.UidNavigation.RoleId == 3 && s.UidNavigation.Status == true)
+                .Select(s => s.UidNavigation.Username)
+                .FirstOrDefaultAsync();
+            return username;
+        }
+
+        private async Task<string> GetCustomerUserName(int uid)
+        {
+            var username = await _customerRepository.GetAllByIQueryable()
+                .Where(s => s.Uid == uid && s.Status == true && s.UidNavigation.RoleId == 4 && s.UidNavigation.Status == true)
+                .Select(s => s.UidNavigation.Username)
+                .FirstOrDefaultAsync();
+            return username;
         }
 
         public async Task<PagedResult<ListOrderResponse>> GetListOrderForCustomer(string token, FilterOrderParameter param)
@@ -352,6 +385,8 @@ namespace BigSizeFashion.Business.Services
                         await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
                     }
 
+                    var username = await GetCustomerUserName(order.CustomerId);
+                    await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " đã được xác nhận", "Đơn hàng của bạn sẽ được giao trong thời gian sớm nhất.", "");
                     result.Content = null;
                     return result;
                 }
@@ -368,7 +403,7 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<PagedResult<ListOrderResponse>> GetListOrderOfStoreForManager(string token, FilterOrderParameter param)
+        public async Task<PagedResult<ListOrderForManagerResponse>> GetListOrderOfStoreForManager(string token, FilterOrderParameter param)
         {
             try
             {
@@ -378,11 +413,16 @@ namespace BigSizeFashion.Business.Services
                 var query = orders.AsQueryable();
                 FilterOrderByType(ref query, param.OrderType);
                 FilterOrderStatus(ref query, param.OrderStatus.ToString());
-                OrderByStatus(ref query);
+                OrderByStatus(ref query, param.OrderStatus);
                 //OrderByCreateDate(ref query, param.OrderByCreateDate);
                 var list = query.ToList();
-                var response = _mapper.Map<List<ListOrderResponse>>(list);
-                return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+                var response = _mapper.Map<List<ListOrderForManagerResponse>>(list);
+                for (int i = 0; i < response.Count; i++)
+                {
+                    var date = GetDateOfOrder(query, response[i].OrderId, param.OrderStatus);
+                    response[i].CreateDate = ConvertDateTime.ConvertDateTimeToString(date);
+                }
+                return PagedResult<ListOrderForManagerResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
             }
             catch (Exception)
             {
@@ -391,14 +431,67 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        private void OrderByStatus(ref IQueryable<Order> query)
+        private DateTime? GetDateOfOrder(IQueryable<Order> query, int orderId, OrderStatusEnum? orderStatus)
+        {
+            if (!query.Any())
+            {
+                return null;
+            }
+            
+            if (OrderStatusEnum.Approved == orderStatus)
+            {
+                return query.Where(q => q.OrderId == orderId).Select(q => q.ApprovalDate).FirstOrDefault();
+            }
+            else if (OrderStatusEnum.Packaged == orderStatus)
+            {
+                return query.Where(q => q.OrderId == orderId).Select(q => q.PackagedDate).FirstOrDefault();
+            }
+            else if (OrderStatusEnum.Delivery == orderStatus)
+            {
+                return query.Where(q => q.OrderId == orderId).Select(q => q.DeliveryDate).FirstOrDefault();
+            }
+            else if (OrderStatusEnum.Received == orderStatus)
+            {
+                return query.Where(q => q.OrderId == orderId).Select(q => q.ReceivedDate).FirstOrDefault();
+            }
+            else if (OrderStatusEnum.Reject == orderStatus)
+            {
+                return query.Where(q => q.OrderId == orderId).Select(q => q.RejectedDate).FirstOrDefault();
+            }
+            return query.Where(q => q.OrderId == orderId).Select(q => q.CreateDate).FirstOrDefault();
+        }
+
+        private void OrderByStatus(ref IQueryable<Order> query, OrderStatusEnum? orderStatus)
         {
             if (!query.Any())
             {
                 return;
             }
 
-            query = query.OrderBy(q => q.CreateDate).OrderByDescending(q => q.Status == 1);
+            if(OrderStatusEnum.Pending == orderStatus || OrderStatusEnum.Cancel == orderStatus || OrderStatusEnum.All  == orderStatus || orderStatus == null)
+            {
+                query = query.OrderByDescending(q => q.CreateDate);
+            }
+            else if(OrderStatusEnum.Approved == orderStatus)
+            {
+                query = query.OrderByDescending(q => q.ApprovalDate);
+            }
+            else if(OrderStatusEnum.Packaged == orderStatus)
+            {
+                query = query.OrderByDescending(q => q.PackagedDate);
+            }
+            else if (OrderStatusEnum.Delivery == orderStatus)
+            {
+                query = query.OrderByDescending(q => q.DeliveryDate);
+            }
+            else if (OrderStatusEnum.Received == orderStatus)
+            {
+                query = query.OrderByDescending(q => q.ReceivedDate);
+            }
+            else if (OrderStatusEnum.Reject == orderStatus)
+            {
+                query = query.OrderByDescending(q => q.RejectedDate);
+            }
         }
 
         public async Task<Result<bool>> AssignOrder(AssignOrderRequest request)
@@ -409,6 +502,9 @@ namespace BigSizeFashion.Business.Services
                 var order = await _orderRepository.FindAsync(o => o.OrderId == request.OrderId);
                 order.StaffId = request.StaffId;
                 await _orderRepository.UpdateAsync(order);
+
+                var username = await GetStaffUserName(order.StaffId.Value);
+                await _firebaseNotificationService.SendNotification(username, "Phân công đơn hàng #" + order.OrderId, "Bạn được phân công đóng gói và xử lý đơn hàng #" + order.OrderId, "");
                 result.Content = true;
                 return result;
             }
@@ -517,6 +613,10 @@ namespace BigSizeFashion.Business.Services
                 order.PackagedDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Packaged;
                 await _orderRepository.UpdateAsync(order);
+
+                var username = await GetCustomerUserName(order.CustomerId);
+                await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " đã được đóng gói", "Đơn hàng của bạn sẽ được giao trong thời gian sớm nhất.", "");
+
                 result.Content = true;
                 return result;
             }
@@ -548,6 +648,10 @@ namespace BigSizeFashion.Business.Services
                     var response = await hc.PostAsync(ThirdPartyDeliverySimulationConstants.UrlServer, new StringContent(json, Encoding.UTF8, "application/json"));
                     //var responseString = await response.Content.ReadAsStringAsync();
                     //var sadsd = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseString);
+
+                    var username = await GetCustomerUserName(order.CustomerId);
+                    await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " đang được vận chuyển", "Đơn hàng của bạn sẽ được giao trong thời gian sớm nhất.", "");
+
                 }
                 result.Content = true;
                 return result;
@@ -587,6 +691,10 @@ namespace BigSizeFashion.Business.Services
                 order.RejectedDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Reject;
                 await _orderRepository.UpdateAsync(order);
+
+                var username = await GetCustomerUserName(order.CustomerId);
+                await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " bị từ chối", "Đơn hàng của bạn bị từ chối", "");
+
                 result.Content = true;
                 return result;
             }
@@ -637,7 +745,9 @@ namespace BigSizeFashion.Business.Services
                                 await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
                             }
                         }
-                        order.Status = (byte)OrderStatusEnum.Cancel;
+                        order.Status = (byte)OrderStatusEnum.Pending;
+                        order.StaffId = null;
+                        order.ApprovalDate = null;
                         await _orderRepository.UpdateAsync(order);
                         result.Content = true;
                         return result;
@@ -717,6 +827,8 @@ namespace BigSizeFashion.Business.Services
             //var result = new Result<List<OrderResponse>>();
             //result.Content = new List<OrderResponse>();
             //result.Content = listOrderResponse;
+            var username = await GetManagerUserName(order.StoreId);
+            await _firebaseNotificationService.SendNotification(username, "Đơn hàng online #" + order.OrderId + " vừa được tạo", "Vui lòng xác thực đơn hàng.", "");
 
             result.Content = _mapper.Map<OrderResponse>(order);
             return result;
@@ -1208,6 +1320,10 @@ namespace BigSizeFashion.Business.Services
                 order.ReceivedDate = request.ReceivedDate;
                 order.Status = (byte)OrderStatusEnum.Received;
                 await _orderRepository.UpdateAsync(order);
+
+                var username = await GetCustomerUserName(order.CustomerId);
+                await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " hoàn tất", "Cảm ơn bạn đã tin tưởng mua sắm tại Big-size Fashion.", "");
+
                 result.Content = true;
                 return result;
             }

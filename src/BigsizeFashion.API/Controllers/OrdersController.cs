@@ -319,7 +319,8 @@ namespace BigsizeFashion.API.Controllers
         /// Cancel order
         /// </summary>
         /// <remarks>
-        /// customer chỉ hủy được những đơn hàng có trạng thái là "Chờ xác nhận", manager thì full quyền
+        /// - customer chỉ hủy được những đơn hàng có trạng thái là "Chờ xác nhận"
+        /// - manager thì chuyển trạng thái về "Chờ xác nhận"
         /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="id"></param>

@@ -27,13 +27,13 @@ namespace BigSizeFashion.Business.Helpers.Common
         {
             return status switch
             {
-                OrderStatusConstants.Cancel => 0,
-                OrderStatusConstants.Pending => 1,
-                OrderStatusConstants.Approved => 2,
-                OrderStatusConstants.Packaged => 3,
-                OrderStatusConstants.Delivery => 4,
-                OrderStatusConstants.Received => 5,
-                OrderStatusConstants.Reject => 6,
+                "Cancel" => 0,
+                "Pending" => 1,
+                "Approved" => 2,
+                "Packaged" => 3,
+                "Delivery" => 4,
+                "Received" => 5,
+                "Reject" => 6,
                 _ => 0
             };
         }
