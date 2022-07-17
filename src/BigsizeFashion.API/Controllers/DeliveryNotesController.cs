@@ -26,7 +26,10 @@ namespace BigsizeFashion.API.Controllers
         /// Manager get list request import product
         /// </summary>
         /// <remarks>
-        /// Bên nào yêu cầu nhập hàng thì gọi api này
+        /// - Bên nào yêu cầu nhập hàng thì gọi api này
+        /// - Status = 0 => cancel
+        /// - Status = 1 => pending
+        /// - status = 2 => approved
         /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="param"></param>
@@ -47,7 +50,10 @@ namespace BigsizeFashion.API.Controllers
         /// Manager get list export
         /// </summary>
         /// <remarks>
-        /// Bên xuất hàng gọi api này
+        /// - Bên xuất hàng gọi api này
+        /// - Status = 0 => cancel
+        /// - Status = 1 => pending
+        /// - status = 2 => approved
         /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="param"></param>
@@ -150,6 +156,11 @@ namespace BigsizeFashion.API.Controllers
         /// <summary>
         /// Get list export product for main warehouse (In admin page)
         /// </summary>
+        /// <remarks>
+        /// - Status = 0 => cancel
+        /// - Status = 1 => pending
+        /// - status = 2 => approved
+        /// </remarks>
         /// <param name="authorization"></param>
         /// <param name="param"></param>
         /// <returns></returns>

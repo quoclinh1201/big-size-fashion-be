@@ -241,9 +241,15 @@ namespace BigSizeFashion.Business.Services
                         .Include(d => d.ToStoreNavigation)
                         .ToListAsync();
                 var query = dn.AsQueryable();
+                FilterByStatus(ref query, param.Status);
                 FilterByName(ref query, param.DeliveryNoteName);
-                query.OrderByDescending(q => q.CreateDate);
+                OrderByStatus(ref query, param.Status);
                 var result = _mapper.Map<List<ListExportProductResponse>>(query.ToList());
+                for (int i = 0; i < result.Count; i++)
+                {
+                    var date = GetDateOfDelivernote(query, result[i].DeliveryNoteId, param.Status);
+                    result[i].CreateDate = ConvertDateTime.ConvertDateTimeToString(date);
+                }
                 return PagedResult<ListExportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
             }
             catch (Exception)
@@ -274,9 +280,15 @@ namespace BigSizeFashion.Business.Services
                 }
                 
                 var query = list.AsQueryable();
+                FilterByStatus(ref query, param.Status);
                 FilterByName(ref query, param.DeliveryNoteName);
-                query.OrderByDescending(q => q.CreateDate);
+                OrderByStatus(ref query, param.Status);
                 var result = _mapper.Map<List<ListExportProductResponse>>(query.ToList());
+                for (int i = 0; i < result.Count; i++)
+                {
+                    var date = GetDateOfDelivernote(query, result[i].DeliveryNoteId, param.Status);
+                    result[i].CreateDate = ConvertDateTime.ConvertDateTimeToString(date);
+                }
                 return PagedResult<ListExportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
             }
             catch (Exception)
@@ -298,9 +310,15 @@ namespace BigSizeFashion.Business.Services
                     .Where(d => d.ToStore == toStoreId)
                     .ToListAsync();
                 var query = dn.AsQueryable();
+                FilterByStatus(ref query, param.Status);
                 FilterByName(ref query, param.DeliveryNoteName);
-                query.OrderByDescending(q => q.CreateDate);
+                OrderByStatus(ref query, param.Status);
                 var result = _mapper.Map<List<ListImportProductResponse>>(query.ToList());
+                for (int i = 0; i < result.Count; i++)
+                {
+                    var date = GetDateOfDelivernote(query, result[i].DeliveryNoteId, param.Status);
+                    result[i].CreateDate = ConvertDateTime.ConvertDateTimeToString(date);
+                }
                 return PagedResult<ListImportProductResponse>.ToPagedList(result, param.PageNumber, param.PageSize);
             }
             catch (Exception)
@@ -308,6 +326,49 @@ namespace BigSizeFashion.Business.Services
 
                 throw;
             }
+        }
+
+        private void OrderByStatus(ref IQueryable<DeliveryNote> query, byte? status)
+        {
+            if (!query.Any())
+            {
+                return;
+            }
+
+            if(status == 2)
+            {
+                query = query.OrderByDescending(q => q.ApprovalDate);
+            }
+            else
+            {
+                query = query.OrderByDescending(q => q.CreateDate);
+            }
+        }
+
+        private DateTime? GetDateOfDelivernote(IQueryable<DeliveryNote> query, int id, byte? status)
+        {
+            if (!query.Any())
+            {
+                return null;
+            }
+
+            if(status == 2)
+            {
+                return query.Where(q => q.DeliveryNoteId == id && q.Status == 2).Select(q => q.ApprovalDate).FirstOrDefault();
+            }
+            else
+            {
+                return query.Where(q => q.DeliveryNoteId == id).Select(q => q.CreateDate).FirstOrDefault();
+            }
+        }
+
+        private void FilterByStatus(ref IQueryable<DeliveryNote> query, byte? status)
+        {
+            if(!query.Any() || status == null)
+            {
+                return;
+            }
+            query = query.Where(q => q.Status == status);
         }
 
         public async Task<Result<bool>> RejectRequestImportProduct(int id)

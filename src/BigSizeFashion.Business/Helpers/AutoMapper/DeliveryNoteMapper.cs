@@ -18,13 +18,13 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             CreateMap<DeliveryNote, ListImportProductResponse>()
                 .ForMember(d => d.RequestStore, s => s.MapFrom(s => s.FromStoreNavigation.StoreName))
                 .ForMember(d => d.StoreAddress, s => s.MapFrom(s => s.FromStoreNavigation.StoreAddress))
-                .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateDate)))
+                .ForMember(d => d.CreateDate, s => s.MapFrom(s => ""))
                 .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == 0 ? "Đã hủy" : s.Status == 1 ? "Chờ xác nhận" : "Đã xác nhận"));
 
             CreateMap<DeliveryNote, ListExportProductResponse>()
                 .ForMember(d => d.RequestStore, s => s.MapFrom(s => s.ToStoreNavigation.StoreName))
                 .ForMember(d => d.StoreAddress, s => s.MapFrom(s => s.ToStoreNavigation.StoreAddress))
-                .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateDate)))
+                .ForMember(d => d.CreateDate, s => s.MapFrom(s => ""))
                 .ForMember(d => d.Status, s => s.MapFrom(s => s.Status == 0 ? "Đã hủy" : s.Status == 1 ? "Chờ xác nhận" : "Đã xác nhận"));
 
             CreateMap<DeliveryNote, DeliveryNoteDetailResponse>()

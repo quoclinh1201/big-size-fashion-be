@@ -10,5 +10,6 @@ namespace BigSizeFashion.Business.Dtos.Parameters
     public class ImportProductParameter : QueryStringParameters
     {
         public string DeliveryNoteName { get; set; }
+        public byte? Status { get; set; }
     }
 }
