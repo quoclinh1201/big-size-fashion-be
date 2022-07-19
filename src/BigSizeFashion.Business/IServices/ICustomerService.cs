@@ -14,10 +14,10 @@ namespace BigSizeFashion.Business.IServices
     {
         Task<Result<CustomerProfileResponse>> GetOwnProfile(string token);
         Task<Result<CustomerProfileResponse>> UpdateProfile(string token, UpdateCustomerProfileRequest request);
-        Task<Result<bool>> CreatePINCode(string token, CreatePINCodeRequest request);
-        Task<Result<bool>> ChangePINCode(string token, ChangePINCodeRequest request);
-        Task<Result<bool>> ValidatePINCode(string token, ValidatePINCodeRequest request);
-        Task<Result<bool>> CheckPINCode(string token);
+        //Task<Result<bool>> CreatePINCode(string token, CreatePINCodeRequest request);
+        //Task<Result<bool>> ChangePINCode(string token, ChangePINCodeRequest request);
+        //Task<Result<bool>> ValidatePINCode(string token, ValidatePINCodeRequest request);
+        //Task<Result<bool>> CheckPINCode(string token);
         Task<Result<CustomerProfileResponse>> GetCustomerByPhoneNumber(string phoneNumber);
         Task<Result<CustomerProfileResponse>> AddNewCustomer(AddNewCustomerRequest request);
     }

@@ -183,11 +183,6 @@ namespace BigSizeFashion.Data.Entities
                     .IsUnicode(false)
                     .HasColumnName("phone_number");
 
-                entity.Property(e => e.PinCode)
-                    .HasMaxLength(6)
-                    .IsUnicode(false)
-                    .HasColumnName("PIN_code");
-
                 entity.Property(e => e.Status).HasColumnName("status");
 
                 entity.Property(e => e.Weight).HasColumnName("weight");
@@ -356,11 +351,6 @@ namespace BigSizeFashion.Data.Entities
                     .IsRequired()
                     .HasMaxLength(500)
                     .HasColumnName("message");
-
-                entity.Property(e => e.ReferenceUrl)
-                    .HasMaxLength(500)
-                    .IsUnicode(false)
-                    .HasColumnName("reference_url");
 
                 entity.Property(e => e.Status).HasColumnName("status");
 

@@ -87,128 +87,87 @@ namespace BigsizeFashion.API.Controllers
             return Ok(result);
         }
 
-        /// <summary>
-        /// Allow customer create PIN code
-        /// </summary>
-        /// <remarks>
-        /// - PIN code have 6 number characters
-        /// - Return true if create successful
-        /// - Return false if this customer is existed PIN code
-        /// </remarks>
-        /// <param name="authorization"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPost("create-pin-code")]
-        public async Task<IActionResult> CreatePINCode([FromHeader] string authorization, [FromBody] CreatePINCodeRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await _service.CreatePINCode(authorization.Substring(7), request);
-            if (!result.IsSuccess)
-            {
-                if(result.Error.Code == 401)
-                {
-                    return Unauthorized(result);
-                }
-                else
-                {
-                    return BadRequest(result);
-                }
-            }
-            return Ok(result);
-        }
+        //[Authorize]
+        //[HttpPost("create-pin-code")]
+        //public async Task<IActionResult> CreatePINCode([FromHeader] string authorization, [FromBody] CreatePINCodeRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.CreatePINCode(authorization.Substring(7), request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        if(result.Error.Code == 401)
+        //        {
+        //            return Unauthorized(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(result);
+        //        }
+        //    }
+        //    return Ok(result);
+        //}
 
-        /// <summary>
-        /// Allow customer change PIN code
-        /// </summary>
-        /// <remarks>
-        /// - PIN code have 6 number characters
-        /// - Return true if change successful
-        /// - Return false if wrong Old Pin code
-        /// </remarks>
-        /// <param name="authorization"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPut("change-pin-code")]
-        public async Task<IActionResult> ChangePINCode([FromHeader] string authorization, [FromBody] ChangePINCodeRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await _service.ChangePINCode(authorization.Substring(7), request);
-            if (!result.IsSuccess)
-            {
-                if (result.Error.Code == 401)
-                {
-                    return Unauthorized(result);
-                }
-                else
-                {
-                    return BadRequest(result);
-                }
-            }
-            return Ok(result);
-        }
+        //[Authorize]
+        //[HttpPut("change-pin-code")]
+        //public async Task<IActionResult> ChangePINCode([FromHeader] string authorization, [FromBody] ChangePINCodeRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.ChangePINCode(authorization.Substring(7), request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        if (result.Error.Code == 401)
+        //        {
+        //            return Unauthorized(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(result);
+        //        }
+        //    }
+        //    return Ok(result);
+        //}
 
-        /// <summary>
-        /// Check this customer is had PIN code or not
-        /// </summary>
-        /// <remarks>
-        /// - Return true if existed
-        /// - Return false if not and require customer create PIN code
-        /// </remarks>
-        /// <param name="authorization"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpGet("check-pin-code")]
-        public async Task<IActionResult> CheckPINCode([FromHeader] string authorization)
-        {
-            var result = await _service.CheckPINCode(authorization.Substring(7));
-            if(!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[Authorize]
+        //[HttpGet("check-pin-code")]
+        //public async Task<IActionResult> CheckPINCode([FromHeader] string authorization)
+        //{
+        //    var result = await _service.CheckPINCode(authorization.Substring(7));
+        //    if(!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
-        /// <summary>
-        /// Validate PIN code when customer want to check out their Cart
-        /// </summary>
-        /// <remarks>
-        /// - PIN code have 6 number characters
-        /// - Return true if right Pin code
-        /// - Return false if wrong Pin code
-        /// </remarks>
-        /// <param name="authorization"></param>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        [Authorize]
-        [HttpPost("validate-pin-code")]
-        public async Task<IActionResult> ValidatePINCode([FromHeader] string authorization, [FromBody] ValidatePINCodeRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await _service.ValidatePINCode(authorization.Substring(7), request);
-            if (!result.IsSuccess)
-            {
-                if (result.Error.Code == 401)
-                {
-                    return Unauthorized(result);
-                }
-                else
-                {
-                    return BadRequest(result);
-                }
-            }
-            return Ok(result);
-        }
+
+        //[Authorize]
+        //[HttpPost("validate-pin-code")]
+        //public async Task<IActionResult> ValidatePINCode([FromHeader] string authorization, [FromBody] ValidatePINCodeRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.ValidatePINCode(authorization.Substring(7), request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        if (result.Error.Code == 401)
+        //        {
+        //            return Unauthorized(result);
+        //        }
+        //        else
+        //        {
+        //            return BadRequest(result);
+        //        }
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Get customer informaion by phone number
