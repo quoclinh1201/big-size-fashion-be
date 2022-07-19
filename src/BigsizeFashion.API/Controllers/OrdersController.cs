@@ -471,5 +471,37 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Lấy thống kê số lượng order trong hôm nay
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
+        [HttpGet("statistic-today")] 
+        public async Task<IActionResult> GetStatisticToday([FromHeader] string authorization)
+        {
+            var result = await _service.GetStatisticToday(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Lấy thống kê số lượng order trong 30 ngày gần nhất
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
+        [HttpGet("statistic-last-30-days")]
+        public async Task<IActionResult> GetStatisticLast30Days([FromHeader] string authorization)
+        {
+            var result = await _service.GetStatisticLast30Days(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

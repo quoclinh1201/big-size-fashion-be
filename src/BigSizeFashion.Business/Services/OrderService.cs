@@ -1333,5 +1333,70 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<StatisticOrderResponse>> GetStatisticToday(string token)
+        {
+            var result = new Result<StatisticOrderResponse>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository
+                    .GetAllByIQueryable()
+                    .Where(s => s.Uid == uid && s.Status == true)
+                    .Select(s => s.StoreId)
+                    .FirstOrDefaultAsync();
+                var now = DateTime.Now;
+                var orders = await _orderRepository.FindByAsync(o => o.StoreId == storeId 
+                                                               && o.CreateDate.Day == now.Day
+                                                               && o.CreateDate.Month == now.Month
+                                                               && o.CreateDate.Year == now.Year);
+                var cc = new StatisticOrderResponse
+                {
+                    TotalOrders = orders.Select(o => o.OrderId).Count(),
+                    PendingOrders = orders.Where(o => o.Status == 1).Select(o => o.OrderId).Count(),
+                    ProcessingOrders = orders.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count(),
+                    ReceivedOrders = orders.Where(o => o.Status == 5).Select(o => o.OrderId).Count(),
+                    CanceledOrders = orders.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count(),
+                };
+                result.Content = cc;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<StatisticOrderResponse>> GetStatisticLast30Days(string token)
+        {
+            var result = new Result<StatisticOrderResponse>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository
+                    .GetAllByIQueryable()
+                    .Where(s => s.Uid == uid && s.Status == true)
+                    .Select(s => s.StoreId)
+                    .FirstOrDefaultAsync();
+                var last30Days = DateTime.Now.AddDays(-30);
+                var orders = await _orderRepository.FindByAsync(o => o.StoreId == storeId && o.CreateDate.Date >= last30Days.Date);
+                var cc = new StatisticOrderResponse
+                {
+                    TotalOrders = orders.Select(o => o.OrderId).Count(),
+                    PendingOrders = orders.Where(o => o.Status == 1).Select(o => o.OrderId).Count(),
+                    ProcessingOrders = orders.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count(),
+                    ReceivedOrders = orders.Where(o => o.Status == 5).Select(o => o.OrderId).Count(),
+                    CanceledOrders = orders.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count(),
+                };
+                result.Content = cc;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
