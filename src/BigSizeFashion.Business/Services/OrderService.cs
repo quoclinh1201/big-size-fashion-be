@@ -834,10 +834,11 @@ namespace BigSizeFashion.Business.Services
             return result;
         }
 
-        public async Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueOfOwnStore(string token, GetRevenueParameter param)
+        public async Task<Result<GetRevenueAndNumberOrdersResponse>> GetRevenueOfOwnStore(string token, GetRevenueParameter param)
         {
-            var result = new Result<IEnumerable<GetRevenueResponse>>();
+            var result = new Result<GetRevenueAndNumberOrdersResponse>();
             var listDate = new List<GetRevenueResponse>();
+            var response = new GetRevenueAndNumberOrdersResponse();
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
@@ -862,7 +863,19 @@ namespace BigSizeFashion.Business.Services
                     var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
                     listDate[i - 1].Value = revenue;
                 }
-                result.Content = listDate;
+                response.Revenues = listDate;
+
+                var orderss = await _orderRepository.FindByAsync(o => o.StoreId == staff.StoreId && o.CreateDate.Month == param.Month && o.CreateDate.Year == param.Year);
+                var cc = new StatisticOrderResponse
+                {
+                    TotalOrders = orderss.Select(o => o.OrderId).Count(),
+                    PendingOrders = orderss.Where(o => o.Status == 1).Select(o => o.OrderId).Count(),
+                    ProcessingOrders = orderss.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count(),
+                    ReceivedOrders = orderss.Where(o => o.Status == 5).Select(o => o.OrderId).Count(),
+                    CanceledOrders = orderss.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count(),
+                };
+                response.NumberOrders = cc;
+                result.Content = response; 
                 return result;
             }
             catch (Exception ex)
