@@ -38,6 +38,8 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
 
             CreateMap<ProductDetail, DeliveryNoteDetailItem>()
                 .ForMember(d => d.Category, s => s.MapFrom(s => s.Product.Category.CategoryName))
+                .ForMember(d => d.ProductName, s => s.MapFrom(s => s.Product.ProductName))
+                .ForMember(d => d.Brand, s => s.MapFrom(s => s.Product.Brand))
                 .ForMember(d => d.Size, s => s.MapFrom(s => s.Size.SizeName))
                 .ForMember(d => d.Colour, s => s.MapFrom(s => s.Colour.ColourName));
 

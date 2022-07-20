@@ -15,6 +15,8 @@ namespace BigSizeFashion.Business.Dtos.Responses
         //public List<ProductDeliveryNoteDetail> DetailList { get; set; } = new List<ProductDeliveryNoteDetail>();
         public string Colour { get; set; }
         public string Size { get; set; }
+        public int Quantity { get; set; }
+        public decimal PricePerOne { get; set; }
         public decimal Price { get; set; }
         public string Brand { get; set; }
     }

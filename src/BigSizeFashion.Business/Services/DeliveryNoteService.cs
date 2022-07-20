@@ -217,6 +217,8 @@ namespace BigSizeFashion.Business.Services
                     var dndi = _mapper.Map<DeliveryNoteDetailItem>(product);
                     dndi.ImageUrl = imageUrl ?? CommonConstants.NoImageUrl;
                     dndi.Price = item.Price;
+                    dndi.Quantity = item.Quantity;
+                    dndi.PricePerOne = item.Price / item.Quantity;
                     response.ProductList.Add(dndi);
                 }
                 result.Content = response;
