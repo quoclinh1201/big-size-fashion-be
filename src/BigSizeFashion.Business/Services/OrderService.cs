@@ -504,7 +504,8 @@ namespace BigSizeFashion.Business.Services
                 await _orderRepository.UpdateAsync(order);
 
                 var username = await GetStaffUserName(order.StaffId.Value);
-                await _firebaseNotificationService.SendNotification(username, "Phân công đơn hàng #" + order.OrderId, "Bạn được phân công đóng gói và xử lý đơn hàng #" + order.OrderId, "");
+                var cc = await _firebaseNotificationService.SendNotification(username, "Phân công đơn hàng #" + order.OrderId, "Bạn được phân công đóng gói và xử lý đơn hàng #" + order.OrderId, "");
+            
                 result.Content = true;
                 return result;
             }
@@ -536,6 +537,9 @@ namespace BigSizeFashion.Business.Services
                 {
                     var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == list[i].OrderId).Select(o => o.Quantity).Sum();
                     list[i].TotalQuantity = totalQuantity;
+                    var address = await _orderRepository.GetAllByIQueryable().Where(a => a.OrderId == list[i].OrderId).Include(a => a.DeliveryAddressNavigation).FirstOrDefaultAsync();
+                    list[i].CustomerName = address.DeliveryAddressNavigation.ReceiverName;
+                    list[i].CustomerPhone = address.DeliveryAddressNavigation.ReceiverPhone;
                 }
                 result.Content = list;
                 return result;
@@ -593,6 +597,17 @@ namespace BigSizeFashion.Business.Services
                 {
                     var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == response[i].OrderId).Select(o => o.Quantity).Sum();
                     response[i].TotalQuantity = totalQuantity;
+                    var address = await _orderRepository.GetAllByIQueryable().Where(a => a.OrderId == response[i].OrderId).Include(a => a.DeliveryAddressNavigation).FirstOrDefaultAsync();
+                    if(address.DeliveryAddressNavigation != null)
+                    {
+                        response[i].CustomerName = address.DeliveryAddressNavigation.ReceiverName;
+                        response[i].CustomerPhone = address.DeliveryAddressNavigation.ReceiverPhone;
+                    }
+                    else
+                    {
+                        response[i].CustomerName = orders.Where(o => o.OrderId == response[i].OrderId).Select(o => o.Customer.Fullname).FirstOrDefault();
+                        response[i].CustomerPhone = orders.Where(o => o.OrderId == response[i].OrderId).Select(o => o.Customer.PhoneNumber).FirstOrDefault();
+                    }
                 }
                 result.Content = response;
                 return result;
@@ -672,6 +687,10 @@ namespace BigSizeFashion.Business.Services
                 order.ReceivedDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Received;
                 await _orderRepository.UpdateAsync(order);
+
+                var username = await GetCustomerUserName(order.CustomerId);
+                await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " hoàn tất", "Cảm ơn bạn đã tin tưởng mua sắm tại Big-size Fashion.", "");
+
                 result.Content = true;
                 return result;
             }
@@ -989,6 +1008,9 @@ namespace BigSizeFashion.Business.Services
                         storeWarehouse.Quantity -= item.Quantity;
                         await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
                     }
+
+                    var username = await GetStaffUserName(order.StaffId.Value);
+                    var cc = await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " đã được duyệt", "Quản lý đã duyệt đơn hàng #" + order.OrderId + " thành công", "");
 
                     result.Content = null;
                     return result;
@@ -1314,7 +1336,9 @@ namespace BigSizeFashion.Business.Services
                     });
                 }
 
-                result.Content = list;
+                var cc = list.OrderByDescending(l => l.Revenue);
+                
+                result.Content = cc.ToList();
                 return result;
             }
             catch (Exception ex)

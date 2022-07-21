@@ -9,6 +9,7 @@ namespace BigSizeFashion.Business.Dtos.Responses
     public class DeliveryNoteDetailItem
     {
         public int ProductId { get; set; }
+        public int ProductDetailId { get; set; }
         public string ProductName { get; set; }
         public string ImageUrl { get; set; }
         public string Category { get; set; }

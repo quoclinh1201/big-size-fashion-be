@@ -249,7 +249,7 @@ namespace BigSizeFashion.Business.Services
                 
                 var request = new DistanceMatrixRequest
                 {
-                    Key = "AIzaSyCFKLwbTjlrdCxqK7hvue9Wfh-syUm9hPY",
+                    Key = "AIzaSyAATbwbYUzoiPa8RLrro9TqvstoBzT-eJQ",
                     Origins = new[]
                     {
                         new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
@@ -269,7 +269,11 @@ namespace BigSizeFashion.Business.Services
                 var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
                 decimal shippingFee = 0;
 
-                if(listAddress[storeId] < 10000)
+                if(listAddress[storeId] < 1000)
+                {
+                    shippingFee = 3000;
+                }
+                else if(listAddress[storeId] >= 1000 && listAddress[storeId] < 10000)
                 {
                     shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 3000;
                 }

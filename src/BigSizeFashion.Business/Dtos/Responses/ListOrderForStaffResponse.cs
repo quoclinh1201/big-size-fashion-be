@@ -10,6 +10,7 @@ namespace BigSizeFashion.Business.Dtos.Responses
     {
         public int OrderId { get; set; }
         public string CustomerName { get; set; }
+        public string CustomerPhone { get; set; }
         public int TotalQuantity { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal? TotalPriceAfterDiscount { get; set; }
