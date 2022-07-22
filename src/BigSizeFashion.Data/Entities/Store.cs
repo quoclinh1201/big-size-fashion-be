@@ -17,11 +17,11 @@ namespace BigSizeFashion.Data.Entities
         }
 
         public int StoreId { get; set; }
+        public string StoreName { get; set; }
         public string StoreAddress { get; set; }
         public string StorePhone { get; set; }
-        public bool Status { get; set; }
-        public string StoreName { get; set; }
         public bool IsMainWarehouse { get; set; }
+        public bool Status { get; set; }
 
         public virtual ICollection<DeliveryNote> DeliveryNoteFromStoreNavigations { get; set; }
         public virtual ICollection<DeliveryNote> DeliveryNoteToStoreNavigations { get; set; }

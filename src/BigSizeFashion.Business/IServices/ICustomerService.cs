@@ -2,6 +2,7 @@
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +21,7 @@ namespace BigSizeFashion.Business.IServices
         //Task<Result<bool>> CheckPINCode(string token);
         Task<Result<CustomerProfileResponse>> GetCustomerByPhoneNumber(string phoneNumber);
         Task<Result<CustomerProfileResponse>> AddNewCustomer(AddNewCustomerRequest request);
+        Task<Result<string>> UploadAvatar(string v, IFormFile file);
+        Task<Result<string>> GetAvatar(string v);
     }
 }

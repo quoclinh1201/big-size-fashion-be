@@ -2,6 +2,7 @@
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<StaffProfileResponse>> GetOwnProfile(string token);
         Task<Result<StaffProfileResponse>> UpdateProfile(string token, UpdateStaffProfileRequest request);
         Task<Result<IEnumerable<StaffOfStoreResponse>>> GetAllStaffOfStore(string v);
+        Task<Result<string>> UploadAvatar(string v, IFormFile file);
+        Task<Result<string>> GetAvatar(string v);
     }
 }

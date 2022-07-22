@@ -24,6 +24,7 @@ namespace BigSizeFashion.Data.Entities
         public byte? Weight { get; set; }
         public byte? Height { get; set; }
         public bool Status { get; set; }
+        public string AvatarUrl { get; set; }
 
         public virtual Account UidNavigation { get; set; }
         public virtual ICollection<Address> Addresses { get; set; }

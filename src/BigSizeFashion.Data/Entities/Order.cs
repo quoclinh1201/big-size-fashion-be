@@ -20,6 +20,7 @@ namespace BigSizeFashion.Data.Entities
         public DateTime CreateDate { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal? TotalPriceAfterDiscount { get; set; }
+        public decimal? ShippingFee { get; set; }
         public bool OrderType { get; set; }
         public string PaymentMethod { get; set; }
         public DateTime? ApprovalDate { get; set; }
@@ -28,7 +29,6 @@ namespace BigSizeFashion.Data.Entities
         public DateTime? ReceivedDate { get; set; }
         public DateTime? RejectedDate { get; set; }
         public byte Status { get; set; }
-        public decimal? ShippingFee { get; set; }
 
         public virtual Customer Customer { get; set; }
         public virtual Address DeliveryAddressNavigation { get; set; }

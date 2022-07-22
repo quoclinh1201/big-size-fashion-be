@@ -20,6 +20,7 @@ namespace BigSizeFashion.Data.Entities
         public string Email { get; set; }
         public DateTime? Birthday { get; set; }
         public bool Status { get; set; }
+        public string AvatarUrl { get; set; }
 
         public virtual Store Store { get; set; }
         public virtual Account UidNavigation { get; set; }

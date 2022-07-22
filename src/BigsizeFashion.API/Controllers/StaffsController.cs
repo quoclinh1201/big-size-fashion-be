@@ -98,5 +98,40 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Upload avatar
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("upload-avatar")]
+        public async Task<IActionResult> UploadAvatar([FromHeader] string authorization, IFormFile file)
+        {
+            var result = await _service.UploadAvatar(authorization.Substring(7), file);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get avatar url
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("get-avatar")]
+        public async Task<IActionResult> GetAvatar([FromHeader] string authorization)
+        {
+            var result = await _service.GetAvatar(authorization.Substring(7));
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
