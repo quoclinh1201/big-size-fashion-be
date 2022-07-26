@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Dtos.Responses;
+﻿using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.Helpers.ResponseObjects;
@@ -18,5 +19,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<StaffOfStoreResponse>>> GetAllStaffOfStore(string v);
         Task<Result<string>> UploadAvatar(string v, IFormFile file);
         Task<Result<string>> GetAvatar(string v);
+        Task<PagedResult<GetListManagerResponse>> GetListManager(GetListManagerParameter param);
     }
 }

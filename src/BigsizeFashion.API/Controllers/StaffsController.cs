@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.RequestObjects;
+﻿using BigSizeFashion.Business.Dtos.Parameters;
+using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -131,6 +132,19 @@ namespace BigsizeFashion.API.Controllers
             {
                 return BadRequest(result);
             }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get list manager for owner
+        /// </summary>
+        /// <param name="param"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpGet("list-manager")]
+        public async Task<IActionResult> GetListManager([FromQuery] GetListManagerParameter param)
+        {
+            var result = await _service.GetListManager(param);
             return Ok(result);
         }
     }

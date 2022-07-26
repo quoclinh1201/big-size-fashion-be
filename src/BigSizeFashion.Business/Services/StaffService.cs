@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Parameters;
 using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
@@ -86,6 +87,39 @@ namespace BigSizeFashion.Business.Services
                 result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
                 return result;
             }
+        }
+
+        public async Task<PagedResult<GetListManagerResponse>> GetListManager(GetListManagerParameter param)
+        {
+            try
+            {
+                var managers = await _staffRepository
+                    .GetAllByIQueryable()
+                    .Include(s => s.UidNavigation)
+                    .Include(s => s.Store)
+                    .Where(s => s.UidNavigation.RoleId == 2 && s.Status == true && s.UidNavigation.Status == true)
+                    .ToListAsync();
+
+                var query = managers.AsQueryable();
+                FilterByFullname(ref query, param.Fullname);
+                var response = _mapper.Map<List<GetListManagerResponse>>(query.ToList());
+                return PagedResult<GetListManagerResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        private void FilterByFullname(ref IQueryable<staff> query, string fullname)
+        {
+            if (!query.Any() || String.IsNullOrEmpty(fullname) || String.IsNullOrWhiteSpace(fullname))
+            {
+                return;
+            }
+
+            query = query.Where(q => q.Fullname.ToLower().Contains(fullname.ToLower()));
         }
 
         public async Task<Result<StaffProfileResponse>> GetOwnProfile(string token)

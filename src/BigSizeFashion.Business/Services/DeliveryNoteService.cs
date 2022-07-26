@@ -102,6 +102,14 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<bool>();
             try
             {
+                var dupes = request.ListProducts.GroupBy(x => new { x.ProductId, x.SizeId, x.ColourId })
+                            .Where(x => x.Skip(1).Any());
+                if (dupes != null)
+                {
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
+                    return result;
+                }
+
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
                 var staff = await _staffRepository.FindAsync(s => s.Uid == uid && s.Status == true);
                 var import = new DeliveryNote();

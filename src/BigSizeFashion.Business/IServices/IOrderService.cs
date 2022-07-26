@@ -31,7 +31,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<OrderResponse>> AddOrder(string authorization, OrderRequest request);
         Task<Result<bool>> CancelOrder(string v, int id);
         Task<Result<GetRevenueAndNumberOrdersResponse>> GetRevenueOfOwnStore(string v, GetRevenueParameter param);
-        Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param);
+        Task<Result<GetRevenueAndNumberOrdersResponse>> GetRevenueByStoreId(int id, GetRevenueParameter param);
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOfflineOrder(int id);
         Task<Result<IEnumerable<StaffPerformanceResponse>>> GetStaffPerformance(string v);
         Task<Result<IEnumerable<StaffPerformanceOrderResponse>>> GetStaffPerformanceOrder(string v);
@@ -39,5 +39,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<StaffPerformanceOfStoreResponse>>> GetPerformanceOfAllStaff(string v, GetRevenueParameter param);
         Task<Result<StatisticOrderResponse>> GetStatisticToday(string v);
         Task<Result<StatisticOrderResponse>> GetStatisticLast30Days(string v);
+        Task<Result<StatisticOrderResponse>> GetStatisticTodayForOwner(int id);
     }
 }

@@ -14,6 +14,6 @@ namespace BigSizeFashion.Business.Dtos.Requests
         [Required]
         public int FromStoreId { get; set; }
         [Required]
-        public List<ImportProductItem> ListProducts { get; set; }
+        public List<ImportProductItem> ListProducts { get; set; } = new List<ImportProductItem>();
     }
 }

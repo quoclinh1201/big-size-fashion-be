@@ -24,6 +24,9 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
 
             CreateMap<staff, StaffOfStoreResponse>()
                .ForMember(d => d.Birthday, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.Birthday)));
+
+            CreateMap<staff, GetListManagerResponse>()
+                .ForMember(d => d.StoreName, s => s.MapFrom(s => s.Store.StoreName));
         }
     }
 }

@@ -45,12 +45,17 @@ namespace BigSizeFashion.Business.Services
             {
                 if(request.ListProductId.Count > 0)
                 {
-                    var error = string.Empty;
+                    if (request.ListProductId.Count != request.ListProductId.Distinct().Count())
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
+                        return result;
+                    }
+
                     var promoton = await _promotionRepository.FindAsync(p => p.PromotionId == request.PromotionId && p.Status == true);
 
                     if(promoton == null)
                     {
-                        result.Content = list;
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Promotion ID không hợp lệ."); ;
                         return result;
                     }
                     else

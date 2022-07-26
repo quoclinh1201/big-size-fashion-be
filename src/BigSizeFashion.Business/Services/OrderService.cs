@@ -290,6 +290,13 @@ namespace BigSizeFashion.Business.Services
                 var response = _mapper.Map<GetOrderDetailResponse>(order);
                 response.DeliveryAddress = _mapper.Map<DeliveryAddressResponse>(order.DeliveryAddressNavigation);
                 response.Store = _mapper.Map<StoreResponse>(order.Store);
+
+                var acc = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.RoleId == 2 && a.staff.StoreId == order.StoreId && a.Status == true && a.staff.Status == true)
+                        .Select(a => a.staff.Fullname)
+                        .FirstOrDefaultAsync();
+                response.Store.ManagerName = acc;
                 response.ProductList = _mapper.Map<List<OrderDetailItem>>(order.OrderDetails);
 
                 for (int i = 0; i < response.ProductList.Count; i++)
@@ -588,7 +595,8 @@ namespace BigSizeFashion.Business.Services
                             && o.StoreId == staff.StoreId
                             && o.CreateDate.Day == date.Value.Day
                             && o.CreateDate.Month == date.Value.Month
-                            && o.CreateDate.Year == date.Value.Year)
+                            && o.CreateDate.Year == date.Value.Year
+                            && o.Status == 4 || o.Status == 5)
                     .Include(o => o.Customer)
                     .OrderByDescending(o => o.CreateDate)
                     .ToListAsync();
@@ -904,10 +912,12 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<IEnumerable<GetRevenueResponse>>> GetRevenueByStoreId(int id, GetRevenueParameter param)
+        public async Task<Result<GetRevenueAndNumberOrdersResponse>> GetRevenueByStoreId(int id, GetRevenueParameter param)
         {
-            var result = new Result<IEnumerable<GetRevenueResponse>>();
+            var result = new Result<GetRevenueAndNumberOrdersResponse>();
             var listDate = new List<GetRevenueResponse>();
+            var response = new GetRevenueAndNumberOrdersResponse();
+            var cc = new StatisticOrderResponse();
             try
             {
                 for (int i = 1; i <= DateTime.DaysInMonth(param.Year, param.Month); i++)
@@ -930,6 +940,12 @@ namespace BigSizeFashion.Business.Services
                         var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
                         listDate[i - 1].Value = revenue;
                     }
+                    var orderss = await _orderRepository.FindByAsync(o => o.CreateDate.Month == param.Month && o.CreateDate.Year == param.Year);
+                    cc.TotalOrders = orderss.Select(o => o.OrderId).Count();
+                    cc.PendingOrders = orderss.Where(o => o.Status == 1).Select(o => o.OrderId).Count();
+                    cc.ProcessingOrders = orderss.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count();
+                    cc.ReceivedOrders = orderss.Where(o => o.Status == 5).Select(o => o.OrderId).Count();
+                    cc.CanceledOrders = orderss.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count();
                 }
                 else
                 {
@@ -946,8 +962,17 @@ namespace BigSizeFashion.Business.Services
                         var revenue = orders.Select(o => o.TotalPriceAfterDiscount).Sum();
                         listDate[i - 1].Value = revenue;
                     }
+                    var orderss = await _orderRepository.FindByAsync(o => o.StoreId == id && o.CreateDate.Month == param.Month && o.CreateDate.Year == param.Year);
+                    cc.TotalOrders = orderss.Select(o => o.OrderId).Count();
+                    cc.PendingOrders = orderss.Where(o => o.Status == 1).Select(o => o.OrderId).Count();
+                    cc.ProcessingOrders = orderss.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count();
+                    cc.ReceivedOrders = orderss.Where(o => o.Status == 5).Select(o => o.OrderId).Count();
+                    cc.CanceledOrders = orderss.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count();
                 }
-                result.Content = listDate;
+                response.Revenues = listDate;
+                response.NumberOrders = cc;
+
+                result.Content = response;
                 return result;
             }
             catch (Exception ex)
@@ -1428,6 +1453,53 @@ namespace BigSizeFashion.Business.Services
                 };
                 result.Content = cc;
                 return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<StatisticOrderResponse>> GetStatisticTodayForOwner(int id)
+        {
+            var result = new Result<StatisticOrderResponse>();
+            try
+            {
+                var now = DateTime.Now;
+                if (id == 0)
+                {
+                    var orders = await _orderRepository.FindByAsync(o => o.CreateDate.Day == now.Day
+                                                                      && o.CreateDate.Month == now.Month
+                                                                      && o.CreateDate.Year == now.Year);
+                    var cc = new StatisticOrderResponse
+                    {
+                        TotalOrders = orders.Select(o => o.OrderId).Count(),
+                        PendingOrders = orders.Where(o => o.Status == 1).Select(o => o.OrderId).Count(),
+                        ProcessingOrders = orders.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count(),
+                        ReceivedOrders = orders.Where(o => o.Status == 5).Select(o => o.OrderId).Count(),
+                        CanceledOrders = orders.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count(),
+                    };
+                    result.Content = cc;
+                    return result;
+                }
+                else
+                {
+                    var orders = await _orderRepository.FindByAsync(o => o.StoreId == id
+                                                               && o.CreateDate.Day == now.Day
+                                                               && o.CreateDate.Month == now.Month
+                                                               && o.CreateDate.Year == now.Year);
+                    var cc = new StatisticOrderResponse
+                    {
+                        TotalOrders = orders.Select(o => o.OrderId).Count(),
+                        PendingOrders = orders.Where(o => o.Status == 1).Select(o => o.OrderId).Count(),
+                        ProcessingOrders = orders.Where(o => o.Status == 2 || o.Status == 3 || o.Status == 4).Select(o => o.OrderId).Count(),
+                        ReceivedOrders = orders.Where(o => o.Status == 5).Select(o => o.OrderId).Count(),
+                        CanceledOrders = orders.Where(o => o.Status == 0 || o.Status == 6).Select(o => o.OrderId).Count(),
+                    };
+                    result.Content = cc;
+                    return result;
+                } 
             }
             catch (Exception ex)
             {

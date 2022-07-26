@@ -503,5 +503,24 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Lấy thống kê số lượng order trong hôm nay cho owner
+        /// </summary>
+        /// <remarks>
+        /// - Id = 0 => lấy số lượng order của cả chuỗi
+        /// </remarks>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("statistic-today/{id}")]
+        public async Task<IActionResult> GetStatisticTodayForOwner(int id)
+        {
+            var result = await _service.GetStatisticTodayForOwner(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }
