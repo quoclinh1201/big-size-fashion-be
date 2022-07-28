@@ -53,42 +53,70 @@ namespace BigSizeFashion.Business.Services
             _mapper = mapper;
         }
 
-        public async Task<Result<bool>> ApproveRequestImportProduct(string token, int id)
+        public async Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveRequestImportProduct(int id)
         {
-            var result = new Result<bool>();
+            var result = new Result<IEnumerable<NotEnoughProductResponse>>();
+            var list = new List<NotEnoughProductResponse>();
             try
             {
-                var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var staff = await _staffRepository.FindAsync(s => s.Uid == uid && s.Status == true);
+                //var uid = DecodeToken.DecodeTokenToGetUid(token);
+                //var staff = await _staffRepository.FindAsync(s => s.Uid == uid && s.Status == true);
                 var pn = await _genericRepository.FindAsync(p => p.DeliveryNoteId == id);
-                pn.ApprovalDate = DateTime.UtcNow.AddHours(7);
-                pn.Status = 2;
-                await _genericRepository.UpdateAsync(pn);
 
                 var pnd = await _noteDetailRepository.FindByAsync(p => p.DeliveryNoteId == id);
 
                 foreach (var item in pnd)
                 {
-                    var from = await _storeWarehouseRepository.FindAsync(s => s.StoreId == pn.FromStore && s.ProductDetailId == item.ProductDetailId);
-                    from.Quantity -= item.Quantity;
-                    await _storeWarehouseRepository.UpdateAsync(from);
+                    var storeWarehouse = await _storeWarehouseRepository.GetAllByIQueryable()
+                        .Where(s => s.StoreId == pn.FromStore && s.ProductDetailId == item.ProductDetailId)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Colour)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Product)
+                        .Include(s => s.ProductDetail)
+                        .ThenInclude(s => s.Size)
+                        .FirstOrDefaultAsync();
 
-                    var to = await _storeWarehouseRepository.FindAsync(s => s.StoreId == pn.ToStore && s.ProductDetailId == item.ProductDetailId);
-                    to.Quantity += item.Quantity;
-                    await _storeWarehouseRepository.UpdateAsync(to);
-
-                    //if(from.Quantity < 0)
-                    //{
-                    //    from.Quantity += item.Quantity;
-                    //    await _storeWarehouseRepository.UpdateAsync(from);
-                    //    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.NotEnoughProduct);
-                    //    return result;
-                    //}
-
-
+                    if (storeWarehouse.Quantity < item.Quantity)
+                    {
+                        var cc = new NotEnoughProductResponse
+                        {
+                            ColourId = storeWarehouse.ProductDetail.ColourId,
+                            ColourName = storeWarehouse.ProductDetail.Colour.ColourName,
+                            ProductId = storeWarehouse.ProductDetail.ProductId,
+                            ProductName = storeWarehouse.ProductDetail.Product.ProductName,
+                            SizeId = storeWarehouse.ProductDetail.SizeId,
+                            SizeName = storeWarehouse.ProductDetail.Size.SizeName,
+                            QuantityInStore = storeWarehouse.Quantity,
+                            RequiredQuantity = item.Quantity
+                        };
+                        list.Add(cc);
+                    }
                 }
-                result.Content = true;
-                return result;
+
+                if(list.Count == 0)
+                {
+                    foreach (var item in pnd)
+                    {
+                        var from = await _storeWarehouseRepository.FindAsync(s => s.StoreId == pn.FromStore && s.ProductDetailId == item.ProductDetailId);
+                        from.Quantity -= item.Quantity;
+                        await _storeWarehouseRepository.UpdateAsync(from);
+
+                        var to = await _storeWarehouseRepository.FindAsync(s => s.StoreId == pn.ToStore && s.ProductDetailId == item.ProductDetailId);
+                        to.Quantity += item.Quantity;
+                        await _storeWarehouseRepository.UpdateAsync(to);
+                    }
+                    pn.ApprovalDate = DateTime.UtcNow.AddHours(7);
+                    pn.Status = 2;
+                    await _genericRepository.UpdateAsync(pn);
+                    result.Content = null;
+                    return result;
+                }
+                else
+                {
+                    result.Content = list;
+                    return result;
+                }
             }
             catch (Exception ex)
             {
@@ -102,12 +130,15 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<bool>();
             try
             {
-                var dupes = request.ListProducts.GroupBy(x => new { x.ProductId, x.SizeId, x.ColourId })
-                            .Where(x => x.Skip(1).Any());
-                if (dupes != null)
+                if(request.ListProducts.Count() > 1)
                 {
-                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
-                    return result;
+                    var dupes = request.ListProducts.GroupBy(x => new { x.ProductId, x.SizeId, x.ColourId })
+                            .Where(x => x.Skip(1).Any());
+                    if (dupes != null)
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
+                        return result;
+                    }
                 }
 
                 var uid = DecodeToken.DecodeTokenToGetUid(token);

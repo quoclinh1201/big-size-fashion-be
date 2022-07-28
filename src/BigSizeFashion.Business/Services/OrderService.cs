@@ -349,10 +349,6 @@ namespace BigSizeFashion.Business.Services
             {
                 var list = new List<NotEnoughProductResponse>();
                 var order = await _orderRepository.FindAsync(o => o.OrderId == id);
-                order.ApprovalDate = DateTime.UtcNow.AddHours(7);
-                order.Status = (byte)OrderStatusEnum.Approved;
-                await _orderRepository.UpdateAsync(order);
-
                 var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
 
                 foreach (var item in ods)
@@ -385,6 +381,10 @@ namespace BigSizeFashion.Business.Services
 
                 if(list.Count == 0)
                 {
+                    order.ApprovalDate = DateTime.UtcNow.AddHours(7);
+                    order.Status = (byte)OrderStatusEnum.Approved;
+                    await _orderRepository.UpdateAsync(order);
+
                     foreach (var item in ods)
                     {
                         var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
@@ -596,11 +596,12 @@ namespace BigSizeFashion.Business.Services
                             && o.CreateDate.Day == date.Value.Day
                             && o.CreateDate.Month == date.Value.Month
                             && o.CreateDate.Year == date.Value.Year
-                            && o.Status == 4 || o.Status == 5)
+                            && (o.OrderType == true && (o.Status == 4 || o.Status == 5) || o.OrderType == false))
                     .Include(o => o.Customer)
                     .OrderByDescending(o => o.CreateDate)
                     .ToListAsync();
                 var response = _mapper.Map<List<ListOrderForStaffResponse>>(orders);
+
                 for (int i = 0; i < response.Count; i++)
                 {
                     var totalQuantity = _orderDetailRepository.GetAllByIQueryable().Where(o => o.OrderId == response[i].OrderId).Select(o => o.Quantity).Sum();

@@ -126,9 +126,9 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpPut("approve/{id}")]
-        public async Task<IActionResult> ApproveRequestImportProduct([FromHeader] string authorization, int id)
+        public async Task<IActionResult> ApproveRequestImportProduct(int id)
         {
-            var result = await _service.ApproveRequestImportProduct(authorization.Substring(7), id);
+            var result = await _service.ApproveRequestImportProduct(id);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
