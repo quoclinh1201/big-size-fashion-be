@@ -121,7 +121,6 @@ namespace BigsizeFashion.API.Controllers
         /// <remarks>
         /// - id là id của delivery note
         /// </remarks>
-        /// <param name="authorization"></param>
         /// <param name="id"></param>
         /// <returns></returns>
         //[Authorize]

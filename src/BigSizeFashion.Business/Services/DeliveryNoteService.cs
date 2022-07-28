@@ -81,6 +81,7 @@ namespace BigSizeFashion.Business.Services
                     {
                         var cc = new NotEnoughProductResponse
                         {
+                            ProductDetailId = storeWarehouse.ProductDetailId,
                             ColourId = storeWarehouse.ProductDetail.ColourId,
                             ColourName = storeWarehouse.ProductDetail.Colour.ColourName,
                             ProductId = storeWarehouse.ProductDetail.ProductId,
