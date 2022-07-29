@@ -991,12 +991,6 @@ namespace BigSizeFashion.Business.Services
             {
                 var list = new List<NotEnoughProductResponse>();
                 var order = await _orderRepository.FindAsync(o => o.OrderId == id);
-                order.ApprovalDate = DateTime.UtcNow.AddHours(7);
-                order.PackagedDate = DateTime.UtcNow.AddHours(7);
-                order.DeliveryDate = DateTime.UtcNow.AddHours(7);
-                order.ReceivedDate = DateTime.UtcNow.AddHours(7);
-                order.Status = (byte)OrderStatusEnum.Received;
-                await _orderRepository.UpdateAsync(order);
 
                 var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
                 foreach (var item in ods)
@@ -1039,6 +1033,13 @@ namespace BigSizeFashion.Business.Services
 
                     var username = await GetStaffUserName(order.StaffId.Value);
                     var cc = await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " đã được duyệt", "Quản lý đã duyệt đơn hàng #" + order.OrderId + " thành công", "");
+
+                    order.ApprovalDate = DateTime.UtcNow.AddHours(7);
+                    order.PackagedDate = DateTime.UtcNow.AddHours(7);
+                    order.DeliveryDate = DateTime.UtcNow.AddHours(7);
+                    order.ReceivedDate = DateTime.UtcNow.AddHours(7);
+                    order.Status = (byte)OrderStatusEnum.Received;
+                    await _orderRepository.UpdateAsync(order);
 
                     result.Content = null;
                     return result;

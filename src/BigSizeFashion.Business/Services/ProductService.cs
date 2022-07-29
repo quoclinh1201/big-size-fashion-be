@@ -1334,7 +1334,8 @@ namespace BigSizeFashion.Business.Services
                         ColourName = item.Colour.ColourName,
                         ProductId = item.ProductId,
                         ColourId = item.ColourId,
-                        SizeId = item.SizeId
+                        SizeId = item.SizeId,
+                        ProductDeatailId = item.ProductDetailId
                     }) ;
                 }
                 result.Content = list;

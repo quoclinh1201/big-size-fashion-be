@@ -11,6 +11,7 @@ namespace BigSizeFashion.Data.Entities
         {
             DeliveryNoteFromStoreNavigations = new HashSet<DeliveryNote>();
             DeliveryNoteToStoreNavigations = new HashSet<DeliveryNote>();
+            InventoryNotes = new HashSet<InventoryNote>();
             Orders = new HashSet<Order>();
             StoreWarehouses = new HashSet<StoreWarehouse>();
             staff = new HashSet<staff>();
@@ -25,6 +26,7 @@ namespace BigSizeFashion.Data.Entities
 
         public virtual ICollection<DeliveryNote> DeliveryNoteFromStoreNavigations { get; set; }
         public virtual ICollection<DeliveryNote> DeliveryNoteToStoreNavigations { get; set; }
+        public virtual ICollection<InventoryNote> InventoryNotes { get; set; }
         public virtual ICollection<Order> Orders { get; set; }
         public virtual ICollection<StoreWarehouse> StoreWarehouses { get; set; }
         public virtual ICollection<staff> staff { get; set; }

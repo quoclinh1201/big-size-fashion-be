@@ -131,11 +131,17 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<bool>();
             try
             {
-                if(request.ListProducts.Count() > 1)
+                if (request.ListProducts.Count() > 1)
                 {
-                    var dupes = request.ListProducts.GroupBy(x => new { x.ProductId, x.SizeId, x.ColourId })
-                            .Where(x => x.Skip(1).Any());
-                    if (dupes != null)
+                    //var dupes = request.ListProducts.GroupBy(x => new { x.ProductId, x.SizeId, x.ColourId })
+                    //        .Where(x => x.Skip(1).Any());
+                    //if (dupes != null)
+                    //{
+                    //    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
+                    //    return result;
+                    //}
+
+                    if (request.ListProducts.Select(p => p.ProductDeatilId).Count() != request.ListProducts.Select(p => p.ProductDeatilId).Distinct().Count())
                     {
                         result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
                         return result;

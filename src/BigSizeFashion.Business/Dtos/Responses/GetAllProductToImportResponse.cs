@@ -14,5 +14,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public int ProductId { get; set; }
         public int ColourId { get; set; }
         public int SizeId { get; set; }
+        public int ProductDeatailId { get; set; }
     }
 }

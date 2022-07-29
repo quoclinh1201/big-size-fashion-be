@@ -26,6 +26,8 @@ namespace BigSizeFashion.Data.Entities
         public virtual DbSet<DeliveryNote> DeliveryNotes { get; set; }
         public virtual DbSet<DeliveryNoteDetail> DeliveryNoteDetails { get; set; }
         public virtual DbSet<Feedback> Feedbacks { get; set; }
+        public virtual DbSet<InventoryNote> InventoryNotes { get; set; }
+        public virtual DbSet<InventoryNoteDetail> InventoryNoteDetails { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
         public virtual DbSet<Order> Orders { get; set; }
         public virtual DbSet<OrderDetail> OrderDetails { get; set; }
@@ -48,11 +50,11 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<Account>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__Account__DD7012640198691E");
+                    .HasName("PK__Account__DD701264AED9B0F0");
 
                 entity.ToTable("Account");
 
-                entity.HasIndex(e => e.Username, "UQ__Account__F3DBC572AD6E9C64")
+                entity.HasIndex(e => e.Username, "UQ__Account__F3DBC572F4CDED26")
                     .IsUnique();
 
                 entity.Property(e => e.Uid).HasColumnName("uid");
@@ -153,7 +155,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<Customer>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__Customer__DD7012642B5781A8");
+                    .HasName("PK__Customer__DD70126407DB127C");
 
                 entity.ToTable("Customer");
 
@@ -202,7 +204,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<CustomerCart>(entity =>
             {
                 entity.HasKey(e => new { e.CustomerId, e.ProductDetailId })
-                    .HasName("PK__Customer__E0BE8156E6367CDF");
+                    .HasName("PK__Customer__E0BE81562776416F");
 
                 entity.ToTable("CustomerCart");
 
@@ -278,7 +280,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<DeliveryNoteDetail>(entity =>
             {
                 entity.HasKey(e => new { e.DeliveryNoteId, e.ProductDetailId })
-                    .HasName("PK__Delivery__154BEB55E2DC3247");
+                    .HasName("PK__Delivery__154BEB55F64E9E68");
 
                 entity.ToTable("DeliveryNoteDetail");
 
@@ -338,6 +340,78 @@ namespace BigSizeFashion.Data.Entities
                     .HasForeignKey(d => d.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Feedback__produc__35BCFE0A");
+            });
+
+            modelBuilder.Entity<InventoryNote>(entity =>
+            {
+                entity.ToTable("InventoryNote");
+
+                entity.Property(e => e.InventoryNoteId).HasColumnName("inventory_note_id");
+
+                entity.Property(e => e.AdjustedDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("adjusted_date");
+
+                entity.Property(e => e.FromDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("from_date");
+
+                entity.Property(e => e.InventoryNoteName)
+                    .IsRequired()
+                    .HasMaxLength(100)
+                    .HasColumnName("inventory_note_name");
+
+                entity.Property(e => e.StaffId).HasColumnName("staff_id");
+
+                entity.Property(e => e.Status).HasColumnName("status");
+
+                entity.Property(e => e.StoreId).HasColumnName("store_id");
+
+                entity.Property(e => e.ToDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("to_date");
+
+                entity.HasOne(d => d.Staff)
+                    .WithMany(p => p.InventoryNotes)
+                    .HasForeignKey(d => d.StaffId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Inventory__staff__5DCAEF64");
+
+                entity.HasOne(d => d.Store)
+                    .WithMany(p => p.InventoryNotes)
+                    .HasForeignKey(d => d.StoreId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Inventory__store__5CD6CB2B");
+            });
+
+            modelBuilder.Entity<InventoryNoteDetail>(entity =>
+            {
+                entity.HasKey(e => new { e.InventoryNoteId, e.ProductDetailId })
+                    .HasName("PK__Inventor__B9BC3F0BAB1682C0");
+
+                entity.ToTable("InventoryNoteDetail");
+
+                entity.Property(e => e.InventoryNoteId).HasColumnName("inventory_note_id");
+
+                entity.Property(e => e.ProductDetailId).HasColumnName("product_detail_id");
+
+                entity.Property(e => e.BeginningQuantity).HasColumnName("beginning_quantity");
+
+                entity.Property(e => e.EndingQuantity).HasColumnName("ending_quantity");
+
+                entity.Property(e => e.EndingQuantityAfterAdjusted).HasColumnName("ending_quantity_after_adjusted");
+
+                entity.HasOne(d => d.InventoryNote)
+                    .WithMany(p => p.InventoryNoteDetails)
+                    .HasForeignKey(d => d.InventoryNoteId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Inventory__inven__60A75C0F");
+
+                entity.HasOne(d => d.ProductDetail)
+                    .WithMany(p => p.InventoryNoteDetails)
+                    .HasForeignKey(d => d.ProductDetailId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK__Inventory__produ__619B8048");
             });
 
             modelBuilder.Entity<Notification>(entity =>
@@ -455,7 +529,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<OrderDetail>(entity =>
             {
                 entity.HasKey(e => new { e.OrderId, e.ProductDetailId })
-                    .HasName("PK__OrderDet__6B8228FA601156B1");
+                    .HasName("PK__OrderDet__6B8228FA44BE3685");
 
                 entity.ToTable("OrderDetail");
 
@@ -611,7 +685,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<PromotionDetail>(entity =>
             {
                 entity.HasKey(e => new { e.ProductId, e.PromotionId })
-                    .HasName("PK__Promotio__E5C9E8A3FDB79D88");
+                    .HasName("PK__Promotio__E5C9E8A3C6BF5C4E");
 
                 entity.ToTable("PromotionDetail");
 
@@ -689,7 +763,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<StoreWarehouse>(entity =>
             {
                 entity.HasKey(e => new { e.StoreId, e.ProductDetailId })
-                    .HasName("PK__StoreWar__8F29E9DFB7324827");
+                    .HasName("PK__StoreWar__8F29E9DF9A45AAA5");
 
                 entity.ToTable("StoreWarehouse");
 
@@ -715,7 +789,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<User>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__User__DD701264F2CBFF21");
+                    .HasName("PK__User__DD7012647A8C089C");
 
                 entity.ToTable("User");
 
@@ -753,7 +827,7 @@ namespace BigSizeFashion.Data.Entities
             modelBuilder.Entity<staff>(entity =>
             {
                 entity.HasKey(e => e.Uid)
-                    .HasName("PK__Staff__DD70126413A744E0");
+                    .HasName("PK__Staff__DD7012649C698603");
 
                 entity.ToTable("Staff");
 
