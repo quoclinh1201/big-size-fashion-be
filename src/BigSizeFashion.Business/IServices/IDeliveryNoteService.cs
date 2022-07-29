@@ -19,5 +19,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveRequestImportProduct(int id);
         Task<Result<bool>> RejectRequestImportProduct(int id);
         Task<PagedResult<ListExportProductResponse>> GetListExportProductForMainWarehouse(string v, ImportProductParameter param);
+        Task<Result<bool>> DeleteRequestImportProduct(int id);
     }
 }

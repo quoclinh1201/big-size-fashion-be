@@ -202,19 +202,22 @@ namespace BigSizeFashion.Business.Services
             return username;
         }
 
-        public async Task<PagedResult<ListOrderResponse>> GetListOrderForCustomer(string token, FilterOrderParameter param)
+        public async Task<Result<IEnumerable<ListOrderResponse>>> GetListOrderForCustomer(string token, FilterOrderForStaffParameter param)
         {
+            var result = new Result<IEnumerable<ListOrderResponse>>();
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.FindByAsync(o => o.CustomerId == uid);
-                var query = orders.AsQueryable();
-                FilterOrderByType(ref query, param.OrderType);
-                FilterOrderStatus(ref query, param.OrderStatus.ToString());
-                OrderByCreateDate(ref query, param.OrderByCreateDate);
-                var list = query.ToList();
-                var response = _mapper.Map<List<ListOrderResponse>>(list);
-                return PagedResult<ListOrderResponse>.ToPagedList(response, param.PageNumber, param.PageSize);
+                var orders = await _orderRepository.FindByAsync(o => o.CustomerId == uid && o.CreateDate.Date == ConvertDateTime.ConvertStringToDate(param.CreateDate).Value.Date);
+                //var query = orders.AsQueryable();
+                //FilterOrderByType(ref query, param.OrderType);
+                //FilterOrderStatus(ref query, param.OrderStatus.ToString());
+                //OrderByCreateDate(ref query, param.OrderByCreateDate);
+                //var list = query.ToList();
+                var response = _mapper.Map<List<ListOrderResponse>>(orders.ToList());
+
+                result.Content = response;
+                return result;
             }
             catch (Exception)
             {

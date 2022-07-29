@@ -86,7 +86,7 @@ namespace BigsizeFashion.API.Controllers
         /// <returns></returns>
         //[Authorize]
         [HttpGet("customer")]
-        public async Task<IActionResult> GetListOrderForCustomer([FromHeader] string authorization, [FromQuery] FilterOrderParameter param)
+        public async Task<IActionResult> GetListOrderForCustomer([FromHeader] string authorization, [FromQuery] FilterOrderForStaffParameter param)
         {
             var result = await _service.GetListOrderForCustomer(authorization.Substring(7), param);
             if (!result.IsSuccess)

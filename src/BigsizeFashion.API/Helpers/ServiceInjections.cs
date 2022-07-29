@@ -74,6 +74,7 @@ namespace BigsizeFashion.API.Helpers
             services.AddScoped<IFirebaseNotificationService, FirebaseNotificationService>();
             services.AddScoped<IVNPayService, VNPayService>();
             services.AddScoped<IZaloPayService, ZaloPayService>();
+            services.AddScoped<IInventoryNoteService, InventoryNoteService>();
 
             return services;
         }

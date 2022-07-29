@@ -16,7 +16,7 @@ namespace BigSizeFashion.Business.IServices
     {
         Task<Result<OrderIdResponse>> CreateOrderForCustomer(string v, CreateOrderForCustomerRequest request);
         Task<Result<GetOrderDetailResponse>> GetOrderDetailById(int id);
-        Task<PagedResult<ListOrderResponse>> GetListOrderForCustomer(string v, FilterOrderParameter param);
+        Task<Result<IEnumerable<ListOrderResponse>>> GetListOrderForCustomer(string v, FilterOrderForStaffParameter param);
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOrder(int id);
         Task<PagedResult<ListOrderForManagerResponse>> GetListOrderOfStoreForManager(string v, FilterOrderParameter param);
         Task<Result<bool>> AssignOrder(AssignOrderRequest request);

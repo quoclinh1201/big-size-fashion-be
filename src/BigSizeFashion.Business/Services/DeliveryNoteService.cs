@@ -446,5 +446,24 @@ namespace BigSizeFashion.Business.Services
 
             query = query.Where(q => q.DeliveryNoteName.ToLower().Contains(deliveryNoteName.ToLower()));
         }
+
+        public async Task<Result<bool>> DeleteRequestImportProduct(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var pn = await _genericRepository.FindAsync(p => p.DeliveryNoteId == id);
+                pn.Status = 0;
+                await _genericRepository.UpdateAsync(pn);
+
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
