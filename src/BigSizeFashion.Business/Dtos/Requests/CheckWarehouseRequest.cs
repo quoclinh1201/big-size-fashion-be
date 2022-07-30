@@ -9,10 +9,12 @@ namespace BigSizeFashion.Business.Dtos.Requests
 {
     public class CheckWarehouseRequest
     {
+        //[Required]
+        //public string FromDate { get; set; }
+        //[Required]
+        //public string ToDate { get; set; }
         [Required]
-        public string FromDate { get; set; }
-        [Required]
-        public string ToDate { get; set; }
+        public int InventoryNoteId { get; set; }
         [Required]
         public List<CheckWarehouseItem> ListProducts { get; set; }
 

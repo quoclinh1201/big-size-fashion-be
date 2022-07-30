@@ -1,10 +1,12 @@
 ﻿using BigSizeFashion.Business.Dtos.Parameters;
 using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.IServices;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -88,19 +90,64 @@ namespace BigsizeFashion.API.Controllers
         }
 
         /// <summary>
+        /// Kiểm kê kho
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost("check")]
+        public async Task<IActionResult> CheckWarehouse([FromHeader] string authorization, [FromBody] CheckWarehouseRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
+            var result = await _service.CheckWarehouse(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Điều chỉnh số lượng
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPut("quantity-adjustment")]
+        public async Task<IActionResult> QuantityAdjustment([FromHeader] string authorization, [FromBody] List<QuantityAdjustmentRequest> request)
+        {
+            var result = await _service.QuantityAdjustment(authorization.Substring(7), request);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
         /// Export excel file for Inventory Note
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        //[HttpGet("export-excel/{id}")]
-        //public async Task<IActionResult> ExportExcel(int id)
-        //{
-        //    var result = await _service.ExportExcel(id);
-        //    if (!result.IsSuccess)
-        //    {
-        //        return BadRequest(result);
-        //    }
-        //    return Ok(result);
-        //}
+        [HttpGet("export-excel/{id}")]
+        public async Task<IActionResult> ExportExcel(int id)
+        {
+            var result = await _service.ExportExcel(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+
+            var stream = result.Content;
+            var buffer = stream as MemoryStream;
+            byte[] fileBytes = buffer.ToArray();
+            var mimeType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            return File(fileBytes, mimeType, "inventory_note_#" + id); ;
+        }
     }
 }

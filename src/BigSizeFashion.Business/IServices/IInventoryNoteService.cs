@@ -18,5 +18,7 @@ namespace BigSizeFashion.Business.IServices
         Task<PagedResult<GetListInventoryNoteResponse>> GetListInventoryNote(string v, GetListInventoryNoteParameter param);
         Task<Result<bool>> DeleteInventoryNote(int id);
         Task<Result<Stream>> ExportExcel(int id);
+        Task<Result<CheckWarehouseResponse>> CheckWarehouse(string v, CheckWarehouseRequest request);
+        Task<Result<bool>> QuantityAdjustment(string v, List<QuantityAdjustmentRequest> request);
     }
 }

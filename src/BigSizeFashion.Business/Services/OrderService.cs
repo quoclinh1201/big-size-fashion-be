@@ -208,13 +208,17 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var orders = await _orderRepository.FindByAsync(o => o.CustomerId == uid && o.CreateDate.Date == ConvertDateTime.ConvertStringToDate(param.CreateDate).Value.Date);
+                var orders = await _orderRepository
+                    .GetAllByIQueryable()
+                    .Where(o => o.CustomerId == uid && o.CreateDate.Date == ConvertDateTime.ConvertStringToDate(param.CreateDate).Value.Date)
+                    .OrderByDescending(o => o.CreateDate)
+                    .ToListAsync();
                 //var query = orders.AsQueryable();
                 //FilterOrderByType(ref query, param.OrderType);
                 //FilterOrderStatus(ref query, param.OrderStatus.ToString());
                 //OrderByCreateDate(ref query, param.OrderByCreateDate);
                 //var list = query.ToList();
-                var response = _mapper.Map<List<ListOrderResponse>>(orders.ToList());
+                var response = _mapper.Map<List<ListOrderResponse>>(orders);
 
                 result.Content = response;
                 return result;

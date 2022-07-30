@@ -9,6 +9,7 @@ using BigSizeFashion.Data.Entities;
 using BigSizeFashion.Data.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -65,11 +66,25 @@ namespace BigSizeFashion.Business.Services
                 var allproduct = await _storeWarehouseRepository.FindByAsync(p => p.StoreId == note.StoreId);
                 foreach (var item in allproduct)
                 {
+                    var q = 0;
+                    if(nearestNote.Count > 0)
+                    {
+                        var ccc = _inventoryNoteDetailRepository.GetAllByIQueryable().Where(n => n.InventoryNoteId == nearestNote[0].InventoryNoteId).FirstOrDefault();
+                        if (ccc.EndingQuantityAfterAdjusted != null)
+                        {
+                            q = (int)ccc.EndingQuantityAfterAdjusted;
+                        }
+                        else
+                        {
+                            q = ccc.EndingQuantity;
+                        }
+                    }
+
                     var product = new InventoryNoteDetail
                     {
                         InventoryNoteId = note.InventoryNoteId,
                         ProductDetailId = item.ProductDetailId,
-                        BeginningQuantity = nearestNote.Count > 0 ? (int)_inventoryNoteDetailRepository.GetAllByIQueryable().Where(n => n.InventoryNoteId == nearestNote[0].InventoryNoteId).Select(n => n.EndingQuantityAfterAdjusted).FirstOrDefault() : 0,
+                        BeginningQuantity = q,
                         EndingQuantity = item.Quantity,
                         EndingQuantityAfterAdjusted = null
                     };
@@ -156,9 +171,96 @@ namespace BigSizeFashion.Business.Services
 
                 worksheet.DefaultColWidth = 10;
                 worksheet.Cells.Style.WrapText = true;
+                worksheet.Column(1).Width = 11;
+                worksheet.Column(5).Width = 20;
 
+                worksheet.Cells["A1:K1"].Value = "PHIẾU KIỂM KÊ HÀNG HÓA";
+                worksheet.Cells["A1:K1"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A1:K1"].Style.Font.Bold = true;
+                worksheet.Cells["A1:K1"].Merge = true;
 
+                worksheet.Cells["A3"].Value = "Từ ngày:";
+                worksheet.Cells["A3"].Style.Font.Bold = true;
+                worksheet.Cells["B3:C3"].Value = note.FromDate;
+                worksheet.Cells["B3:C3"].Merge = true;
 
+                worksheet.Cells["A4"].Value = "Đến ngày:";
+                worksheet.Cells["A4"].Style.Font.Bold = true;
+                worksheet.Cells["B4:C4"].Value = note.ToDate;
+                worksheet.Cells["B4:C4"].Merge = true;
+
+                worksheet.Cells["A5"].Value = "Nhân viên:";
+                worksheet.Cells["A5"].Style.Font.Bold = true;
+                worksheet.Cells["B5:D5"].Value = note.StaffName;
+                worksheet.Cells["B5:D5"].Merge = true;
+
+                worksheet.Cells["A6"].Value = "Chi nhánh:";
+                worksheet.Cells["A6"].Style.Font.Bold = true;
+                worksheet.Cells["B6:K6"].Value = note.Store.StoreAddress;
+                worksheet.Cells["B6:K6"].Merge = true;
+
+                worksheet.Cells["A8:A9"].Value = "STT";
+                worksheet.Cells["A8:A9"].Style.Font.Bold = true;
+                worksheet.Cells["A8:A9"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["A8:A9"].Merge = true;
+                worksheet.Cells["A8:A9"].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                worksheet.Cells["B8:E9"].Value = "Sản phẩm";
+                worksheet.Cells["B8:E9"].Style.Font.Bold = true;
+                worksheet.Cells["B8:E9"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["B8:E9"].Merge = true;
+                worksheet.Cells["B8:E9"].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                worksheet.Cells["F8:I8"].Value = "Số lượng trên hệ thống";
+                worksheet.Cells["F8:I8"].Style.Font.Bold = true;
+                worksheet.Cells["F8:I8"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["F8:I8"].Merge = true;
+                worksheet.Cells["F8:I8"].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                worksheet.Cells["F9:G9"].Value = "Đầu kỳ";
+                worksheet.Cells["F9:G9"].Style.Font.Bold = true;
+                worksheet.Cells["F9:G9"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["F9:G9"].Merge = true;
+                worksheet.Cells["F9:G9"].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                worksheet.Cells["H9:I9"].Value = "Cuối kỳ";
+                worksheet.Cells["H9:I9"].Style.Font.Bold = true;
+                worksheet.Cells["H9:I9"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["H9:I9"].Merge = true;
+                worksheet.Cells["H9:I9"].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                worksheet.Cells["J8:K9"].Value = "Số lượng cuối kỳ thực tế";
+                worksheet.Cells["J8:K9"].Style.Font.Bold = true;
+                worksheet.Cells["J8:K9"].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                worksheet.Cells["J8:K9"].Merge = true;
+                worksheet.Cells["J8:K9"].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                var index = 10;
+                for (int i = 0; i < note.InventoryNoteDetail.Count; i++)
+                {
+                    worksheet.Cells["A" + index].Value = i + 1;
+                    worksheet.Cells["A" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["A" + index].Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    worksheet.Cells["A" + index].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    worksheet.Cells["B" + index + ":E" + index].Value = note.InventoryNoteDetail[i].ProductName + "-Màu " + note.InventoryNoteDetail[i].Colour + "-Size " + note.InventoryNoteDetail[i].Size;
+                    worksheet.Cells["B" + index + ":E" + index].Merge = true;
+                    worksheet.Cells["B" + index + ":E" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    worksheet.Cells["B" + index + ":E" + index].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    worksheet.Cells["F" + index + ":G" + index].Value = note.InventoryNoteDetail[i].BeginningQuantity;
+                    worksheet.Cells["F" + index + ":G" + index].Merge = true;
+                    worksheet.Cells["F" + index + ":G" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["F" + index + ":G" + index].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    worksheet.Cells["H" + index + ":I" + index].Value = note.InventoryNoteDetail[i].EndingQuantity;
+                    worksheet.Cells["H" + index + ":I" + index].Merge = true;
+                    worksheet.Cells["H" + index + ":I" + index].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    worksheet.Cells["H" + index + ":I" + index].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+
+                    worksheet.Cells["J" + index + ":K" + index].Style.Border.BorderAround(ExcelBorderStyle.Thin);
+                    index += 1;
+                }
             }
             catch (Exception)
             {
@@ -256,6 +358,94 @@ namespace BigSizeFashion.Business.Services
             }
 
             query = query.Where(q => q.InventoryNoteName.ToLower().Contains(inventoryNoteName.ToLower()));
+        }
+
+        public async Task<Result<CheckWarehouseResponse>> CheckWarehouse(string v, CheckWarehouseRequest request)
+        {
+            var result = new Result<CheckWarehouseResponse>();
+            var response = new CheckWarehouseResponse();
+            try
+            {
+                if(request.ListProducts.Count > 1)
+                {
+                    if (request.ListProducts.Select(p => p.ProductDetailId).Count() != request.ListProducts.Select(p => p.ProductDetailId).Distinct().Count())
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
+                        return result;
+                    }
+                }
+
+                foreach (var item in request.ListProducts)
+                {
+                    var product = await _inventoryNoteDetailRepository
+                        .GetAllByIQueryable()
+                        .Include(n => n.ProductDetail)
+                        .ThenInclude(n => n.Product)
+                        .Include(n => n.ProductDetail)
+                        .ThenInclude(n => n.Size)
+                        .Include(n => n.ProductDetail)
+                        .ThenInclude(n => n.Colour)
+                        .Where(n => n.InventoryNoteId == request.InventoryNoteId)
+                        .FirstOrDefaultAsync();
+                    var cc = new Dtos.Responses.CheckWarehouseItem
+                    {
+                        BeginningQuantity = product.BeginningQuantity,
+                        ColourId = product.ProductDetail.ColourId,
+                        ColourName = product.ProductDetail.Colour.ColourName,
+                        EndingQuantityInSystem = product.EndingQuantity,
+                        productId = product.ProductDetail.ProductId,
+                        ProductName = product.ProductDetail.Product.ProductName,
+                        RealQuantity = item.RealQuantity,
+                        SizeId = product.ProductDetail.Size.SizeId,
+                        SizeName = product.ProductDetail.Size.SizeName,
+                        DifferenceQuantity = item.RealQuantity - product.EndingQuantity
+                    };
+                    response.ListProducts.Add(cc);
+                }
+
+                result.Content = response;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> QuantityAdjustment(string token, List<QuantityAdjustmentRequest> request)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository.GetAllByIQueryable()
+                            .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
+
+                foreach (var item in request)
+                {
+                    var tw = await _storeWarehouseRepository.FindAsync(t => t.ProductDetailId == item.ProductDetailId && t.StoreId == storeId);
+
+                    tw.Quantity += item.DifferenceQuantity;
+                    await _storeWarehouseRepository.UpdateAsync(tw);
+
+                    var note = await _inventoryNoteDetailRepository.FindAsync(t => t.ProductDetailId == item.ProductDetailId && t.InventoryNoteId == item.InventoryNoteId);
+                    note.EndingQuantityAfterAdjusted = tw.Quantity;
+                    await _inventoryNoteDetailRepository.UpdateAsync(note);
+                }
+
+                var n = await _inventoryNoteRepository.FindAsync(s => s.InventoryNoteId == request[0].InventoryNoteId);
+                n.AdjustedDate = DateTime.Now;
+                await _inventoryNoteRepository.UpdateAsync(n);
+
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
         }
     }
 }

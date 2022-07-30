@@ -45,123 +45,123 @@ namespace BigSizeFashion.Business.Services
             _mapper = mapper;
         }
 
-        public async Task<Result<CheckWarehouseResponse>> CheckWarehouse(string token, CheckWarehouseRequest request)
-        {
-            var result = new Result<CheckWarehouseResponse>();
-            var response = new CheckWarehouseResponse();
-            try
-            {
-                response.FromDate = request.FromDate;
-                response.ToDate = request.ToDate;
-                var from = ConvertDateTime.ConvertStringToDate(request.FromDate);
-                var to = ConvertDateTime.ConvertStringToDate(request.ToDate);
-                var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var storeId = await _staffRepository.GetAllByIQueryable()
-                    .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
-                var map = new Dictionary<int, int>();
+        //public async Task<Result<CheckWarehouseResponse>> CheckWarehouse(string token, CheckWarehouseRequest request)
+        //{
+        //    var result = new Result<CheckWarehouseResponse>();
+        //    var response = new CheckWarehouseResponse();
+        //    try
+        //    {
+        //        response.FromDate = request.FromDate;
+        //        response.ToDate = request.ToDate;
+        //        var from = ConvertDateTime.ConvertStringToDate(request.FromDate);
+        //        var to = ConvertDateTime.ConvertStringToDate(request.ToDate);
+        //        var uid = DecodeToken.DecodeTokenToGetUid(token);
+        //        var storeId = await _staffRepository.GetAllByIQueryable()
+        //            .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
+        //        var map = new Dictionary<int, int>();
 
-                var orders = await _orderRepository
-                        .FindByAsync(o => o.StoreId == storeId
-                        && o.ApprovalDate.Value.Day >= from.Value.Day
-                        && o.ApprovalDate.Value.Month >= from.Value.Month
-                        && o.ApprovalDate.Value.Year >= from.Value.Year
-                        && o.ApprovalDate.Value.Day <= to.Value.Day
-                        && o.ApprovalDate.Value.Month <= to.Value.Month
-                        && o.ApprovalDate.Value.Year <= to.Value.Year
-                        && o.Status != 0
-                        && o.Status != 1
-                        && o.Status != 6);
+        //        var orders = await _orderRepository
+        //                .FindByAsync(o => o.StoreId == storeId
+        //                && o.ApprovalDate.Value.Day >= from.Value.Day
+        //                && o.ApprovalDate.Value.Month >= from.Value.Month
+        //                && o.ApprovalDate.Value.Year >= from.Value.Year
+        //                && o.ApprovalDate.Value.Day <= to.Value.Day
+        //                && o.ApprovalDate.Value.Month <= to.Value.Month
+        //                && o.ApprovalDate.Value.Year <= to.Value.Year
+        //                && o.Status != 0
+        //                && o.Status != 1
+        //                && o.Status != 6);
 
-                var deliverynotes = await _deliveryNoteRepository
-                        .FindByAsync(o => (o.ToStore == storeId || o.FromStore == storeId)
-                        && o.ApprovalDate.Value.Day >= from.Value.Day
-                        && o.ApprovalDate.Value.Month >= from.Value.Month
-                        && o.ApprovalDate.Value.Year >= from.Value.Year
-                        && o.ApprovalDate.Value.Day <= to.Value.Day
-                        && o.ApprovalDate.Value.Month <= to.Value.Month
-                        && o.ApprovalDate.Value.Year <= to.Value.Year
-                        && o.Status == 2);
+        //        var deliverynotes = await _deliveryNoteRepository
+        //                .FindByAsync(o => (o.ToStore == storeId || o.FromStore == storeId)
+        //                && o.ApprovalDate.Value.Day >= from.Value.Day
+        //                && o.ApprovalDate.Value.Month >= from.Value.Month
+        //                && o.ApprovalDate.Value.Year >= from.Value.Year
+        //                && o.ApprovalDate.Value.Day <= to.Value.Day
+        //                && o.ApprovalDate.Value.Month <= to.Value.Month
+        //                && o.ApprovalDate.Value.Year <= to.Value.Year
+        //                && o.Status == 2);
 
-                foreach (var item in request.ListProducts)
-                {
-                    var cc = new Dtos.Responses.CheckWarehouseItem();
-                    var eq = await _genericRepository
-                        .GetAllByIQueryable()
-                        .Include(e => e.ProductDetail.Colour)
-                        .Include(e => e.ProductDetail.Product)
-                        .Include(e => e.ProductDetail.Size)
-                        .Include(e => e.ProductDetail)
-                        .Where(e => e.ProductDetail.ProductId == item.productId
-                                && e.ProductDetail.SizeId == item.SizeId
-                                && e.ProductDetail.ColourId == item.ColourId)
-                        .FirstOrDefaultAsync();
+        //        foreach (var item in request.ListProducts)
+        //        {
+        //            var cc = new Dtos.Responses.CheckWarehouseItem();
+        //            var eq = await _genericRepository
+        //                .GetAllByIQueryable()
+        //                .Include(e => e.ProductDetail.Colour)
+        //                .Include(e => e.ProductDetail.Product)
+        //                .Include(e => e.ProductDetail.Size)
+        //                .Include(e => e.ProductDetail)
+        //                .Where(e => e.ProductDetail.ProductId == item.productId
+        //                        && e.ProductDetail.SizeId == item.SizeId
+        //                        && e.ProductDetail.ColourId == item.ColourId)
+        //                .FirstOrDefaultAsync();
 
-                    if(eq != null)
-                    {
-                        cc.productId = item.productId;
-                        cc.ProductName = eq.ProductDetail.Product.ProductName;
-                        cc.SizeId = item.SizeId;
-                        cc.SizeName = eq.ProductDetail.Size.SizeName;
-                        cc.ColourId = item.ColourId;
-                        cc.ColourName = eq.ProductDetail.Colour.ColourName;
-                        cc.RealQuantity = item.RealQuantity;
-                        cc.EndingQuantityInSystem = eq.Quantity;
+        //            if(eq != null)
+        //            {
+        //                cc.productId = item.productId;
+        //                cc.ProductName = eq.ProductDetail.Product.ProductName;
+        //                cc.SizeId = item.SizeId;
+        //                cc.SizeName = eq.ProductDetail.Size.SizeName;
+        //                cc.ColourId = item.ColourId;
+        //                cc.ColourName = eq.ProductDetail.Colour.ColourName;
+        //                cc.RealQuantity = item.RealQuantity;
+        //                cc.EndingQuantityInSystem = eq.Quantity;
 
-                        map.Add(eq.ProductDetailId, eq.Quantity);
-                        response.ListProducts.Add(cc);
-                    }
-                }
+        //                map.Add(eq.ProductDetailId, eq.Quantity);
+        //                response.ListProducts.Add(cc);
+        //            }
+        //        }
 
-                foreach (var order in orders)
-                {
-                    foreach (var item in map)
-                    {
-                        var odt = await _orderDetailRepository.FindAsync(o => o.OrderId == order.OrderId && o.ProductDetailId == item.Key);
-                        if(odt != null)
-                            map[odt.ProductDetailId] += odt.Quantity;
+        //        foreach (var order in orders)
+        //        {
+        //            foreach (var item in map)
+        //            {
+        //                var odt = await _orderDetailRepository.FindAsync(o => o.OrderId == order.OrderId && o.ProductDetailId == item.Key);
+        //                if(odt != null)
+        //                    map[odt.ProductDetailId] += odt.Quantity;
 
-                    }
-                }
+        //            }
+        //        }
 
-                foreach (var deliverynote in deliverynotes)
-                {
-                    foreach (var item in map)
-                    {
-                        var dnd = await _deliveryNoteDetailRepository.FindAsync(d => d.DeliveryNoteId == deliverynote.DeliveryNoteId && d.ProductDetailId == item.Key); ;
-                        if(dnd != null)
-                        {
-                            if (deliverynote.FromStore == storeId)
-                            {
-                                map[dnd.ProductDetailId] += dnd.Quantity;
-                            }
-                            else if (deliverynote.ToStore == storeId)
-                            {
-                                map[dnd.ProductDetailId] -= dnd.Quantity;
-                            }
-                        }
-                    } 
-                }
+        //        foreach (var deliverynote in deliverynotes)
+        //        {
+        //            foreach (var item in map)
+        //            {
+        //                var dnd = await _deliveryNoteDetailRepository.FindAsync(d => d.DeliveryNoteId == deliverynote.DeliveryNoteId && d.ProductDetailId == item.Key); ;
+        //                if(dnd != null)
+        //                {
+        //                    if (deliverynote.FromStore == storeId)
+        //                    {
+        //                        map[dnd.ProductDetailId] += dnd.Quantity;
+        //                    }
+        //                    else if (deliverynote.ToStore == storeId)
+        //                    {
+        //                        map[dnd.ProductDetailId] -= dnd.Quantity;
+        //                    }
+        //                }
+        //            } 
+        //        }
 
-                foreach (var item in map)
-                {
-                    var pd = await _productDetailRepository.FindAsync(p => p.ProductDetailId == item.Key);
-                    response.ListProducts.Find(p => p.productId == pd.ProductId && p.SizeId == pd.SizeId && p.ColourId == pd.ColourId).BeginningQuantity = item.Value;
-                }
+        //        foreach (var item in map)
+        //        {
+        //            var pd = await _productDetailRepository.FindAsync(p => p.ProductDetailId == item.Key);
+        //            response.ListProducts.Find(p => p.productId == pd.ProductId && p.SizeId == pd.SizeId && p.ColourId == pd.ColourId).BeginningQuantity = item.Value;
+        //        }
 
-                for (int i = 0; i < response.ListProducts.Count; i++)
-                {
-                    response.ListProducts[i].DifferenceQuantity = response.ListProducts[i].RealQuantity - response.ListProducts[i].EndingQuantityInSystem;
-                }
+        //        for (int i = 0; i < response.ListProducts.Count; i++)
+        //        {
+        //            response.ListProducts[i].DifferenceQuantity = response.ListProducts[i].RealQuantity - response.ListProducts[i].EndingQuantityInSystem;
+        //        }
 
-                result.Content = response;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-                return result;
-            }
-        }
+        //        result.Content = response;
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+        //        return result;
+        //    }
+        //}
 
         public async Task<Result<bool>> IncreaseOrDesceaseProductInStore(string token, IncreaseOrDesceaseProductRequest request)
         {
@@ -201,37 +201,37 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> QuantityAdjustment(string token, List<QuantityAdjustmentRequest> request)
-        {
-            var result = new Result<bool>();
-            try
-            {
-                var uid = DecodeToken.DecodeTokenToGetUid(token);
-                var storeId = await _staffRepository.GetAllByIQueryable()
-                    .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
+        //public async Task<Result<bool>> QuantityAdjustment(string token, List<QuantityAdjustmentRequest> request)
+        //{
+        //    var result = new Result<bool>();
+        //    try
+        //    {
+        //        var uid = DecodeToken.DecodeTokenToGetUid(token);
+        //        var storeId = await _staffRepository.GetAllByIQueryable()
+        //            .Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
 
-                foreach (var item in request)
-                {
-                    var tw = await _genericRepository
-                        .GetAllByIQueryable()
-                        .Include(t => t.ProductDetail)
-                        .Where(t => t.ProductDetail.ProductId == item.ProductId
-                                && t.ProductDetail.ColourId == item.ColourId
-                                && t.ProductDetail.SizeId == item.SizeId)
-                        .FirstOrDefaultAsync();
+        //        foreach (var item in request)
+        //        {
+        //            var tw = await _genericRepository
+        //                .GetAllByIQueryable()
+        //                .Include(t => t.ProductDetail)
+        //                .Where(t => t.ProductDetail.ProductId == item.ProductId
+        //                        && t.ProductDetail.ColourId == item.ColourId
+        //                        && t.ProductDetail.SizeId == item.SizeId)
+        //                .FirstOrDefaultAsync();
 
-                    tw.Quantity += item.DifferenceQuantity;
-                    await _genericRepository.UpdateAsync(tw);
-                }
+        //            tw.Quantity += item.DifferenceQuantity;
+        //            await _genericRepository.UpdateAsync(tw);
+        //        }
 
-                result.Content = true;
-                return result;
-            }
-            catch (Exception ex)
-            {
-                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
-                return result;
-            }
-        }
+        //        result.Content = true;
+        //        return result;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+        //        return result;
+        //    }
+        //}
     }
 }

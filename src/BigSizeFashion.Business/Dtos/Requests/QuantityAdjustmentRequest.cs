@@ -8,9 +8,8 @@ namespace BigSizeFashion.Business.Dtos.Requests
 {
     public class QuantityAdjustmentRequest
     {
-        public int ProductId { get; set; }
-        public int SizeId { get; set; }
-        public int ColourId { get; set; }
+        public int InventoryNoteId { get; set; }
+        public int ProductDetailId { get; set; }
         public int DifferenceQuantity { get; set; }
     }
 }

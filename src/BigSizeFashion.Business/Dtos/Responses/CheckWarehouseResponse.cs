@@ -8,8 +8,8 @@ namespace BigSizeFashion.Business.Dtos.Responses
 {
     public class CheckWarehouseResponse
     {
-        public string FromDate { get; set; }
-        public string ToDate { get; set; }
+        //public string FromDate { get; set; }
+        //public string ToDate { get; set; }
         public List<CheckWarehouseItem> ListProducts { get; set; } = new List<CheckWarehouseItem>();
     }
 }

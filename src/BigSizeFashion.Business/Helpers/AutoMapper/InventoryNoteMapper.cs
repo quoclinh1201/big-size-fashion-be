@@ -24,7 +24,7 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             CreateMap<InventoryNote, GetListInventoryNoteResponse>()
                 .ForMember(d => d.ToDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.ToDate)))
                 .ForMember(d => d.FromDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.FromDate)))
-                .ForMember(d => d.AdjustedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.AdjustedDate)))
+                .ForMember(d => d.AdjustedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.AdjustedDate)))
                 .ForMember(d => d.StaffName, s => s.MapFrom(s => s.Staff.Fullname));
         }
     }

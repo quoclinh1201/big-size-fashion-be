@@ -12,7 +12,7 @@ namespace BigSizeFashion.Business.IServices
     public interface IStoreWarehouseService
     {
         Task<Result<bool>> IncreaseOrDesceaseProductInStore(string v, IncreaseOrDesceaseProductRequest request);
-        Task<Result<CheckWarehouseResponse>> CheckWarehouse(string v, CheckWarehouseRequest request);
-        Task<Result<bool>> QuantityAdjustment(string v, List<QuantityAdjustmentRequest> request);
+        //Task<Result<CheckWarehouseResponse>> CheckWarehouse(string v, CheckWarehouseRequest request);
+        //Task<Result<bool>> QuantityAdjustment(string v, List<QuantityAdjustmentRequest> request);
     }
 }

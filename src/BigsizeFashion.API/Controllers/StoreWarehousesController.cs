@@ -59,20 +59,20 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpPost]
-        public async Task<IActionResult> CheckWarehouse([FromHeader] string authorization, [FromBody] CheckWarehouseRequest request)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await _service.CheckWarehouse(authorization.Substring(7), request);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> CheckWarehouse([FromHeader] string authorization, [FromBody] CheckWarehouseRequest request)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest();
+        //    }
+        //    var result = await _service.CheckWarehouse(authorization.Substring(7), request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
 
         /// <summary>
         /// Điều chỉnh số lượng trong kho sau khi kiểm kê
@@ -81,15 +81,15 @@ namespace BigsizeFashion.API.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         //[Authorize]
-        [HttpPut("quantity-adjustment")]
-        public async Task<IActionResult> QuantityAdjustment([FromHeader] string authorization, [FromBody] List<QuantityAdjustmentRequest> request)
-        {
-            var result = await _service.QuantityAdjustment(authorization.Substring(7), request);
-            if (!result.IsSuccess)
-            {
-                return BadRequest(result);
-            }
-            return Ok(result);
-        }
+        //[HttpPut("quantity-adjustment")]
+        //public async Task<IActionResult> QuantityAdjustment([FromHeader] string authorization, [FromBody] List<QuantityAdjustmentRequest> request)
+        //{
+        //    var result = await _service.QuantityAdjustment(authorization.Substring(7), request);
+        //    if (!result.IsSuccess)
+        //    {
+        //        return BadRequest(result);
+        //    }
+        //    return Ok(result);
+        //}
     }
 }
