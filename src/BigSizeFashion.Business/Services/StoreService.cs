@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BigSizeFashion.Business.Dtos.Requests;
 using BigSizeFashion.Business.Dtos.Responses;
 using BigSizeFashion.Business.Helpers.Common;
 using BigSizeFashion.Business.Helpers.Constants;
@@ -27,6 +28,7 @@ namespace BigSizeFashion.Business.Services
         private readonly IGenericRepository<StoreWarehouse> _storeWarehouseRepository;
         private readonly IGenericRepository<ProductDetail> _productDetailRepository;
         private readonly IGenericRepository<Account> _accountRepository;
+        private readonly IGenericRepository<staff> _staffRepository;
         private readonly IMapper _mapper;
 
         public StoreService(
@@ -34,12 +36,14 @@ namespace BigSizeFashion.Business.Services
             IGenericRepository<StoreWarehouse> storeWarehouseRepository,
             IGenericRepository<ProductDetail> productDetailRepository,
             IGenericRepository<Account> accountRepository,
+            IGenericRepository<staff> staffRepository,
             IMapper mapper)
         {
             _genericRepository = genericRepository;
             _storeWarehouseRepository = storeWarehouseRepository;
             _productDetailRepository = productDetailRepository;
             _accountRepository = accountRepository;
+            _staffRepository = staffRepository;
             _mapper = mapper;
         }
 
@@ -249,7 +253,7 @@ namespace BigSizeFashion.Business.Services
                 
                 var request = new DistanceMatrixRequest
                 {
-                    Key = "AIzaSyB9zumBhbMOzmW913sVJxEsq7xCxj6ddqY",
+                    Key = CommonConstants.GoogleMapApiKey,
                     Origins = new[]
                     {
                         new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
@@ -287,6 +291,111 @@ namespace BigSizeFashion.Business.Services
                 nearest.ShippingFee = shippingFee;
 
                 result.Content = nearest;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<IEnumerable<GetAvailableStoreResponse>>> GetAvailableStore(string token, List<GetAvailableStoreRequest> request)
+        {
+            var result = new Result<IEnumerable<GetAvailableStoreResponse>>();
+            var response = new List<GetAvailableStoreResponse>();
+            var storeAddressList = new List<StoreResponse>();
+            try
+            {
+                if(request.Count > 1)
+                {
+                    if (request.Select(s => s.ProductDetailId).Count() != request.Select(s => s.ProductDetailId).Distinct().Count())
+                    {
+                        result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Trùng sản phẩm!");
+                        return result;
+                    }
+                }
+
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var staff = await _staffRepository.GetAllByIQueryable().Include(s => s.Store).Where(s => s.Uid == uid).FirstOrDefaultAsync();
+                var stores = await _genericRepository.FindByAsync(s => s.Status == true && s.StoreId != staff.StoreId);
+                foreach (var store in stores)
+                {
+                    var isAdd = true;
+                    if (store.IsMainWarehouse)
+                    {
+                        response.Add(new GetAvailableStoreResponse
+                        {
+                            StoreId = store.StoreId,
+                            StoreName = store.StoreName
+                        });
+                        //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
+                    }
+                    else
+                    {
+                        foreach (var item in request)
+                        {
+                            var p = await _storeWarehouseRepository
+                                .FindAsync(s => s.ProductDetailId == item.ProductDetailId 
+                                            && s.Quantity >= item.Quantity 
+                                            && s.StoreId == store.StoreId);
+                            if(p == null)
+                            {
+                                isAdd = false;
+                                break;
+                            }
+                        }
+
+                        if(isAdd)
+                        {
+                            response.Add(new GetAvailableStoreResponse
+                            {
+                                StoreId = store.StoreId,
+                                StoreName = store.StoreName
+                            });
+                            //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
+                        }
+                    }
+                }
+
+                //var list = new List<LocationEx>();
+                //var listAddress = new Dictionary<int, int?>();
+
+                //foreach (var item in storeAddressList)
+                //{
+                //    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
+                //    listAddress.Add(item.StoreId, null);
+                //}
+
+                //var requestt = new DistanceMatrixRequest
+                //{
+                //    Key = CommonConstants.GoogleMapApiKey,
+                //    Origins = new[]
+                //    {
+                //        new LocationEx(new GoogleApi.Entities.Common.Address(staff.Store.StoreAddress))
+                //    },
+                //    Destinations = list
+                //};
+
+                //var responsee = await GoogleMaps.DistanceMatrix.QueryAsync(requestt);
+                //var index = 0;
+
+                //foreach (var item in listAddress)
+                //{
+                //    listAddress[item.Key] = responsee.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
+                //    index++;
+                //}
+
+                //foreach (var a in listAddress.OrderBy(key => key.Value))
+                //{
+                //    response.Add(new GetAvailableStoreResponse
+                //    {
+                //        StoreId = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreId).FirstOrDefault(),
+                //        StoreName = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreName).FirstOrDefault()
+                //    });
+                //}
+
+                result.Content = response;
                 return result;
             }
             catch (Exception ex)

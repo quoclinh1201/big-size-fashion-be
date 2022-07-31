@@ -1,4 +1,5 @@
-﻿using BigSizeFashion.Business.Helpers.Parameters;
+﻿using BigSizeFashion.Business.Dtos.Requests;
+using BigSizeFashion.Business.Helpers.Parameters;
 using BigSizeFashion.Business.Helpers.RequestObjects;
 using BigSizeFashion.Business.IServices;
 using Microsoft.AspNetCore.Authorization;
@@ -130,6 +131,23 @@ namespace BigsizeFashion.API.Controllers
         public async Task<IActionResult> GetNearestStore(string address)
         {
             var result = await _service.GetNearestStore(address);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
+
+        /// <summary>
+        /// Get cửa hàng còn hàng
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("available-store")]
+        public async Task<IActionResult> GetAvailableStore([FromHeader] string authorization, [FromBody] List<GetAvailableStoreRequest> request)
+        {
+            var result = await _service.GetAvailableStore(authorization.Substring(7), request);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);
