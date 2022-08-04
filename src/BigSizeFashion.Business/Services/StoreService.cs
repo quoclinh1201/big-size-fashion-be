@@ -324,12 +324,12 @@ namespace BigSizeFashion.Business.Services
                     var isAdd = true;
                     if (store.IsMainWarehouse)
                     {
-                        response.Add(new GetAvailableStoreResponse
-                        {
-                            StoreId = store.StoreId,
-                            StoreName = store.StoreName
-                        });
-                        //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
+                        //response.Add(new GetAvailableStoreResponse
+                        //{
+                        //    StoreId = store.StoreId,
+                        //    StoreName = store.StoreName
+                        //});
+                        storeAddressList.Add(_mapper.Map<StoreResponse>(store));
                     }
                     else
                     {
@@ -348,52 +348,52 @@ namespace BigSizeFashion.Business.Services
 
                         if(isAdd)
                         {
-                            response.Add(new GetAvailableStoreResponse
-                            {
-                                StoreId = store.StoreId,
-                                StoreName = store.StoreName
-                            });
-                            //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
+                            //response.Add(new GetAvailableStoreResponse
+                            //{
+                            //    StoreId = store.StoreId,
+                            //    StoreName = store.StoreName
+                            //});
+                            storeAddressList.Add(_mapper.Map<StoreResponse>(store));
                         }
                     }
                 }
 
-                //var list = new List<LocationEx>();
-                //var listAddress = new Dictionary<int, int?>();
+                var list = new List<LocationEx>();
+                var listAddress = new Dictionary<int, int?>();
 
-                //foreach (var item in storeAddressList)
-                //{
-                //    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
-                //    listAddress.Add(item.StoreId, null);
-                //}
+                foreach (var item in storeAddressList)
+                {
+                    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
+                    listAddress.Add(item.StoreId, null);
+                }
 
-                //var requestt = new DistanceMatrixRequest
-                //{
-                //    Key = CommonConstants.GoogleMapApiKey,
-                //    Origins = new[]
-                //    {
-                //        new LocationEx(new GoogleApi.Entities.Common.Address(staff.Store.StoreAddress))
-                //    },
-                //    Destinations = list
-                //};
+                var requestt = new DistanceMatrixRequest
+                {
+                    Key = CommonConstants.GoogleMapApiKey,
+                    Origins = new[]
+                    {
+                        new LocationEx(new GoogleApi.Entities.Common.Address(staff.Store.StoreAddress))
+                    },
+                    Destinations = list
+                };
 
-                //var responsee = await GoogleMaps.DistanceMatrix.QueryAsync(requestt);
-                //var index = 0;
+                var responsee = await GoogleMaps.DistanceMatrix.QueryAsync(requestt);
+                var index = 0;
 
-                //foreach (var item in listAddress)
-                //{
-                //    listAddress[item.Key] = responsee.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
-                //    index++;
-                //}
+                foreach (var item in listAddress)
+                {
+                    listAddress[item.Key] = responsee.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
+                    index++;
+                }
 
-                //foreach (var a in listAddress.OrderBy(key => key.Value))
-                //{
-                //    response.Add(new GetAvailableStoreResponse
-                //    {
-                //        StoreId = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreId).FirstOrDefault(),
-                //        StoreName = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreName).FirstOrDefault()
-                //    });
-                //}
+                foreach (var a in listAddress.OrderBy(key => key.Value))
+                {
+                    response.Add(new GetAvailableStoreResponse
+                    {
+                        StoreId = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreId).FirstOrDefault(),
+                        StoreName = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreName).FirstOrDefault()
+                    });
+                }
 
                 result.Content = response;
                 return result;

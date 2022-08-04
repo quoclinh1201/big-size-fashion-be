@@ -20,7 +20,7 @@ namespace BigSizeFashion.Business.Helpers.RequestObjects
         [Required(AllowEmptyStrings = false)]
         [MaxLength(20)]
         [Compare("NewPassword",
-            ErrorMessage = "New password and confirmation new password do not match.")]
+            ErrorMessage = "Mật khẩu xác nhận không khớp.")]
         public string ConfirmNewPassword{ get; set; }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace BigSizeFashion.Business.Dtos.Responses
 {
-    public class CheckWarehouseItem
+    public class QuantityAdjustmentResponse
     {
         public int productDetailId { get; set; }
         public int productId { get; set; }
@@ -17,7 +17,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public string ColourName { get; set; }
         public int BeginningQuantity { get; set; }
         public int EndingQuantityInSystem { get; set; }
-        public int RealQuantity { get; set; }
-        public int DifferenceQuantity { get; set; }
+        public int? EndingQuantityAfterAdjusted { get; set; }
     }
 }

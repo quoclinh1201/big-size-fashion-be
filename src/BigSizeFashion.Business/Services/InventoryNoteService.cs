@@ -385,10 +385,11 @@ namespace BigSizeFashion.Business.Services
                         .ThenInclude(n => n.Size)
                         .Include(n => n.ProductDetail)
                         .ThenInclude(n => n.Colour)
-                        .Where(n => n.InventoryNoteId == request.InventoryNoteId)
+                        .Where(n => n.InventoryNoteId == request.InventoryNoteId && n.ProductDetailId == item.ProductDetailId)
                         .FirstOrDefaultAsync();
                     var cc = new Dtos.Responses.CheckWarehouseItem
                     {
+                        productDetailId = product.ProductDetailId,
                         BeginningQuantity = product.BeginningQuantity,
                         ColourId = product.ProductDetail.ColourId,
                         ColourName = product.ProductDetail.Colour.ColourName,
@@ -413,9 +414,10 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> QuantityAdjustment(string token, List<QuantityAdjustmentRequest> request)
+        public async Task<Result<IEnumerable<QuantityAdjustmentResponse>>> QuantityAdjustment(string token, List<QuantityAdjustmentRequest> request)
         {
-            var result = new Result<bool>();
+            var result = new Result<IEnumerable<QuantityAdjustmentResponse>> ();
+            var list = new List<QuantityAdjustmentResponse>();
             try
             {
                 var uid = DecodeToken.DecodeTokenToGetUid(token);
@@ -432,13 +434,36 @@ namespace BigSizeFashion.Business.Services
                     var note = await _inventoryNoteDetailRepository.FindAsync(t => t.ProductDetailId == item.ProductDetailId && t.InventoryNoteId == item.InventoryNoteId);
                     note.EndingQuantityAfterAdjusted = tw.Quantity;
                     await _inventoryNoteDetailRepository.UpdateAsync(note);
+
+                    var cc = await _inventoryNoteDetailRepository.GetAllByIQueryable()
+                        .Include(t => t.ProductDetail)
+                        .ThenInclude(t => t.Product)
+                        .Include(t => t.ProductDetail)
+                        .ThenInclude(t => t.Size)
+                        .Include(t => t.ProductDetail)
+                        .ThenInclude(t => t.Colour)
+                        .Where(t => t.ProductDetailId == item.ProductDetailId && t.InventoryNoteId == item.InventoryNoteId)
+                        .FirstOrDefaultAsync();
+                    list.Add(new QuantityAdjustmentResponse
+                    {
+                        productDetailId = cc.ProductDetailId,
+                        productId = cc.ProductDetail.ProductId,
+                        ProductName = cc.ProductDetail.Product.ProductName,
+                        ColourId = cc.ProductDetail.ColourId,
+                        ColourName = cc.ProductDetail.Colour.ColourName,
+                        SizeId = cc.ProductDetail.SizeId,
+                        SizeName = cc.ProductDetail.Size.SizeName,
+                        BeginningQuantity = cc.BeginningQuantity,
+                        EndingQuantityInSystem = cc.EndingQuantity,
+                        EndingQuantityAfterAdjusted = cc.EndingQuantityAfterAdjusted
+                    }) ;
                 }
 
                 var n = await _inventoryNoteRepository.FindAsync(s => s.InventoryNoteId == request[0].InventoryNoteId);
                 n.AdjustedDate = DateTime.Now;
                 await _inventoryNoteRepository.UpdateAsync(n);
 
-                result.Content = true;
+                result.Content = list;
                 return result;
             }
             catch (Exception ex)

@@ -1518,5 +1518,24 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<bool>> ChangePaymentMethod(int id, string method)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                order.PaymentMethod = method;
+                await _orderRepository.UpdateAsync(order);
+
+                result.Content = true;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
