@@ -539,5 +539,22 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get order detail for manager
+        /// </summary>
+        /// <param name="authorization"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("detail-for-manager/{id}")]
+        public async Task<IActionResult> GetOrderDetailForManager([FromHeader] string authorization, int id)
+        {
+            var result = await _service.GetOrderDetailForManager(authorization.Substring(7), id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

@@ -32,6 +32,20 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
                 .ForMember(d => d.RejectedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.RejectedDate)))
                 .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
 
+            CreateMap<Order, GetOrderDetailForManagerResponse>()
+                .ForMember(d => d.CustomerName, s => s.MapFrom(s => s.Customer.Fullname))
+                .ForMember(d => d.StaffName, s => s.MapFrom(s => s.Staff.Fullname))
+                .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))
+                .ForMember(d => d.DeliveryAddress, s => s.MapFrom(s => new DeliveryAddressResponse()))
+                .ForMember(d => d.ShippingFee, s => s.MapFrom(s => s.ShippingFee == null ? 0 : s.ShippingFee))
+                .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.CreateDate)))
+                .ForMember(d => d.ApprovalDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.ApprovalDate)))
+                .ForMember(d => d.PackagedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.PackagedDate)))
+                .ForMember(d => d.DeliveryDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.DeliveryDate)))
+                .ForMember(d => d.ReceivedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.ReceivedDate)))
+                .ForMember(d => d.RejectedDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateTimeToString(s.RejectedDate)))
+                .ForMember(d => d.Status, s => s.MapFrom(s => ConvertOrderStatus.ConvertOrderStatusToString(s.Status)));
+
             CreateMap<Order, ListOrderResponse>()
                 .ForMember(d => d.CreateDate, s => s.MapFrom(s => ConvertDateTime.ConvertDateToString(s.CreateDate)))
                 .ForMember(d => d.OrderType, s => s.MapFrom(s => s.OrderType == true ? "Online" : "Offline"))

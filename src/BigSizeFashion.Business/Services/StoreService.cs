@@ -324,12 +324,12 @@ namespace BigSizeFashion.Business.Services
                     var isAdd = true;
                     if (store.IsMainWarehouse)
                     {
-                        //response.Add(new GetAvailableStoreResponse
-                        //{
-                        //    StoreId = store.StoreId,
-                        //    StoreName = store.StoreName
-                        //});
-                        storeAddressList.Add(_mapper.Map<StoreResponse>(store));
+                        response.Add(new GetAvailableStoreResponse
+                        {
+                            StoreId = store.StoreId,
+                            StoreName = store.StoreName
+                        });
+                        //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
                     }
                     else
                     {
@@ -348,16 +348,17 @@ namespace BigSizeFashion.Business.Services
 
                         if(isAdd)
                         {
-                            //response.Add(new GetAvailableStoreResponse
-                            //{
-                            //    StoreId = store.StoreId,
-                            //    StoreName = store.StoreName
-                            //});
-                            storeAddressList.Add(_mapper.Map<StoreResponse>(store));
+                            response.Add(new GetAvailableStoreResponse
+                            {
+                                StoreId = store.StoreId,
+                                StoreName = store.StoreName
+                            });
+                            //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
                         }
                     }
                 }
 
+                /*
                 var list = new List<LocationEx>();
                 var listAddress = new Dictionary<int, int?>();
 
@@ -394,6 +395,7 @@ namespace BigSizeFashion.Business.Services
                         StoreName = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreName).FirstOrDefault()
                     });
                 }
+                */
 
                 result.Content = response;
                 return result;

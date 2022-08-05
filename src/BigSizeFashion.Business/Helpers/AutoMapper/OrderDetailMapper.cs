@@ -20,6 +20,8 @@ namespace BigSizeFashion.Business.Helpers.AutoMapper
             //.ForMember(d => d.DiscountPrice, s => s.MapFrom(s => FormatMoney.FormatPrice(s.DiscountPrice)));
 
             CreateMap<OrderDetailRequest, OrderDetail>();
+
+            CreateMap<OrderDetail, OrderDetailItemForManager>();
         }
     }
 }

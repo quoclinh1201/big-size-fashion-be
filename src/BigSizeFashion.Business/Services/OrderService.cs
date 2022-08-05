@@ -1537,5 +1537,80 @@ namespace BigSizeFashion.Business.Services
                 return result;
             }
         }
+
+        public async Task<Result<GetOrderDetailForManagerResponse>> GetOrderDetailForManager(string token, int id)
+        {
+            var result = new Result<GetOrderDetailForManagerResponse>();
+            try
+            {
+                var order = await _orderRepository.GetAllByIQueryable()
+                                .Where(o => o.OrderId == id)
+                                .Include(o => o.Customer)
+                                .Include(o => o.Staff)
+                                .Include(o => o.DeliveryAddressNavigation)
+                                .Include(o => o.Store)
+                                .Include(o => o.OrderDetails)
+                                .FirstOrDefaultAsync();
+                if (order == null)
+                {
+                    result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ErrorMessageConstants.NotExistedOrder);
+                    return result;
+                }
+                var response = _mapper.Map<GetOrderDetailForManagerResponse>(order);
+                response.DeliveryAddress = _mapper.Map<DeliveryAddressResponse>(order.DeliveryAddressNavigation);
+                response.Store = _mapper.Map<StoreResponse>(order.Store);
+
+                var acc = await _accountRepository.GetAllByIQueryable()
+                        .Include(a => a.staff)
+                        .Where(a => a.RoleId == 2 && a.staff.StoreId == order.StoreId && a.Status == true && a.staff.Status == true)
+                        .Select(a => a.staff.Fullname)
+                        .FirstOrDefaultAsync();
+                response.Store.ManagerName = acc;
+                response.ProductList = _mapper.Map<List<OrderDetailItemForManager>>(order.OrderDetails);
+
+                var uid = DecodeToken.DecodeTokenToGetUid(token);
+                var storeId = await _staffRepository.GetAllByIQueryable().Where(s => s.Uid == uid).Select(s => s.StoreId).FirstOrDefaultAsync();
+                for (int i = 0; i < response.ProductList.Count; i++)
+                {
+                    var product = await _productDetailRepository.GetAllByIQueryable()
+                                          .Where(p => p.ProductDetailId == response.ProductList[i].ProductDetailId)
+                                          .Include(p => p.Size)
+                                          .Include(p => p.Colour)
+                                          .Include(p => p.Product)
+                                          .ThenInclude(p => p.Category)
+                                          .FirstOrDefaultAsync();
+
+                    response.ProductList[i].ProductId = product.Product.ProductId;
+                    response.ProductList[i].ProductName = product.Product.ProductName;
+                    response.ProductList[i].Category = product.Product.Category.CategoryName;
+                    response.ProductList[i].Colour = product.Colour.ColourName;
+                    response.ProductList[i].Size = product.Size.SizeName;
+                    var imageUrl = await _productImageRepository.GetAllByIQueryable()
+                        .Where(p => p.ProductId == product.Product.ProductId && p.IsMainImage == true)
+                        .Select(p => p.ImageUrl)
+                        .FirstOrDefaultAsync();
+                    if (imageUrl == null)
+                    {
+                        response.ProductList[i].ProductImageUrl = CommonConstants.NoImageUrl;
+                    }
+                    else
+                    {
+                        response.ProductList[i].ProductImageUrl = imageUrl;
+                    }
+
+                    response.ProductList[i].CurrentQuantityInStore = await _storeWarehouseRepository
+                        .GetAllByIQueryable()
+                        .Where(s => s.StoreId == storeId && s.ProductDetailId == response.ProductList[i].ProductDetailId)
+                        .Select(s => s.Quantity).FirstOrDefaultAsync();
+                }
+                result.Content = response;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
     }
 }
