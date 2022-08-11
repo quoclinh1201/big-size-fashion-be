@@ -577,7 +577,7 @@ namespace BigSizeFashion.Business.Services
                 var customer = await _customerRepository.FindAsync(c => c.Uid == accountUId);
                 var height = customer.Height;
                 var weight = customer.Weight;
-                var s = new SearchProductsParameter { Category = param.CategoryName , PageNumber = param.PageNumber, PageSize = param.PageSize, Status = true };
+                var s = new SearchProductsParameter {ProductName = param.ProductName, Category = param.CategoryName , PageNumber = param.PageNumber, PageSize = param.PageSize, Status = true };
 
                 if (height == null || weight == null)
                 {
@@ -1368,6 +1368,27 @@ namespace BigSizeFashion.Business.Services
                     });
                 }
                 result.Content = list;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<GetQuantityOfProductInAllStoreResponse>> GetQuantityOfProductInAllStore(int id)
+        {
+            var result = new Result<GetQuantityOfProductInAllStoreResponse>();
+            try
+            {
+                var cc = await _storeWarehouseRepository
+                    .GetAllByIQueryable()
+                    .Include(s => s.Store)
+                    .Where(s => s.ProductDetailId == id && s.Store.Status == true)
+                    .ToListAsync();
+
+                result.Content = new GetQuantityOfProductInAllStoreResponse { ProductDetailId = id, Quantity = cc.Select(c => c.Quantity).Sum() };
                 return result;
             }
             catch (Exception ex)

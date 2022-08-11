@@ -14,5 +14,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public string SubReturnMessage { get; set; }
         public string OrderUrl { get; set; }
         public string ZpTransToken { get; set; }
+        public string ZpTransId { get; set; }
     }
 }

@@ -36,5 +36,6 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<GetDetailProductResponse>> GetDetailFitProductWithCustomer(string v, int id);
         Task<Result<IEnumerable<GetAllProductToImportResponse>>> GetAllProductToImport();
         Task<Result<IEnumerable<GetAllProductToAddIntoPromotionResponse>>> GetAllProductToAddIntoPromotion();
+        Task<Result<GetQuantityOfProductInAllStoreResponse>> GetQuantityOfProductInAllStore(int id);
     }
 }

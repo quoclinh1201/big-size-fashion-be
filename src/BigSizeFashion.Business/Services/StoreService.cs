@@ -238,60 +238,64 @@ namespace BigSizeFashion.Business.Services
             var result = new Result<NearestStoreResponse>();
             try
             {
-                var storeAddressList = await _genericRepository.GetAllByIQueryable()
-                        .Where(s => s.Status == true && s.IsMainWarehouse == false)
-                        .ToListAsync();
-
-                var list = new List<LocationEx>();
-                var listAddress = new Dictionary<int, int?>();
-
-                foreach (var item in storeAddressList)
-                {
-                    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
-                    listAddress.Add(item.StoreId, null);
-                }
-                
-                var request = new DistanceMatrixRequest
-                {
-                    Key = CommonConstants.GoogleMapApiKey,
-                    Origins = new[]
-                    {
-                        new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
-                    },
-                    Destinations = list
-                };
-
-                var response = await GoogleMaps.DistanceMatrix.QueryAsync(request);
-                var index = 0;
-                var test = response.RawJson;
-
-                foreach (var item in listAddress)
-                {
-                    listAddress[item.Key] = response.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
-                    index++;
-                }
-                var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-                decimal shippingFee = 0;
-
-                if(listAddress[storeId] < 1000)
-                {
-                    shippingFee = 3000;
-                }
-                else if(listAddress[storeId] >= 1000 && listAddress[storeId] < 10000)
-                {
-                    shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 3000;
-                }
-                else
-                {
-                    shippingFee = 30000;
-                }
-
-                var nearest = new NearestStoreResponse();
-                nearest.StoreId = storeId;
-                nearest.ShippingFee = shippingFee;
-
-                result.Content = nearest;
+                // hạt code here
+                result.Content = new NearestStoreResponse { StoreId = 2, ShippingFee = 3000 };
                 return result;
+
+                //var storeAddressList = await _genericRepository.GetAllByIQueryable()
+                //        .Where(s => s.Status == true && s.IsMainWarehouse == false)
+                //        .ToListAsync();
+
+                //var list = new List<LocationEx>();
+                //var listAddress = new Dictionary<int, int?>();
+
+                //foreach (var item in storeAddressList)
+                //{
+                //    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
+                //    listAddress.Add(item.StoreId, null);
+                //}
+
+                //var request = new DistanceMatrixRequest
+                //{
+                //    Key = CommonConstants.GoogleMapApiKey,
+                //    Origins = new[]
+                //    {
+                //        new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
+                //    },
+                //    Destinations = list
+                //};
+
+                //var response = await GoogleMaps.DistanceMatrix.QueryAsync(request);
+                //var index = 0;
+                //var test = response.RawJson;
+
+                //foreach (var item in listAddress)
+                //{
+                //    listAddress[item.Key] = response.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
+                //    index++;
+                //}
+                //var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+                //decimal shippingFee = 0;
+
+                //if (listAddress[storeId] < 1000)
+                //{
+                //    shippingFee = 3000;
+                //}
+                //else if (listAddress[storeId] >= 1000 && listAddress[storeId] < 10000)
+                //{
+                //    shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 3000;
+                //}
+                //else
+                //{
+                //    shippingFee = 30000;
+                //}
+
+                //var nearest = new NearestStoreResponse();
+                //nearest.StoreId = storeId;
+                //nearest.ShippingFee = shippingFee;
+
+                //result.Content = nearest;
+                //return result;
             }
             catch (Exception ex)
             {

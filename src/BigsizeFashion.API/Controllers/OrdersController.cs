@@ -527,12 +527,12 @@ namespace BigsizeFashion.API.Controllers
         /// Change payment method
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="method"></param>
+        /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPut("change-payment-method/{id}/{method}")]
-        public async Task<IActionResult> ChangePaymentMethod(int id, string method)
+        [HttpPut("change-payment-method/{id}")]
+        public async Task<IActionResult> ChangePaymentMethod(int id, [FromBody] ChangePaymentMethodRequest request)
         {
-            var result = await _service.ChangePaymentMethod(id, method);
+            var result = await _service.ChangePaymentMethod(id, request);
             if (!result.IsSuccess)
             {
                 return BadRequest(result);

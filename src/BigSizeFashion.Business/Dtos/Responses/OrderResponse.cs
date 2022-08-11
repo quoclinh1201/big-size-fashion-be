@@ -25,5 +25,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public DateTime? RejectedDate { get; set; }
         public byte Status { get; set; }
         public decimal? ShippingFee { get; set; }
+        public string ZpTransId { get; set; }
     }
 }

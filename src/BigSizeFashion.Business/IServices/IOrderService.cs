@@ -40,7 +40,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<StatisticOrderResponse>> GetStatisticToday(string v);
         Task<Result<StatisticOrderResponse>> GetStatisticLast30Days(string v);
         Task<Result<StatisticOrderResponse>> GetStatisticTodayForOwner(int id);
-        Task<Result<bool>> ChangePaymentMethod(int id, string method);
+        Task<Result<bool>> ChangePaymentMethod(int id, ChangePaymentMethodRequest request);
         Task<Result<GetOrderDetailForManagerResponse>> GetOrderDetailForManager(string v, int id);
     }
 }

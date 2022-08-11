@@ -16,5 +16,6 @@ namespace BigSizeFashion.Business.Dtos.Requests
         public string PaymentMethod { get; set; }
         public decimal? ShippingFee { get; set; }
         public int StoreId { get; set; }
+        public string ZpTransId { get; set; }
     }
 }

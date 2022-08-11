@@ -724,6 +724,10 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+                if(order.PaymentMethod.Equals("ZaloPay"))
+                {
+                    await RefundZaloPay(order);
+                }
                 order.RejectedDate = DateTime.UtcNow.AddHours(7);
                 order.Status = (byte)OrderStatusEnum.Reject;
                 await _orderRepository.UpdateAsync(order);
@@ -756,6 +760,10 @@ namespace BigSizeFashion.Business.Services
                     {
                         if(order.Status == (byte)OrderStatusEnum.Pending)
                         {
+                            if(order.PaymentMethod.Equals("ZaloPay"))
+                            {
+                               await RefundZaloPay(order);
+                            }
                             order.Status = (byte)OrderStatusEnum.Cancel;
                             await _orderRepository.UpdateAsync(order);
                             result.Content = true;
@@ -802,6 +810,35 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
+        private async Task RefundZaloPay(Order order)
+        {
+            try
+            {
+                var timestamp = Utils.GetTimeStamp().ToString();
+                var rand = new Random();
+                var uid = timestamp + "" + rand.Next(111, 999).ToString();
+                var amount = order.TotalPriceAfterDiscount + order.ShippingFee;
+
+                Dictionary<string, string> param = new Dictionary<string, string>();
+                param.Add("appid", ZaloPayConstants.AppId);
+                param.Add("mrefundid", DateTime.Now.ToString("yyMMdd") + "_" + ZaloPayConstants.AppId + "_" + uid);
+                param.Add("zptransid", order.ZpTransId);
+                param.Add("amount", amount.ToString().Substring(0, amount.ToString().Length - 5));
+                param.Add("timestamp", timestamp);
+                param.Add("description", "Hoàn tiền");
+
+                var data = ZaloPayConstants.AppId + "|" + param["zptransid"] + "|" + param["amount"] + "|" + param["description"] + "|" + param["timestamp"];
+                param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, ZaloPayConstants.Key1, data));
+
+                var result = await HttpHelper.PostFormAsync(ZaloPayConstants.RefundUrl, param);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         public async Task<Result<OrderResponse>> AddOrder(string authorization, OrderRequest request)
         {
             var result = new Result<OrderResponse>();
@@ -824,6 +861,7 @@ namespace BigSizeFashion.Business.Services
                 TotalPriceAfterDiscount = request.TotalAfterDiscount,
                 StoreId = request.StoreId,
                 ShippingFee = request.ShippingFee,
+                ZpTransId = request.ZpTransId
             };
             //saveOrder
             var order = _mapper.Map<Order>(orderResponse);
@@ -1519,13 +1557,13 @@ namespace BigSizeFashion.Business.Services
             }
         }
 
-        public async Task<Result<bool>> ChangePaymentMethod(int id, string method)
+        public async Task<Result<bool>> ChangePaymentMethod(int id, ChangePaymentMethodRequest request)
         {
             var result = new Result<bool>();
             try
             {
                 var order = await _orderRepository.FindAsync(o => o.OrderId == id);
-                order.PaymentMethod = method;
+                order.PaymentMethod = request.Method;
                 await _orderRepository.UpdateAsync(order);
 
                 result.Content = true;

@@ -318,5 +318,21 @@ namespace BigsizeFashion.API.Controllers
             }
             return Ok(result);
         }
+
+        /// <summary>
+        /// Lấy số lượng của sản phẩm trong toàn bộ chi nhánh (truyền product_detail_id xuống)
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpGet("quantity-of-prouduct-in-all-store/{id}")] 
+        public async Task<IActionResult> GetQuantityOfProductInAllStore(int id)
+        {
+            var result = await _service.GetQuantityOfProductInAllStore(id);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result);
+            }
+            return Ok(result);
+        }
     }
 }

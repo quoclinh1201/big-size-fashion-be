@@ -9,6 +9,7 @@ namespace BigSizeFashion.Business.Dtos.Parameters
 {
     public class GetListProductFitWithCustomerParameters : QueryStringParameters
     {
+        public string ProductName { get; set; }
         public string CategoryName { get; set; }
     }
 }

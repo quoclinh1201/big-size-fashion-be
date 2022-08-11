@@ -61,7 +61,8 @@ namespace BigSizeFashion.Business.Services.ZaloPay
                     SubReturnCode = Convert.ToInt32(response["sub_return_code"]),
                     SubReturnMessage = response["sub_return_message"].ToString(),
                     OrderUrl = response["order_url"].ToString(),
-                    ZpTransToken = response["zp_trans_token"].ToString()
+                    ZpTransToken = response["zp_trans_token"].ToString(),
+                    ZpTransId = param["app_trans_id"].Trim()
                 };
 
                 //foreach (var entry in response)
@@ -164,7 +165,8 @@ namespace BigSizeFashion.Business.Services.ZaloPay
                     SubReturnCode = Convert.ToInt32(response["sub_return_code"]),
                     SubReturnMessage = response["sub_return_message"].ToString(),
                     OrderUrl = response["order_url"].ToString(),
-                    ZpTransToken = response["zp_trans_token"].ToString()
+                    ZpTransToken = response["zp_trans_token"].ToString(),
+                    ZpTransId = param["app_trans_id"].Trim()
                 };
 
                 //foreach (var entry in response)
