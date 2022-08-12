@@ -817,20 +817,37 @@ namespace BigSizeFashion.Business.Services
                 var timestamp = Utils.GetTimeStamp().ToString();
                 var rand = new Random();
                 var uid = timestamp + "" + rand.Next(111, 999).ToString();
-                var amount = order.TotalPriceAfterDiscount + order.ShippingFee;
+                var amount = "";
+                var zp_trans_id = "";
+                var param2 = new Dictionary<string, string>();
+                param2.Add("app_id", ZaloPayConstants.AppId);
+                param2.Add("app_trans_id", order.ZpTransId);
+                var data2 = ZaloPayConstants.AppId + "|" + order.ZpTransId + "|" + ZaloPayConstants.Key1;
+                param2.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, ZaloPayConstants.Key1, data2));
+                var result2 = await HttpHelper.PostFormAsync(ZaloPayConstants.GetStatusUrl, param2);
+                amount = result2["amount"].ToString();
+                zp_trans_id = result2["zp_trans_id"].ToString();
+
 
                 Dictionary<string, string> param = new Dictionary<string, string>();
-                param.Add("appid", ZaloPayConstants.AppId);
-                param.Add("mrefundid", DateTime.Now.ToString("yyMMdd") + "_" + ZaloPayConstants.AppId + "_" + uid);
-                param.Add("zptransid", order.ZpTransId);
-                param.Add("amount", amount.ToString().Substring(0, amount.ToString().Length - 5));
+                param.Add("app_id", ZaloPayConstants.AppId);
+                param.Add("m_refund_id", DateTime.Now.ToString("yyMMdd") + "_" + ZaloPayConstants.AppId + "_" + uid);
+                param.Add("zp_trans_id", zp_trans_id);
+                param.Add("amount", amount);
                 param.Add("timestamp", timestamp);
                 param.Add("description", "Hoàn tiền");
 
-                var data = ZaloPayConstants.AppId + "|" + param["zptransid"] + "|" + param["amount"] + "|" + param["description"] + "|" + param["timestamp"];
+                var data = ZaloPayConstants.AppId + "|" + param["zp_trans_id"] + "|" + param["amount"] + "|" + param["description"] + "|" + param["timestamp"];
                 param.Add("mac", HmacHelper.Compute(ZaloPayHMAC.HMACSHA256, ZaloPayConstants.Key1, data));
 
                 var result = await HttpHelper.PostFormAsync(ZaloPayConstants.RefundUrl, param);
+
+                var test = "";
+                foreach (var entry in result)
+                {
+                    test += entry.Key + ": " + entry.Value + "\n";
+                    Console.WriteLine("{0} = {1}", entry.Key, entry.Value);
+                }
             }
             catch (Exception)
             {
@@ -855,13 +872,13 @@ namespace BigSizeFashion.Business.Services
                 DeliveryAddress = request.DeliveryAddress,
                 PaymentMethod = request.PaymentMethod,
                 Status = (byte)OrderStatusEnum.Pending,
-              //  StoreId = storeId,
+                //  StoreId = storeId,
                 OrderType = request.OrderType,
                 TotalPrice = request.TotalPrice,
                 TotalPriceAfterDiscount = request.TotalAfterDiscount,
                 StoreId = request.StoreId,
                 ShippingFee = request.ShippingFee,
-                ZpTransId = request.ZpTransId
+                ZpTransId = request.ZpTransId.Replace("-", "")
             };
             //saveOrder
             var order = _mapper.Map<Order>(orderResponse);
