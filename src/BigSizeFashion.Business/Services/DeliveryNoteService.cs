@@ -265,6 +265,11 @@ namespace BigSizeFashion.Business.Services
                     dndi.Price = item.Price;
                     dndi.Quantity = item.Quantity;
                     dndi.PricePerOne = item.Price / item.Quantity;
+                    dndi.CurrentQuantity = await _storeWarehouseRepository
+                        .GetAllByIQueryable()
+                        .Where(s => s.StoreId == response.FromStore.StoreId && s.ProductDetailId == item.ProductDetailId)
+                        .Select(s => s.Quantity)
+                        .FirstOrDefaultAsync();
                     response.ProductList.Add(dndi);
                 }
                 result.Content = response;

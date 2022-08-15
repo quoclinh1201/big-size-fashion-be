@@ -20,5 +20,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
         public decimal PricePerOne { get; set; }
         public decimal Price { get; set; }
         public string Brand { get; set; }
+        public int CurrentQuantity { get; set; }
     }
 }
