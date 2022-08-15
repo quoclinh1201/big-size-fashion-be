@@ -30,7 +30,8 @@ namespace BigSizeFashion.Business.Services.ZaloPay
             try
             {
                 Random rnd = new Random();
-                var embed_data = new { };
+                var embed_data = new Dictionary<string, string>();
+                embed_data.Add("redirecturl", "https://bigsizefashion.page/payment-success");
                 var items = new[] { new { } };
                 var param = new Dictionary<string, string>();
                 var app_trans_id = rnd.Next(1000000); // Generate a random order's ID.
@@ -46,7 +47,7 @@ namespace BigSizeFashion.Business.Services.ZaloPay
                 param.Add("app_trans_id", DateTime.Now.ToString("yyMMdd") + "_" + app_trans_id); // mã giao dich có định dạng yyMMdd_xxxx
                 param.Add("embed_data", JsonConvert.SerializeObject(embed_data));
                 param.Add("item", JsonConvert.SerializeObject(items));
-                param.Add("description", "BigSizeFashion - Thanh toán đơn hàng #" + app_trans_id);
+                param.Add("description", "BigSizeFashion - Thanh toán đơn hàng #" + id);
                 param.Add("bank_code", "zalopayapp");
 
                 var data = ZaloPayConstants.AppId + "|" + param["app_trans_id"] + "|" + param["app_user"] + "|" + param["amount"] + "|"

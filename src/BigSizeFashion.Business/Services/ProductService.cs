@@ -605,7 +605,7 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
                         {
-                            s.Size = "XXXL";
+                            s.Size = "3XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                         else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
@@ -643,7 +643,7 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
                         {
-                            s.Size = "XXXL";
+                            s.Size = "3XL";
                             return await GetListProductsWithAllStatus(s);
                         }
                         else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
@@ -978,7 +978,7 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
                         {
-                            size = "XXXL";
+                            size = "3XL";
                         }
                         else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
                         {
@@ -1009,7 +1009,7 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
                         {
-                        size = "XXXL";
+                        size = "XL";
                         }
                         else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
                         {
@@ -1183,7 +1183,7 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 188 && weight >= 96 && height < 194 && weight < 101)
                         {
-                            size = "XXXL";
+                            size = "3XL";
                         }
                         else if (height >= 188 && weight >= 101 && height < 195 && weight < 116)
                         {
@@ -1214,7 +1214,7 @@ namespace BigSizeFashion.Business.Services
                         }
                         else if (height >= 182 && weight >= 86 && height < 188 && weight < 91)
                         {
-                            size = "XXXL";
+                            size = "3XL";
                         }
                         else if (height >= 182 && weight >= 91 && height < 189 && weight < 106)
                         {
