@@ -10,5 +10,6 @@ namespace BigSizeFashion.Business.Dtos.Responses
     {
         public int StoreId { get; set; }
         public string StoreName { get; set; }
+        public string Distance { get; set; }
     }
 }

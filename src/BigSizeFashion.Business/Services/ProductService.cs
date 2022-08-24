@@ -589,7 +589,7 @@ namespace BigSizeFashion.Business.Services
                     if (customer.Gender == true)
                     {
                         s.Gender = "Male";
-                        if (height < 176 || weight < 76)
+                        if (height < 176 && weight < 76)
                         {
                             return await GetListProductsWithAllStatus(s);
                         }
@@ -618,16 +618,53 @@ namespace BigSizeFashion.Business.Services
                             s.Size = "5XL";
                             return await GetListProductsWithAllStatus(s);
                         }
-                        else
+                        else if(height >= 188 && weight >= 121 && height < 197)
                         {
                             s.Size = "6XL";
                             return await GetListProductsWithAllStatus(s);
+                        }
+                        else
+                        {
+                            if (weight < 76)
+                            {
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if ( weight >= 76 && weight < 86)
+                            {
+                                s.Size = "XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 86 && weight < 96)
+                            {
+                                s.Size = "XXL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 96 && weight < 101)
+                            {
+                                s.Size = "3XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 101 && weight < 116)
+                            {
+                                s.Size = "4XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 115 && weight < 121)
+                            {
+                                s.Size = "5XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else
+                            {
+                                s.Size = "6XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
                         }
                     }
                     else
                     {
                         s.Gender = "Female";
-                        if (height < 168 || weight < 66)
+                        if (height < 168 && weight < 66)
                         {
                             return await GetListProductsWithAllStatus(s);
                         }
@@ -656,10 +693,47 @@ namespace BigSizeFashion.Business.Services
                             s.Size = "5XL";
                             return await GetListProductsWithAllStatus(s);
                         }
-                        else
+                        else if(height >= 188 && weight >= 111 && height < 191)
                         {
                             s.Size = "6XL";
                             return await GetListProductsWithAllStatus(s);
+                        }
+                        else
+                        {
+                            if (weight < 66)
+                            {
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 66 && weight < 76)
+                            {
+                                s.Size = "XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 76 && weight < 86)
+                            {
+                                s.Size = "XXL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 86 && weight < 91)
+                            {
+                                s.Size = "3XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 91 && weight < 106)
+                            {
+                                s.Size = "4XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else if (weight >= 106 && weight < 111)
+                            {
+                                s.Size = "5XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
+                            else
+                            {
+                                s.Size = "6XL";
+                                return await GetListProductsWithAllStatus(s);
+                            }
                         }
                     }
                 }

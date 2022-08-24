@@ -239,63 +239,63 @@ namespace BigSizeFashion.Business.Services
             try
             {
                 // hạt code here
-                result.Content = new NearestStoreResponse { StoreId = 2, ShippingFee = 3000 };
+                result.Content = new NearestStoreResponse { StoreId = 2, ShippingFee = 15000 };
                 return result;
 
-                //var storeAddressList = await _genericRepository.GetAllByIQueryable()
-                //        .Where(s => s.Status == true && s.IsMainWarehouse == false)
-                //        .ToListAsync();
+                //    var storeAddressList = await _genericRepository.GetAllByIQueryable()
+                //            .Where(s => s.Status == true && s.IsMainWarehouse == false)
+                //            .ToListAsync();
 
-                //var list = new List<LocationEx>();
-                //var listAddress = new Dictionary<int, int?>();
+                //    var list = new List<LocationEx>();
+                //    var listAddress = new Dictionary<int, int?>();
 
-                //foreach (var item in storeAddressList)
-                //{
-                //    list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
-                //    listAddress.Add(item.StoreId, null);
-                //}
-
-                //var request = new DistanceMatrixRequest
-                //{
-                //    Key = CommonConstants.GoogleMapApiKey,
-                //    Origins = new[]
+                //    foreach (var item in storeAddressList)
                 //    {
-                //        new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
-                //    },
-                //    Destinations = list
-                //};
+                //        list.Add(new LocationEx(new GoogleApi.Entities.Common.Address(item.StoreAddress)));
+                //        listAddress.Add(item.StoreId, null);
+                //    }
 
-                //var response = await GoogleMaps.DistanceMatrix.QueryAsync(request);
-                //var index = 0;
-                //var test = response.RawJson;
+                //    var request = new DistanceMatrixRequest
+                //    {
+                //        Key = CommonConstants.GoogleMapApiKey,
+                //        Origins = new[]
+                //        {
+                //            new LocationEx(new GoogleApi.Entities.Common.Address(receiveAddress))
+                //        },
+                //        Destinations = list
+                //    };
 
-                //foreach (var item in listAddress)
-                //{
-                //    listAddress[item.Key] = response.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
-                //    index++;
-                //}
-                //var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
-                //decimal shippingFee = 0;
+                //    var response = await GoogleMaps.DistanceMatrix.QueryAsync(request);
+                //    var index = 0;
+                //    var test = response.RawJson;
 
-                //if (listAddress[storeId] < 1000)
-                //{
-                //    shippingFee = 3000;
-                //}
-                //else if (listAddress[storeId] >= 1000 && listAddress[storeId] < 10000)
-                //{
-                //    shippingFee = Math.Ceiling((decimal)(listAddress[storeId] / 1000)) * 3000;
-                //}
-                //else
-                //{
-                //    shippingFee = 30000;
-                //}
+                //    foreach (var item in listAddress)
+                //    {
+                //        listAddress[item.Key] = response.Rows.ElementAt(0).Elements.ElementAt(index).Distance.Value;
+                //        index++;
+                //    }
+                //    var storeId = listAddress.Aggregate((l, r) => l.Value < r.Value ? l : r).Key;
+                //    decimal shippingFee = 0;
 
-                //var nearest = new NearestStoreResponse();
-                //nearest.StoreId = storeId;
-                //nearest.ShippingFee = shippingFee;
+                //    if (listAddress[storeId] <= 3000)
+                //    {
+                //        shippingFee = 15000;
+                //    }
+                //    else if (listAddress[storeId] > 3000 && listAddress[storeId] <= 8000)
+                //    {
+                //        shippingFee = 15000 + ((Math.Ceiling((decimal)((listAddress[storeId] - 3000) / 1000)) + 1) * 3000);
+                //    }
+                //    else
+                //    {
+                //        shippingFee = 30000;
+                //    }
 
-                //result.Content = nearest;
-                //return result;
+                //    var nearest = new NearestStoreResponse();
+                //    nearest.StoreId = storeId;
+                //    nearest.ShippingFee = shippingFee;
+
+                //    result.Content = nearest;
+                //    return result;
             }
             catch (Exception ex)
             {
@@ -331,7 +331,8 @@ namespace BigSizeFashion.Business.Services
                         response.Add(new GetAvailableStoreResponse
                         {
                             StoreId = store.StoreId,
-                            StoreName = store.StoreName
+                            StoreName = store.StoreName,
+                            Distance = "3.82"
                         });
                         //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
                     }
@@ -355,7 +356,8 @@ namespace BigSizeFashion.Business.Services
                             response.Add(new GetAvailableStoreResponse
                             {
                                 StoreId = store.StoreId,
-                                StoreName = store.StoreName
+                                StoreName = store.StoreName,
+                                Distance = "5.55"
                             });
                             //storeAddressList.Add(_mapper.Map<StoreResponse>(store));
                         }
@@ -396,7 +398,8 @@ namespace BigSizeFashion.Business.Services
                     response.Add(new GetAvailableStoreResponse
                     {
                         StoreId = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreId).FirstOrDefault(),
-                        StoreName = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreName).FirstOrDefault()
+                        StoreName = storeAddressList.Where(s => s.StoreId == a.Key).Select(s => s.StoreName).FirstOrDefault(),
+                        Distance = Math.Round((double)a.Value / 1000, 2).ToString("#.##")
                     });
                 }
                 */
