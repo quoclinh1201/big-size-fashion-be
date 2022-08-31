@@ -777,9 +777,7 @@ namespace BigSizeFashion.Business.Services
                     }
                     else
                     {
-                        if (order.Status != (byte)OrderStatusEnum.Pending
-                            && order.Status != (byte)OrderStatusEnum.Reject
-                            && order.Status != (byte)OrderStatusEnum.Cancel)
+                        if (order.Status == (byte)OrderStatusEnum.Approved)
                         {
                             var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
                             foreach (var item in ods)
@@ -788,13 +786,19 @@ namespace BigSizeFashion.Business.Services
                                 storeWarehouse.Quantity += item.Quantity;
                                 await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
                             }
+
+                            order.Status = (byte)OrderStatusEnum.Pending;
+                            order.StaffId = null;
+                            order.ApprovalDate = null;
+                            await _orderRepository.UpdateAsync(order);
+                            result.Content = true;
+                            return result;
                         }
-                        order.Status = (byte)OrderStatusEnum.Pending;
-                        order.StaffId = null;
-                        order.ApprovalDate = null;
-                        await _orderRepository.UpdateAsync(order);
-                        result.Content = true;
-                        return result;
+                        else
+                        {
+                            result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, "Không thể hủy đơn hàng");
+                            return result;
+                        }
                     }
                 }
                 else
@@ -1659,6 +1663,37 @@ namespace BigSizeFashion.Business.Services
                         .Select(s => s.Quantity).FirstOrDefaultAsync();
                 }
                 result.Content = response;
+                return result;
+            }
+            catch (Exception ex)
+            {
+                result.Error = ErrorHelpers.PopulateError(400, APITypeConstants.BadRequest_400, ex.Message);
+                return result;
+            }
+        }
+
+        public async Task<Result<bool>> Cancel(int id)
+        {
+            var result = new Result<bool>();
+            try
+            {
+                var order = await _orderRepository.FindAsync(o => o.OrderId == id);
+
+                var ods = await _orderDetailRepository.FindByAsync(o => o.OrderId == id);
+                foreach (var item in ods)
+                {
+                    var storeWarehouse = await _storeWarehouseRepository.FindAsync(s => s.StoreId == order.StoreId && s.ProductDetailId == item.ProductDetailId);
+                    storeWarehouse.Quantity += item.Quantity;
+                    await _storeWarehouseRepository.UpdateAsync(storeWarehouse);
+                }
+
+                order.Status = (byte)OrderStatusEnum.Cancel;
+                await _orderRepository.UpdateAsync(order);
+
+                var username = await GetCustomerUserName(order.CustomerId);
+                await _firebaseNotificationService.SendNotification(username, "Đơn hàng #" + order.OrderId + " đã bị hủy", "Đơn hàng của bạn đã bị hủy", "");
+
+                result.Content = true;
                 return result;
             }
             catch (Exception ex)

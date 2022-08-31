@@ -150,7 +150,7 @@ namespace BigSizeFashion.Business.Services.ZaloPay
                 param.Add("app_trans_id", DateTime.Now.ToString("yyMMdd") + "_" + app_trans_id); // mã giao dich có định dạng yyMMdd_xxxx
                 param.Add("embed_data", JsonConvert.SerializeObject(embed_data));
                 param.Add("item", JsonConvert.SerializeObject(items));
-                param.Add("description", "BigSizeFashion - Thanh toán đơn hàng #" + app_trans_id);
+                param.Add("description", "BigSizeFashion - Thanh toán đơn hàng");
                 param.Add("bank_code", "zalopayapp");
 
                 var data = ZaloPayConstants.AppId + "|" + param["app_trans_id"] + "|" + param["app_user"] + "|" + param["amount"] + "|"

@@ -30,6 +30,7 @@ namespace BigSizeFashion.Business.IServices
         Task<Result<bool>> RejectOrder(int id);
         Task<Result<OrderResponse>> AddOrder(string authorization, OrderRequest request);
         Task<Result<bool>> CancelOrder(string v, int id);
+        Task<Result<bool>> Cancel(int id);
         Task<Result<GetRevenueAndNumberOrdersResponse>> GetRevenueOfOwnStore(string v, GetRevenueParameter param);
         Task<Result<GetRevenueAndNumberOrdersResponse>> GetRevenueByStoreId(int id, GetRevenueParameter param);
         Task<Result<IEnumerable<NotEnoughProductResponse>>> ApproveOfflineOrder(int id);

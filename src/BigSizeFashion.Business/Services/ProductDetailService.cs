@@ -82,13 +82,21 @@ namespace BigSizeFashion.Business.Services
 
         private async Task AddNewProductIntoAllStore(int productDetailId)
         {
-            var allStoreId = await _storeRepository.GetAllByIQueryable().Where(s => s.Status == true).Select(s => s.StoreId).ToListAsync();
-            if (allStoreId.Count > 0)
+            var allStore = await _storeRepository.GetAllByIQueryable().Where(s => s.Status == true).ToListAsync();
+            if (allStore.Count > 0)
             {
-                foreach (var id in allStoreId)
+                foreach (var store in allStore)
                 {
-                    var storeWarehoust = new StoreWarehouse { ProductDetailId = productDetailId, StoreId = id, Quantity = 1000 };
-                    await _storeWarehouseRepository.InsertAsync(storeWarehoust);
+                    if(store.IsMainWarehouse)
+                    {
+                        var storeWarehoust = new StoreWarehouse { ProductDetailId = productDetailId, StoreId = store.StoreId, Quantity = 100 };
+                        await _storeWarehouseRepository.InsertAsync(storeWarehoust);
+                    }
+                    else
+                    {
+                        var storeWarehoust = new StoreWarehouse { ProductDetailId = productDetailId, StoreId = store.StoreId, Quantity = 0 };
+                        await _storeWarehouseRepository.InsertAsync(storeWarehoust);
+                    }
                 }
                 await _storeWarehouseRepository.SaveAsync();
             }

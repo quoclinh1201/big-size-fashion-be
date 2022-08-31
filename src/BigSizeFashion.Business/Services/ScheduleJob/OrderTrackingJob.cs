@@ -41,7 +41,15 @@ namespace BigSizeFashion.Business.Services.ScheduleJob
                                 ReceivedDate = (DateTime)item["received_date"]
                             };
 
-                            await _service.UpdateReceivedOrder(request);
+                            if(Convert.ToInt32(item["status"]) == 2)
+                            {
+                                await _service.UpdateReceivedOrder(request);
+                            } 
+                            else if(Convert.ToInt32(item["status"]) == 0)
+                            {
+                                await _service.Cancel(request.OrderId);
+                            }
+                            
                         }
                     }
                 }
